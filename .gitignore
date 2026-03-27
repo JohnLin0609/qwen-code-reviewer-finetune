@@ -1,0 +1,10 @@
+.venv/
+claude_workspace/
+code-review-model/
+train_logs/
+unsloth_compiled_cache/
+claude_cleaned_training_data.json
+cleaned_training_data.json
+code_review_training_data.json
+combined_training_data.json
+github_pr_training_data.json

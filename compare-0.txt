@@ -1,0 +1,428 @@
+################################################################################
+#  比較結果：Fine-tuned vs Original
+################################################################################
+
+================================================================================
+測試 1: SQL Injection
+================================================================================
+程式碼：
+def get_user(user_id):
+    query = f"SELECT * FROM users WHERE id = {user_id}"
+    return db.execute(query).fetchone()
+
+────────────────────────────────────────────────────────────────────────────────
+Fine-tuned:
+────────────────────────────────────────────────────────────────────────────────
+{
+  "issues": [
+    {
+      "type": "安全漏洞",
+      "severity": "高",
+      "description": "user_id 未參數化，可能被注入。",
+      "suggestion": "改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。",
+      "fixed_code": "def get_user(user_id):\n    query = \"SELECT * FROM users WHERE id = ?\"\n    return db.execute(query, (user_id,)).fetchone()"
+    }
+  ],
+  "overall_score": 2,
+  "summary": "存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。"
+}
+
+────────────────────────────────────────────────────────────────────────────────
+Original (Qwen2.5-Coder-7B-Instruct):
+────────────────────────────────────────────────────────────────────────────────
+這段 Python 代碼的目的是從數據庫中獲取特定用戶的信息。以下是對這段代碼的具體評估和建議：
+
+### 1. SQL 注入風險
+這段代碼存在 SQL 注入攻擊的風險。直接將 `user_id` 插入到 SQL 查詢字符串中是不安全的，因為它會使攻击者能夠注入自定義的 SQL 指令。
+
+**建議：**
+使用參數化查詢或預編譯語句來避免 SQL 注入。例如，如果你使用的是 SQLAlchemy，可以這樣改寫：
+```python
+from sqlalchemy import text
+
+def get_user(user_id):
+    query = text("SELECT * FROM users WHERE id = :id")
+    result = db.execute(query, {"id": user_id}).fetchone()
+    return result
+```
+
+### 2. 常見錯誤處理
+當前代碼沒有任何錯誤處理機制。如果數據庫連接失敗或查詢失敗，程序可能會崩潰或返回意外的結果。
+
+**建議：**
+添加适当的错误处理，例如捕获可能的 `DatabaseError` 异常：
+```python
+from sqlalchemy.exc import DatabaseError
+
+def get_user(user_id):
+    try:
+        query = text("SELECT * FROM users WHERE id = :id")
+        result = db.execute(query, {"id": user_id}).fetchone()
+        return result
+    except DatabaseError as e:
+        # Log the error or handle it appropriately
+        print(f"Database error: {e}")
+        return None
+```
+
+### 3. 返回值的處理
+如果用戶不存在，目前的代碼會返回 `None`。這種情況下，調用者需要自己檢查返回值是否為 `None`，這可能會導致不必要的複雜性。
+
+**建議：**
+可以考慮返回一個包含用戶信息的字典，或者在用戶不存在時返回一個表示用戶不存在的特定值（例如空字典）。
+```python
+from sqlalchemy.exc import DatabaseError
+
+def get_user(user_id):
+    try:
+        query = text("SELECT * FROM users WHERE id = :id")
+        result = db.execute(query, {"id": user_id}).fetchone()
+        
+        if result is None:
+            return {"error": "User not found"}
+        
+        return dict(result)
+    except DatabaseError as e:
+        # Log the error or handle it appropriately
+        print(f"Database error: {
+
+================================================================================
+測試 2: 硬編碼密碼
+================================================================================
+程式碼：
+def connect():
+    return psycopg2.connect(
+        host="localhost",
+        user="admin",
+        password="supersecret123"
+    )
+
+────────────────────────────────────────────────────────────────────────────────
+Fine-tuned:
+────────────────────────────────────────────────────────────────────────────────
+{
+  "issues": [
+    {
+      "type": "安全漏洞",
+      "severity": "高",
+      "description": "資料庫連線字串硬編碼帳密，一旦程式碼外洩或進入版本控制歷史，密碼將永久暴露。",
+      "suggestion": "使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。",
+      "fixed_code": "import os\ndef connect():\n    return psycopg2.connect(\n        host=os.environ['DB_HOST'],\n        user=os.environ['DB_USER'],\n        password=os.environ['DB_PASSWORD']\n    )"
+    }
+  ],
+  "overall_score": 4,
+  "summary": "憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。"
+}
+
+────────────────────────────────────────────────────────────────────────────────
+Original (Qwen2.5-Coder-7B-Instruct):
+────────────────────────────────────────────────────────────────────────────────
+這段 Python 代碼用於連接 PostgreSQL 數據庫。然而，它存在一些安全問題和改進的地方。以下是具體的 code review 和建議：
+
+### 安全性問題
+
+1. **硬編碼凭據**：
+   - 將數據庫凭據（如用戶名和密碼）硬編碼在代碼中是非常危險的。如果這段代碼被其他開發者或第三方獲取，將會造成重大安全風險。
+   - 建議使用環境變量來存儲敏感信息，或者使用配置文件。
+
+2. **未處理異常**：
+   - `psycopg2.connect` 可能會拋出異常，例如網絡問題或數據庫服務未啟動。建议添加異常處理以捕獲並處理這些情況。
+
+### 改进建议
+
+1. **使用環境變量**：
+   ```python
+   import os
+
+   def connect():
+       return psycopg2.connect(
+           host=os.getenv("DB_HOST", "localhost"),
+           user=os.getenv("DB_USER", "admin"),
+           password=os.getenv("DB_PASSWORD", "supersecret123")
+       )
+   ```
+
+2. **添加異常處理**：
+   ```python
+   import psycopg2
+
+   def connect():
+       try:
+           return psycopg2.connect(
+               host=os.getenv("DB_HOST", "localhost"),
+               user=os.getenv("DB_USER", "admin"),
+               password=os.getenv("DB_PASSWORD", "supersecret123")
+           )
+       except psycopg2.Error as e:
+           print(f"Database connection error: {e}")
+           raise
+   ```
+
+3. **使用配置文件**：
+   如果你不想使用環境變量，可以考慮使用配置文件（如 JSON 或 YAML 文件），並將其放在 `.gitignore` 中，以防止被提交到版本控制系統。
+   ```python
+   import json
+   import psycopg2
+
+   def load_config(file_path):
+       with open(file_path, 'r') as file:
+           config = json.load(file)
+       return config
+
+   def connect():
+       config = load_config('config.json')
+       try:
+           return psycopg2.connect(
+               host=config['host'],
+               user=config['user'],
+               password=config['password']
+           )
+       except psycopg2.Error as e:
+           print(f"Database connection error: {e}")
+           raise
+   ```
+   配置文件示例 (`config.json`)：
+
+
+================================================================================
+測試 3: 沒有 exception handling
+================================================================================
+程式碼：
+def read_config(path):
+    with open(path) as f:
+        return json.load(f)
+
+────────────────────────────────────────────────────────────────────────────────
+Fine-tuned:
+────────────────────────────────────────────────────────────────────────────────
+{
+  "issues": [
+    {
+      "type": "可靠性問題",
+      "severity": "中",
+      "description": "未處理 FileNotFoundError 與 json.JSONDecodeError。",
+      "suggestion": "加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。",
+      "fixed_code": "def read_config(path):\n    try:\n        with open(path, 'rt', encoding='utf-8') as f:\n            return json.load(f)\n    except FileNotFoundError:\n        raise\n    except (json.JSONDecodeError, OSError) as e:\n        raise RuntimeError(f'Failed to read config: {e}') from None"
+    }
+  ],
+  "overall_score": 4,
+  "summary": "缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。"
+}
+
+────────────────────────────────────────────────────────────────────────────────
+Original (Qwen2.5-Coder-7B-Instruct):
+────────────────────────────────────────────────────────────────────────────────
+這段程式碼的目的是從指定的路徑讀取配置文件並解析為 JSON 格式。以下是對這段程式碼的具體分析和改进建議：
+
+### 分析
+
+1. **功能**：
+   - 這段程式碼的功能是從指定的路徑讀取配置文件並解析為 JSON 格式。
+
+2. **安全性**：
+   - 沒有看到任何安全性方面的問題。
+
+3. **可讀性**：
+   - 使用了 `with` 語句來打開文件，這是一個好的做法，因為它會自動關閉文件。
+   - 但是，如果 `json.load(f)` 發生異常，這段程式碼沒有處理異常情況。
+
+4. **效率**：
+   - 在這種情況下，效率問題不大，因為讀取一個配置文件通常不是主要性能瓶頸。
+
+5. **維護性**：
+   - 將讀取配置文件的邏輯封装在一個函數中是合理的，這樣可以提高代碼的可維護性。
+
+### 改进建议
+
+1. **添加异常处理**：
+   - 增加对 `open` 和 `json.load` 可能發生的異常進行捕獲和處理，以提高程序的健壯性。
+
+2. **返回值類型**：
+   - 可以考虑添加返回值類型注解，以便其他開發者更好地理解這個函數的返回值。
+
+3. **日誌記錄**：
+   - 添加日誌記錄，以便在出现问题時能夠追蹤。
+
+以下是改进後的代碼：
+
+```python
+import json
+import logging
+
+# 配置日誌记录
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
+
+def read_config(path) -> dict:
+    try:
+        with open(path, 'r') as f:
+            config_data = json.load(f)
+            logger.info(f"Successfully read configuration from {path}")
+            return config_data
+    except FileNotFoundError:
+        logger.error(f"Configuration file not found: {path}")
+        raise
+    except json.JSONDecodeError:
+        logger.error(f"Failed to decode JSON from {path}")
+        raise
+```
+
+### 改進點說明
+
+1. **添加异常处理**：
+   - 增加了 `try-except` 块來捕獲 `FileNotFoundError` 和 `json.JSONDecodeError` �
+
+================================================================================
+測試 4: Race condition
+================================================================================
+程式碼：
+vote_counts = {}
+
+def vote(post_id):
+    if post_id in vote_counts:
+        vote_counts[post_id] += 1
+    else:
+        vote_counts[post_id] = 1
+
+────────────────────────────────────────────────────────────────────────────────
+Fine-tuned:
+────────────────────────────────────────────────────────────────────────────────
+{
+  "issues": [
+    {
+      "type": "安全漏洞",
+      "severity": "高",
+      "description": "dict 讀寫是非原子性操作，在並發下可能造成計數不準。",
+      "suggestion": "使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。",
+      "fixed_code": "import threading\ndict_lock = threading.Lock()\nvote_counts = {}\n\ndef vote(post_id):\n    with dict_lock:\n        if post_id in vote_counts:\n            vote_counts[post_id] += 1\n        else:\n            vote_counts[post_id] = 1"
+    }
+  ],
+  "overall_score": 3,
+  "summary": "存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。"
+}
+
+────────────────────────────────────────────────────────────────────────────────
+Original (Qwen2.5-Coder-7B-Instruct):
+────────────────────────────────────────────────────────────────────────────────
+這段程式碼是一個簡單的投票系統，用於記錄每個帖子（post）的票數。以下是對這段程式碼的 code review：
+
+### 正確性 (Correctness)
+- **正確性高**：這段程式碼在功能上是正確的，能夠正確地累加每篇帖子的票數。
+
+### 優化建議 (Optimization)
+- **使用 `collections.Counter`**：
+  - `Counter` 是 `collections` 模組中的一個類別，專門用於計數。它比手動檢查和更新字典更加高效和簡潔。
+  ```python
+  from collections import Counter
+
+  vote_counts = Counter()
+
+  def vote(post_id):
+      vote_counts[post_id] += 1
+  ```
+
+### 頻繁存取 (Frequency of Access)
+- **頻繁存取**：
+  - 如果 `vote` 函數被頻繁調用，這種情況下應該考慮使用更高效的數據結構來存儲投票數據，例如位圖或數組。
+  - 如果帖子 ID 的範圍是已知的且固定，可以考慮使用固定大小的數組來存儲投票數據，這樣可以在 O(1) 時間內完成投票操作。
+
+### 資安 (Security)
+- **資安**：
+  - 當前的程式碼沒有明显的資安問題，但需要注意的是，如果 `post_id` 可能包含用戶輸入，則需要進行適當的輸入驗證和清理，以防止 SQL 注入或其他類型的攻擊。
+  ```python
+  def vote(post_id):
+      if not isinstance(post_id, int) or post_id < 0:
+          raise ValueError("Invalid post_id")
+      vote_counts[post_id] += 1
+  ```
+
+### 統計和報告 (Statistics and Reporting)
+- **統計和報告**：
+  - 如果需要定期生成投票統計或報告，可以添加相應的函數。
+  ```python
+  def get_vote_count(post_id):
+      return vote_counts.get(post_id, 0)
+
+  def get_all_votes():
+      return dict(vote_counts)
+  ```
+
+### 內存管理 (Memory Management)
+- **內存管理**：
+  - 目前的程式碼在內存管理方面是合理的，但如果 `post_id` 的範圍非常大，可能會導致內存使用量過
+
+================================================================================
+測試 5: Path traversal
+================================================================================
+程式碼：
+def get_template(name):
+    with open(f'templates/{name}.html') as f:
+        return f.read()
+
+────────────────────────────────────────────────────────────────────────────────
+Fine-tuned:
+────────────────────────────────────────────────────────────────────────────────
+{
+  "issues": [
+    {
+      "type": "安全漏洞",
+      "severity": "高",
+      "description": "未驗證 template 名稱，可能讀取任意檔案；應使用 pathlib.resolve() 取得絕對路徑後，確認以允許的基礎目錄開頭。",
+      "suggestion": "使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基础目錄開頭；限制僅能存取特定白名單。",
+      "fixed_code": "from pathlib import Path\n\ntemplate_dir = Path('templates').resolve()\n\ndef get_template(name):\n    path = (template_dir / name).resolve()\n    if not str(path).startswith(str(template_dir)):\n        raise ValueError('Template not found')\n    return path.read_text()"
+    }
+  ],
+  "overall_score": 3,
+  "summary": "路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。"
+}
+
+────────────────────────────────────────────────────────────────────────────────
+Original (Qwen2.5-Coder-7B-Instruct):
+────────────────────────────────────────────────────────────────────────────────
+這段程式碼的主要功能是從 `templates` 目錄中讀取指定名稱的 HTML 檔案，並將其內容傳回。以下是該程式碼的一些改进建議：
+
+  1. 錯誤處理：如果指定的模板檔案不存在或無法讀取，當前的程式碼會拋出一個例外。建議添加錯誤處理來捕獲這種情況，例如使用 `try-except` 块：
+```python
+import os
+
+def get_template(name):
+    try:
+        with open(os.path.join('templates', name + '.html')) as f:
+            return f.read()
+    except FileNotFoundError:
+        raise ValueError(f"Template '{name}' not found")
+```
+
+  2. 使用絕對路徑：當前的程式碼使用相對路徑 `templates/{name}.html` 來打開文件。建議使用絕對路徑，以便更好地控制檔案位置和安全性。例如，可以將 `templates` 目錄的路徑作為一個常量定義：
+```python
+import os
+
+TEMPLATES_DIR = 'path/to/templates'
+
+def get_template(name):
+    path = os.path.join(TEMPLATES_DIR, name + '.html')
+    if not os.path.exists(path):
+        raise ValueError(f"Template '{name}' not found")
+    with open(path) as f:
+        return f.read()
+```
+
+  3. 輸入驗證：當前的程式碼假設 `name` 是一個有效的字串。建議添加輸入驗證，以確保 `name` 不是空字符串或包含非法字符。
+```python
+import re
+
+def get_template(name):
+    if not isinstance(name, str) or not re.match(r'^[a-zA-Z0-9_-]+$', name):
+        raise ValueError("Invalid template name")
+
+    path = os.path.join(TEMPLATES_DIR, name + '.html')
+    if not os.path.exists(path):
+        raise ValueError(f"Template '{name}' not found")
+    with open(path) as f:
+        return f.read()
+```
+
+總結而言，這段程式碼存在一些安全性和可靠性問題，因此需要進行一些改進。建議添加錯誤處理、使用絕對路徑以及輸入驗證，以提高程式的可靠性和安全性。
+
+================================================================================
+比較完成
