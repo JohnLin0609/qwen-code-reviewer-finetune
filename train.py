@@ -2,10 +2,10 @@
 Fine-tune Qwen2.5-Coder-7B for Code Review
 ===========================================
 環境需求：
-    pip install unsloth trl transformers datasets peft bitsandbytes
+    pip install unsloth trl transformers datasets peft bitsandbytes accelerate
 
 執行：
-    python train.py
+    accelerate launch --config_file accelerate_config.yaml train.py
 """
 
 import json
@@ -120,6 +120,11 @@ trainer = SFTTrainer(
         output_dir=OUTPUT_DIR,
         report_to="none",    # 改成 "wandb" 可以用 wandb 追蹤
         seed=42,
+        # ── Accelerate ──
+        torch_compile=True,           # Ada GPU 支援，加速 ~20%
+        optim="adamw_8bit",           # 8-bit optimizer，省 VRAM 且速度相近
+        dataloader_pin_memory=True,   # 加速 CPU→GPU 傳輸
+        dataloader_num_workers=4,     # 平行載入資料
     ),
 )
 
