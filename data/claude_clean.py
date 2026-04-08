@@ -15,10 +15,12 @@ Multi-pass cleaning pipeline:
 
 import json
 import re
+from pathlib import Path
 from collections import Counter
 
-INPUT_PATH = "combined_training_data.json"
-OUTPUT_PATH = "claude_cleaned_training_data.json"
+BASE_DIR = Path(__file__).resolve().parent.parent
+INPUT_PATH = str(BASE_DIR / "combined_training_data.json")
+OUTPUT_PATH = str(BASE_DIR / "claude_cleaned_training_data.json")
 
 # ── Load ────────────────────────────────────────────────────────────────
 

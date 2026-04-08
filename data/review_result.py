@@ -1,6 +1,9 @@
 import json
+from pathlib import Path
 
-with open("combined_training_data.json", encoding="utf-8") as f:
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+with open(BASE_DIR / "combined_training_data.json", encoding="utf-8") as f:
     data = json.load(f)
 
 # 已知的 bot 帳號
@@ -50,7 +53,7 @@ print(f"  bot comment 移除：{removed['bot comment']} 筆")
 print(f"  output 空移除：{removed['output 空']} 筆")
 print(f"  input 截斷（保留）：{removed['太長截斷']} 筆")
 
-with open("cleaned_training_data.json", "w", encoding="utf-8") as f:
+with open(BASE_DIR / "cleaned_training_data.json", "w", encoding="utf-8") as f:
     json.dump(cleaned, f, ensure_ascii=False, indent=2)
 
 print("✅ 儲存到 cleaned_training_data.json")

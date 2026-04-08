@@ -1,0 +1,1802 @@
+[
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef webhook_handler(payload, signature):\n    logging.debug(f'Webhook: payload={payload} signature={signature}')\n    if not verify(payload, signature):\n        return 401",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"signature 寫入 log 可被用來偽造 webhook 請求。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef webhook_handler(payload, signature):\\n    logging.debug(f'Webhook received, size={len(str(payload))}')\\n    if not verify(payload, signature):\\n        return 401\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "API_KEY = '1234567890abcdef'\n\ndef get_weather(city):\n    url = f'https://api.weather.com/v1?key={API_KEY}&city={city}'\n    return requests.get(url).json()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"API Key 硬編碼且直接拼入 URL，可能被 log 記錄。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef get_weather(city):\\n    url = 'https://api.weather.com/v1'\\n    params = {'key': os.environ['WEATHER_API_KEY'], 'city': city}\\n    return requests.get(url, params=params).json()\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def bulk_delete(ids):\n    for id in ids:\n        db.delete('records', id=id)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 ids 為列表、長度限制及每個 id 的型別，可能刪除大量資料。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def bulk_delete(ids):\\n    if not isinstance(ids, list) or len(ids) > 100:\\n        raise ValueError('ids must be a list of at most 100 items')\\n    if not all(isinstance(i, int) and i > 0 for i in ids):\\n        raise ValueError('All ids must be positive integers')\\n    for id in ids:\\n        db.delete('records', id=id)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def divide(a, b):\n    return a / b",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理除以零（ZeroDivisionError）與型別錯誤（TypeError）。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def divide(a, b):\\n    if not isinstance(a, (int, float)) or not isinstance(b, (int, float)):\\n        raise TypeError('Operands must be numeric')\\n    if b == 0:\\n        raise ZeroDivisionError('Divisor cannot be zero')\\n    return a / b\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "class Config:\n    DATABASE_URL = 'postgresql://user:supersecret@prod-db.company.com/main'\n    DEBUG = False",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"生產資料庫連線字串硬編碼，包含帳密與主機位址，不應進版本控制。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\nclass Config:\\n    DATABASE_URL = os.environ['DATABASE_URL']\\n    DEBUG = os.environ.get('DEBUG', 'false').lower() == 'true'\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef set_env_config(key, value):\n    logging.debug(f'Config set: {key}={value}')\n    os.environ[key] = value",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"環境變數可能包含 API key、密碼等敏感資訊，不應 log value。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\nSENSITIVE_KEYS = {'PASSWORD', 'SECRET', 'KEY', 'TOKEN', 'API'}\\n\\ndef set_env_config(key, value):\\n    is_sensitive = any(s in key.upper() for s in SENSITIVE_KEYS)\\n    logged_val = '***' if is_sensitive else value\\n    logging.debug(f'Config set: {key}={logged_val}')\\n    os.environ[key] = value\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\nimport string\n\ndef temp_password():\n    return random.choice(string.ascii_uppercase) + \\\n           ''.join(random.choices(string.digits, k=5))",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"臨時密碼只有 7 字元且使用不安全亂數，可被暴力破解。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\nimport string\\n\\ndef temp_password():\\n    alphabet = string.ascii_letters + string.digits\\n    return ''.join(secrets.choice(alphabet) for _ in range(16))\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def read_config(path):\n    with open(path) as f:\n        return json.load(f)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 FileNotFoundError 與 json.JSONDecodeError，程式可能因此崩潰。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def read_config(path):\\n    try:\\n        with open(path) as f:\\n            return json.load(f)\\n    except FileNotFoundError:\\n        raise FileNotFoundError(f'Config not found: {path}')\\n    except json.JSONDecodeError as e:\\n        raise ValueError(f'Invalid config format: {e}')\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "class DataProcessor:\n    instances = []\n    \n    def __init__(self):\n        DataProcessor.instances.append(self)  # 所有實例永遠存活\n    \n    def process(self, data):\n        return transform(data)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"class 層級的 instances list 持有所有實例的強引用，垃圾回收無法釋放。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"import weakref\\n\\nclass DataProcessor:\\n    _instances = weakref.WeakSet()\\n    \\n    def __init__(self):\\n        DataProcessor._instances.add(self)\\n    \\n    def process(self, data):\\n        return transform(data)\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "DEFAULT_ADMIN = {'user': 'admin', 'pass': 'Admin@2024!'}",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"預設管理員憑證硬編碼在程式碼中，是嚴重的安全漏洞。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"# 不應有預設管理員憑證，改用首次啟動設定流程或從環境變數取得\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import time\nimport random\n\nrandom.seed(int(time.time()))\n\ndef generate_key():\n    return random.getrandbits(256)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"以時間為種子，攻擊者可縮小搜索空間暴力破解。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\n\\ndef generate_key():\\n    return secrets.randbits(256)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "MONGO_URI = 'mongodb://admin:password@mongo.prod.internal:27017/db'",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"MongoDB 連線字串含帳密，不應硬編碼，應從環境變數取得。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\nMONGO_URI = os.environ['MONGO_URI']\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def to_float(s):\n    return float(s)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 ValueError，s 為空字串或非數字時崩潰。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def to_float(s):\\n    try:\\n        return float(s)\\n    except (ValueError, TypeError):\\n        raise ValueError(f'Cannot convert to float: {s!r}')\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def export_log(date):\n    path = f'/var/log/app/{date}.log'\n    return open(path).read()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"date 可含路徑遍歷，且未關閉檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"import re\\nfrom pathlib import Path\\n\\nLOG_DIR = Path('/var/log/app').resolve()\\n\\ndef export_log(date):\\n    if not re.match(r'^\\\\d{4}-\\\\d{2}-\\\\d{2}$', date):\\n        raise ValueError('Invalid date format')\\n    path = LOG_DIR / f'{date}.log'\\n    if not path.exists():\\n        raise FileNotFoundError()\\n    return path.read_text()\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def load_yaml(path):\n    import yaml\n    return yaml.safe_load(open(path))",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"open() 未關閉（應用 with）、未處理 FileNotFoundError 與 yaml.YAMLError。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def load_yaml(path):\\n    import yaml\\n    try:\\n        with open(path, encoding='utf-8') as f:\\n            return yaml.safe_load(f)\\n    except FileNotFoundError:\\n        raise\\n    except yaml.YAMLError as e:\\n        raise ValueError(f'Invalid YAML: {e}') from e\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef create_api_key(user_id):\n    key = generate_api_key()\n    logging.info(f'API key created for {user_id}: {key}')\n    return key",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"API key 完整寫入 log，能存取 log 的人即可使用此 key。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef create_api_key(user_id):\\n    key = generate_api_key()\\n    logging.info(f'API key created for {user_id}: {key[:8]}...')\\n    return key\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "active_users = set()\n\ndef add_user(user_id):\n    active_users.add(user_id)\n\ndef remove_user(user_id):\n    active_users.discard(user_id)\n\ndef get_count():\n    return len(active_users)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"set 的讀寫在多執行緒下有競態，特別是 iteration 時可能出錯。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"import threading\\nactive_users = set()\\nlock = threading.Lock()\\n\\ndef add_user(user_id):\\n    with lock: active_users.add(user_id)\\n\\ndef remove_user(user_id):\\n    with lock: active_users.discard(user_id)\\n\\ndef get_count():\\n    with lock: return len(active_users)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def check_duplicate_order(user_id, product_id):\n    exists = Order.query.filter_by(user_id=user_id, product_id=product_id).count() > 0\n    if not exists:\n        Order.create(user_id=user_id, product_id=product_id)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"check-then-act 競態，並發下可能建立重複訂單。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"def check_duplicate_order(user_id, product_id):\\n    try:\\n        Order.create(user_id=user_id, product_id=product_id)\\n    except IntegrityError:  # 依賴 UNIQUE constraint\\n        raise ValueError('Duplicate order')\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef process_payment(card_number, cvv, amount):\n    logging.debug(f'Payment: card={card_number} cvv={cvv} amount={amount}')\n    return charge(card_number, cvv, amount)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"信用卡號與 CVV 寫入 log，違反 PCI DSS 規範，可能導致法律責任。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef process_payment(card_number, cvv, amount):\\n    masked = f'****-****-****-{card_number[-4:]}'\\n    logging.info(f'Payment: card={masked} amount={amount}')\\n    return charge(card_number, cvv, amount)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\n\ndef generate_encryption_key():\n    return bytes([random.randint(0, 255) for _ in range(32)])",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"加密金鑰使用 random 生成，可被預測，應使用 os.urandom。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import os\\n\\ndef generate_encryption_key():\\n    return os.urandom(32)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def render_feed(posts):\n    html = ''\n    for post in posts:\n        likes = Like.query.filter_by(post_id=post.id).count()  # N 次 COUNT\n        html += f'<div>{post.title} ({likes} likes)</div>'\n    return html",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"每篇文章各跑一次 COUNT 查詢，應改用聚合一次取得所有 likes 數。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"from sqlalchemy import func\\ndef render_feed(posts):\\n    post_ids = [p.id for p in posts]\\n    likes_counts = dict(\\n        db.session.query(Like.post_id, func.count())\\n        .filter(Like.post_id.in_(post_ids))\\n        .group_by(Like.post_id).all()\\n    )\\n    return ''.join(f'<div>{p.title} ({likes_counts.get(p.id, 0)} likes)</div>' for p in posts)\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_user_age(user_dict):\n    return int(user_dict['age'])",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 KeyError（欄位不存在）與 ValueError（非數字）。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def get_user_age(user_dict):\\n    try:\\n        return int(user_dict['age'])\\n    except KeyError:\\n        raise ValueError('User dict missing \\\"age\\\" field')\\n    except (ValueError, TypeError):\\n        raise ValueError(f'Invalid age value: {user_dict.get(\\\"age\\\")!r}')\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_json_field(data, key):\n    return data[key]",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 KeyError，key 不存在時崩潰，應提供預設值或明確錯誤。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def get_json_field(data, key, default=None):\\n    try:\\n        return data[key]\\n    except KeyError:\\n        if default is not None:\\n            return default\\n        raise KeyError(f'Missing required field: {key!r}')\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_profile(username):\n    conn = get_db()\n    cur = conn.cursor()\n    cur.execute(\"SELECT * FROM profiles WHERE username='%s'\" % username)\n    return cur.fetchone()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"使用 % 格式化字串拼接 SQL，等同字串拼接，存在注入漏洞。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def get_profile(username):\\n    conn = get_db()\\n    cur = conn.cursor()\\n    cur.execute(\\\"SELECT * FROM profiles WHERE username=?\\\", (username,))\\n    return cur.fetchone()\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def write_file(path, content):\n    with open(path, 'w') as f:\n        f.write(content)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 PermissionError、IOError，寫入失敗時程式靜默崩潰。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def write_file(path, content):\\n    try:\\n        with open(path, 'w', encoding='utf-8') as f:\\n            f.write(content)\\n    except PermissionError:\\n        raise PermissionError(f'No write permission: {path}')\\n    except IOError as e:\\n        raise IOError(f'Write failed: {e}') from e\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "from threading import local\n\n_local = local()\n\ndef get_connection():\n    if not hasattr(_local, 'conn'):\n        _local.conn = create_connection()\n    return _local.conn\n    # 連線從不關閉",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"thread-local 連線在 thread 結束後若未關閉，可能造成連線洩漏（視實作而定）。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"from threading import local\\nimport contextlib\\n\\n_local = local()\\n\\n@contextlib.contextmanager\\ndef get_connection():\\n    if not hasattr(_local, 'conn') or _local.conn.closed:\\n        _local.conn = create_connection()\\n    try:\\n        yield _local.conn\\n    except Exception:\\n        _local.conn.rollback()\\n        raise\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def deactivate_user(user_id):\n    db.execute(\"UPDATE users SET active=0 WHERE id=\" + str(user_id))\n    db.commit()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"str(user_id) 仍是字串拼接，應使用參數化查詢。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def deactivate_user(user_id):\\n    db.execute(\\\"UPDATE users SET active=0 WHERE id=?\\\", (user_id,))\\n    db.commit()\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "GCP_CREDENTIALS = {\n    'type': 'service_account',\n    'private_key': '-----BEGIN RSA PRIVATE KEY-----\\nMIIEpAIBAAKCAQEA...',\n    'client_email': 'myapp@project.iam.gserviceaccount.com'\n}",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"GCP Service Account 私鑰硬編碼，攻擊者可完全掌控 GCP 資源。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"# 使用 Application Default Credentials 或指定憑證檔路徑\\nimport os\\nGCP_CREDENTIALS_PATH = os.environ['GOOGLE_APPLICATION_CREDENTIALS']\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_team_members(team_ids):\n    result = {}\n    for tid in team_ids:\n        members = db.execute('SELECT * FROM members WHERE team_id=?', (tid,)).fetchall()\n        result[tid] = members\n    return result",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"迴圈內逐一查詢，N 個 team_id = N 次 SQL，應改用 IN。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def get_team_members(team_ids):\\n    placeholders = ','.join('?' * len(team_ids))\\n    rows = db.execute(f'SELECT * FROM members WHERE team_id IN ({placeholders})', team_ids)\\n    result = {}\\n    for row in rows:\\n        result.setdefault(row['team_id'], []).append(row)\\n    return result\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef authenticate_ldap(username, password, server):\n    logging.debug(f'LDAP auth: server={server} user={username} pass={password}')\n    return ldap_bind(server, username, password)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"LDAP 密碼寫入 debug log，生產環境若開啟 DEBUG 等級即洩露。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef authenticate_ldap(username, password, server):\\n    logging.debug(f'LDAP auth: server={server} user={username}')\\n    return ldap_bind(server, username, password)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def set_price(price):\n    product.price = price\n    db.save(product)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證價格為正數且為數字型別，可能寫入負數或無效值。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"from decimal import Decimal, InvalidOperation\\ndef set_price(price):\\n    try:\\n        p = Decimal(str(price))\\n    except InvalidOperation:\\n        raise ValueError(f'Invalid price: {price}')\\n    if p < 0:\\n        raise ValueError('Price cannot be negative')\\n    product.price = p\\n    db.save(product)\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import uuid\nimport time\n\ndef generate_transaction_id():\n    return f'TXN-{int(time.time())}-{uuid.uuid1()}'",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"uuid1() 基於時間與 MAC address，可預測；應使用 uuid4()。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import uuid\\n\\ndef generate_transaction_id():\\n    return f'TXN-{uuid.uuid4().hex}'\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\n\ndef lottery_winner(participants):\n    random.seed(len(participants))  # 種子可推算\n    return random.choice(participants)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"種子基於可知資訊，抽獎結果可被預測，公平性存疑。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\n\\ndef lottery_winner(participants):\\n    return secrets.choice(participants)\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "large_data = None\n\ndef load():\n    global large_data\n    large_data = read_large_file()\n\ndef process():\n    load()\n    result = analyze(large_data)\n    return result  # large_data 仍在全域",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"large_data 載入全域後不釋放，之後即使不用也佔用記憶體。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"def process():\\n    data = read_large_file()\\n    try:\\n        return analyze(data)\\n    finally:\\n        del data  # 明確釋放\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_env_var(name):\n    return os.environ[name]",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"若環境變數不存在會拋出 KeyError，應提供預設值或友善錯誤訊息。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def get_env_var(name, default=None):\\n    value = os.environ.get(name, default)\\n    if value is None:\\n        raise EnvironmentError(f'Required env var not set: {name}')\\n    return value\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import tempfile\n\ndef write_temp(data):\n    path = tempfile.mktemp()  # 不安全：mktemp 有 TOCTOU\n    with open(path, 'w') as f:\n        f.write(data)\n    return path",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"mktemp() 只返回名稱不建立檔案，存在 TOCTOU 漏洞，應使用 mkstemp。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"import tempfile\\n\\ndef write_temp(data):\\n    fd, path = tempfile.mkstemp()\\n    with os.fdopen(fd, 'w') as f:\\n        f.write(data)\\n    return path\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\nimport traceback\n\ndef process(data):\n    try:\n        return compute(data)\n    except Exception:\n        logging.error(f'Error with data: {data}')  # data 可能含敏感資訊\n        traceback.print_exc()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"例外處理中 log 完整的 data，data 可能含密碼或個人資料。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef process(data):\\n    try:\\n        return compute(data)\\n    except Exception as e:\\n        logging.error(f'Processing error: {type(e).__name__}: {e}', exc_info=True)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\n\ndef shuffle_exam_questions(questions):\n    random.seed(42)  # 固定種子！\n    random.shuffle(questions)\n    return questions",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"固定種子導致每次洗牌結果相同，考題順序可被預測。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import random\\n\\ndef shuffle_exam_questions(questions):\\n    questions = questions.copy()\\n    random.shuffle(questions)  # 不設種子，使用 os.urandom\\n    return questions\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def resize_image(path, width, height):\n    from PIL import Image\n    img = Image.open(path)\n    return img.resize((width, height))",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 FileNotFoundError、UnidentifiedImageError 與無效尺寸。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def resize_image(path, width, height):\\n    from PIL import Image, UnidentifiedImageError\\n    if width <= 0 or height <= 0:\\n        raise ValueError('Width and height must be positive')\\n    try:\\n        with Image.open(path) as img:\\n            return img.resize((width, height))\\n    except FileNotFoundError:\\n        raise\\n    except UnidentifiedImageError:\\n        raise ValueError(f'Cannot identify image: {path}')\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef login(username, password):\n    logging.info(f'Login attempt: {username} / {password}')\n    return authenticate(username, password)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"密碼明文寫入 log，任何能存取 log 的人都能看到使用者密碼。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef login(username, password):\\n    logging.info(f'Login attempt: {username}')\\n    return authenticate(username, password)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def delete_file(path):\n    import os\n    os.remove(path)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 FileNotFoundError 與 PermissionError。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def delete_file(path):\\n    import os\\n    try:\\n        os.remove(path)\\n    except FileNotFoundError:\\n        pass\\n    except PermissionError:\\n        raise PermissionError(f'Cannot delete file: {path}')\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "class Connection:\n    _pool = []\n    \n    @classmethod\n    def get(cls):\n        if not cls._pool:\n            cls._pool.append(create_connection())\n        return cls._pool[0]\n    \n    @classmethod\n    def release(cls, conn):\n        cls._pool.append(conn)  # 只加不刪，連線無限累積",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"release 只 append 不限制池大小，連線數無限累積。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"class Connection:\\n    _pool = []\\n    MAX_SIZE = 10\\n    \\n    @classmethod\\n    def get(cls):\\n        if cls._pool:\\n            return cls._pool.pop()\\n        return create_connection()\\n    \\n    @classmethod\\n    def release(cls, conn):\\n        if len(cls._pool) < cls.MAX_SIZE:\\n            cls._pool.append(conn)\\n        else:\\n            conn.close()\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "event_listeners = []\n\ndef on_event(handler):\n    event_listeners.append(handler)\n\ndef trigger():\n    for h in event_listeners:\n        h()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"listener 持續累積但從不移除，若 handler 是閉包可能造成記憶體洩漏。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"import weakref\\n\\n_listeners = []\\n\\ndef on_event(handler):\\n    _listeners.append(weakref.ref(handler))\\n\\ndef trigger():\\n    global _listeners\\n    _listeners = [ref for ref in _listeners if ref() is not None]\\n    for ref in _listeners:\\n        handler = ref()\\n        if handler: handler()\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "from io import BytesIO\n\ndef process_bytes(data_list):\n    buffers = []\n    for data in data_list:\n        buf = BytesIO(data)\n        buffers.append(buf)\n        # buf 未關閉\n    return len(buffers)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"BytesIO 物件累積且未關閉，大量資料時佔用大量記憶體。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"from io import BytesIO\\n\\ndef process_bytes(data_list):\\n    count = 0\\n    for data in data_list:\\n        with BytesIO(data) as buf:\\n            process_buffer(buf)\\n            count += 1\\n    return count\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def set_quantity(qty):\n    cart_item.quantity = qty",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證數量為正整數，可能設為負數或零，導致邏輯錯誤。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def set_quantity(qty):\\n    if not isinstance(qty, int) or qty < 1:\\n        raise ValueError(f'Quantity must be a positive integer, got: {qty}')\\n    cart_item.quantity = qty\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_category(cat_name):\n    return db.execute(f\"SELECT id FROM categories WHERE name='{cat_name}'\").fetchone()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"cat_name 未參數化，存在注入漏洞。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def get_category(cat_name):\\n    return db.execute(\\\"SELECT id FROM categories WHERE name=?\\\", (cat_name,)).fetchone()\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def reserve_seat(flight_id, seat_no, user_id):\n    seat = Seat.query.filter_by(flight_id=flight_id, number=seat_no).first()\n    if seat.status == 'available':\n        seat.status = 'reserved'\n        seat.user_id = user_id\n        db.session.commit()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"並發訂位可能導致同一座位被多人預訂，需使用樂觀鎖或 FOR UPDATE。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"def reserve_seat(flight_id, seat_no, user_id):\\n    updated = Seat.query.filter_by(\\n        flight_id=flight_id, number=seat_no, status='available'\\n    ).update({'status': 'reserved', 'user_id': user_id})\\n    db.session.commit()\\n    if updated == 0:\\n        raise ValueError('Seat already taken')\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def lazy_init():\n    global _instance\n    if _instance is None:\n        _instance = HeavyObject()  # 可能初始化兩次\n    return _instance",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Double-Checked Locking 未加鎖，多執行緒下可能初始化多次。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"import threading\\n_instance = None\\n_lock = threading.Lock()\\n\\ndef lazy_init():\\n    global _instance\\n    if _instance is None:\\n        with _lock:\\n            if _instance is None:\\n                _instance = HeavyObject()\\n    return _instance\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def load_config(env):\n    path = f'configs/{env}.yaml'\n    return yaml.safe_load(open(path))",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"env 可含 '../' 讀取任意 YAML 檔案，也未關閉檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"import re\\nfrom pathlib import Path\\n\\nCFG_DIR = Path('configs').resolve()\\n\\ndef load_config(env):\\n    if not re.match(r'^[a-z][a-z0-9_-]*$', env):\\n        raise ValueError(f'Invalid env name: {env}')\\n    path = CFG_DIR / f'{env}.yaml'\\n    if not path.exists():\\n        raise FileNotFoundError(f'Config not found: {env}')\\n    return yaml.safe_load(path.read_text())\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\n\ndef verify_magic_link(token, stored):\n    return token == stored  # timing attack 風險\n\ndef gen_magic_link():\n    return str(random.getrandbits(64))",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"雙重問題：random 可預測、字串比較有 timing attack 風險。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\n\\ndef gen_magic_link():\\n    return secrets.token_urlsafe(32)\\n\\ndef verify_magic_link(token, stored):\\n    return secrets.compare_digest(token, stored)\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef store_pii(user_id, name, email, phone, address):\n    logging.info(f'PII stored: {user_id} {name} {email} {phone} {address}')\n    db.insert('pii', user_id=user_id, name=name, email=email, phone=phone, address=address)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"個人識別資訊（PII）全部寫入 log，可能違反 GDPR 與個資法。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef store_pii(user_id, name, email, phone, address):\\n    logging.info(f'PII stored for user: {user_id}')\\n    db.insert('pii', user_id=user_id, name=name, email=email, phone=phone, address=address)\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_logs(start_date, end_date):\n    sql = f\"SELECT * FROM logs WHERE created_at BETWEEN '{start_date}' AND '{end_date}'\"\n    return db.execute(sql).fetchall()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"日期字串未參數化，可能被注入。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def get_logs(start_date, end_date):\\n    sql = \\\"SELECT * FROM logs WHERE created_at BETWEEN ? AND ?\\\"\\n    return db.execute(sql, (start_date, end_date)).fetchall()\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_review_authors(reviews):\n    return [(r, User.objects.get(id=r.user_id)) for r in reviews]",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"列表推導式中隱藏 N+1，對每個 review 各查一次 user。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def get_review_authors(reviews):\\n    user_ids = [r.user_id for r in reviews]\\n    users = {u.id: u for u in User.objects.filter(id__in=user_ids)}\\n    return [(r, users[r.user_id]) for r in reviews]\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\nimport hashlib\n\ndef generate_csrf_token(user_id):\n    return hashlib.md5(f'{user_id}{random.random()}'.encode()).hexdigest()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"CSRF token 結合了可預測的 random 與弱雜湊（MD5），安全性嚴重不足。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\n\\ndef generate_csrf_token(user_id):\\n    return secrets.token_urlsafe(32)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "ENCRYPTION_KEY = b'0123456789abcdef'\n\ndef encrypt(plaintext):\n    cipher = AES.new(ENCRYPTION_KEY, AES.MODE_ECB)\n    return cipher.encrypt(plaintext)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"加密金鑰硬編碼且使用不安全的 ECB 模式，雙重安全問題。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef encrypt(plaintext):\\n    key = bytes.fromhex(os.environ['ENCRYPTION_KEY'])\\n    cipher = AES.new(key, AES.MODE_GCM)\\n    return cipher.encrypt_and_digest(plaintext)\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_product_reviews(product_ids):\n    result = {}\n    for pid in product_ids:\n        avg = db.execute('SELECT AVG(rating) FROM reviews WHERE product_id=?', (pid,)).fetchone()[0]\n        result[pid] = avg or 0\n    return result",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"對每個 product 各執行一次 AVG 查詢，應改用 GROUP BY 批次取得。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def get_product_reviews(product_ids):\\n    placeholders = ','.join('?' * len(product_ids))\\n    rows = db.execute(\\n        f'SELECT product_id, AVG(rating) FROM reviews WHERE product_id IN ({placeholders}) GROUP BY product_id',\\n        product_ids\\n    ).fetchall()\\n    avgs = dict(rows)\\n    return {pid: avgs.get(pid, 0) for pid in product_ids}\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def search_users(field, value):\n    sql = f\"SELECT * FROM users WHERE {field}='{value}'\"\n    return db.execute(sql).fetchall()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"field 欄位名稱無法參數化，需使用白名單；value 也未處理。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"ALLOWED_FIELDS = {'username', 'email', 'role'}\\ndef search_users(field, value):\\n    if field not in ALLOWED_FIELDS:\\n        raise ValueError('Invalid field')\\n    sql = f\\\"SELECT * FROM users WHERE {field}=?\\\"\\n    return db.execute(sql, (value,)).fetchall()\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def send_email(to, body):\n    smtp = smtplib.SMTP_SSL('smtp.gmail.com', 465)\n    smtp.login('myapp@gmail.com', 'emailpassword123')\n    smtp.sendmail('myapp@gmail.com', to, body)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Gmail 帳密硬編碼，且應使用 App Password 或 OAuth，不應使用真實密碼。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef send_email(to, body):\\n    smtp = smtplib.SMTP_SSL('smtp.gmail.com', 465)\\n    smtp.login(os.environ['GMAIL_USER'], os.environ['GMAIL_APP_PASSWORD'])\\n    smtp.sendmail(os.environ['GMAIL_USER'], to, body)\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "openai.api_key = 'sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'\n\ndef chat(prompt):\n    return openai.ChatCompletion.create(model='gpt-4', messages=[{'role':'user','content':prompt}])",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"OpenAI API Key 硬編碼，外洩會產生高額費用。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\nopenai.api_key = os.environ['OPENAI_API_KEY']\\n\\ndef chat(prompt):\\n    return openai.ChatCompletion.create(model='gpt-4', messages=[{'role':'user','content':prompt}])\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "counter = 0\n\ndef increment():\n    global counter\n    temp = counter\n    temp += 1\n    counter = temp",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"多執行緒下 counter 操作非原子性，可能造成計數丟失。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"import threading\\ncounter = 0\\nlock = threading.Lock()\\n\\ndef increment():\\n    global counter\\n    with lock:\\n        counter += 1\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import tempfile\n\ndef process_upload(data):\n    tmp = tempfile.NamedTemporaryFile()\n    tmp.write(data)\n    result = process_file(tmp.name)\n    return result  # tmp 未關閉，檔案描述子洩漏",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"NamedTemporaryFile 未關閉，造成檔案描述子洩漏，也未刪除暫存檔。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"import tempfile\\n\\ndef process_upload(data):\\n    with tempfile.NamedTemporaryFile(delete=True) as tmp:\\n        tmp.write(data)\\n        tmp.flush()\\n        return process_file(tmp.name)\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def send_sms(to, message):\n    client = TwilioClient('ACxxxxxxx', 'authtoken123')\n    client.messages.create(to=to, from_='+1234', body=message)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Twilio 帳號 SID 與 Auth Token 硬編碼，一旦外洩會產生費用損失。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef send_sms(to, message):\\n    client = TwilioClient(\\n        os.environ['TWILIO_SID'],\\n        os.environ['TWILIO_TOKEN']\\n    )\\n    client.messages.create(to=to, from_=os.environ['TWILIO_FROM'], body=message)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def find_posts(author, tag):\n    sql = f\"SELECT * FROM posts WHERE author='{author}' OR tag='{tag}'\"\n    return db.execute(sql).fetchall()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"兩個欄位皆用字串拼接，存在注入風險。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def find_posts(author, tag):\\n    sql = \\\"SELECT * FROM posts WHERE author=? OR tag=?\\\"\\n    return db.execute(sql, (author, tag)).fetchall()\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def send_email(to, subject, body):\n    smtp = smtplib.SMTP('mail.example.com')\n    smtp.sendmail('noreply@example.com', to, f'Subject: {subject}\\n\\n{body}')\n    smtp.quit()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 SMTPException，連線失敗或發送失敗時不會有任何錯誤提示。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def send_email(to, subject, body):\\n    try:\\n        with smtplib.SMTP('mail.example.com') as smtp:\\n            smtp.sendmail('noreply@example.com', to,\\n                         f'Subject: {subject}\\\\n\\\\n{body}')\\n    except smtplib.SMTPException as e:\\n        logging.error(f'Email failed to {to}: {e}')\\n        raise\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def preview_file(path):\n    return open(path).read(1024)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"完全未限制 path，可讀取系統上任意可讀取的檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"from pathlib import Path\\n\\nALLOWED_DIR = Path('/app/previews').resolve()\\n\\ndef preview_file(path):\\n    resolved = Path(path).resolve()\\n    if not str(resolved).startswith(str(ALLOWED_DIR)):\\n        raise PermissionError('Access outside allowed directory')\\n    return resolved.read_text()[:1024]\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef update_profile(user_id, **kwargs):\n    logging.info(f'Profile update: user={user_id} fields={kwargs}')\n    User.update(user_id, **kwargs)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"kwargs 可能含 password、email 等敏感資料，不應全部 log。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"SAFE_TO_LOG = {'username', 'bio', 'location', 'website'}\\n\\ndef update_profile(user_id, **kwargs):\\n    logged = {k: v for k, v in kwargs.items() if k in SAFE_TO_LOG}\\n    logging.info(f'Profile update: user={user_id} fields={logged}')\\n    User.update(user_id, **kwargs)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def sftp_upload(local, remote):\n    transport = paramiko.Transport(('sftp.example.com', 22))\n    transport.connect(username='deploy', password='deploy123')",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"SFTP 帳密硬編碼，應改用 SSH key 認證並從環境變數取得設定。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef sftp_upload(local, remote):\\n    transport = paramiko.Transport((os.environ['SFTP_HOST'], 22))\\n    pkey = paramiko.RSAKey.from_private_key_file(os.environ['SFTP_KEY_PATH'])\\n    transport.connect(username=os.environ['SFTP_USER'], pkey=pkey)\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\n\ndef create_invite_code():\n    return f'INV-{random.randint(100000, 999999)}'",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"邀請碼使用可預測亂數，攻擊者可枚舉有效邀請碼。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\n\\ndef create_invite_code():\\n    return f'INV-{secrets.token_hex(8).upper()}'\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def connect_redis():\n    return redis.Redis(host='localhost', port=6379, password='redis_pass_2024')",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Redis 密碼硬編碼，且若 Redis 暴露在網路上風險極高。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef connect_redis():\\n    return redis.Redis(\\n        host=os.environ.get('REDIS_HOST', 'localhost'),\\n        port=int(os.environ.get('REDIS_PORT', 6379)),\\n        password=os.environ['REDIS_PASSWORD']\\n    )\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def login(username, password):\n    q = f\"SELECT id FROM users WHERE username='{username}' AND password='{password}'\"\n    return db.execute(q).fetchone() is not None",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"SQL 拼接導致注入漏洞，且密碼應 hash 後再比對，不應存明文。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def login(username, password):\\n    q = \\\"SELECT password_hash FROM users WHERE username=?\\\"\\n    row = db.execute(q, (username,)).fetchone()\\n    return row and check_password_hash(row[0], password)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_image(image_id, size):\n    path = f'images/{image_id}/{size}.jpg'\n    return send_file(path)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"image_id 與 size 皆可含路徑遍歷，可讀取任意 jpg 檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"from pathlib import Path\\nimport re\\n\\nIMG_DIR = Path('images').resolve()\\n\\ndef get_image(image_id, size):\\n    if not re.match(r'^\\\\d+$', str(image_id)) or size not in ('thumb', 'medium', 'large'):\\n        raise ValueError('Invalid parameters')\\n    path = (IMG_DIR / str(image_id) / f'{size}.jpg').resolve()\\n    if not str(path).startswith(str(IMG_DIR)):\\n        raise PermissionError()\\n    return send_file(path)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def load_plugin(plugin_name):\n    path = f'plugins/{plugin_name}.py'\n    with open(path) as f:\n        exec(f.read())",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"路徑遍歷加上 exec，可執行任意程式碼，極度危險。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"ALLOWED_PLUGINS = {'auth', 'cache', 'email'}\\n\\ndef load_plugin(plugin_name):\\n    if plugin_name not in ALLOWED_PLUGINS:\\n        raise ValueError(f'Unknown plugin: {plugin_name}')\\n    import importlib\\n    return importlib.import_module(f'plugins.{plugin_name}')\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "class EventBus:\n    subscribers = {}\n    \n    @classmethod\n    def subscribe(cls, event, handler):\n        cls.subscribers.setdefault(event, []).append(handler)\n    \n    @classmethod\n    def unsubscribe(cls, event, handler):\n        pass  # 未實作取消訂閱",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"unsubscribe 未實作，handler 無法被移除，若 handler 是方法且物件被銷毀，則造成記憶體洩漏。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"import weakref\\n\\nclass EventBus:\\n    _subscribers = {}\\n    \\n    @classmethod\\n    def subscribe(cls, event, handler):\\n        cls._subscribers.setdefault(event, set()).add(weakref.ref(handler))\\n    \\n    @classmethod\\n    def publish(cls, event, *args):\\n        alive = set()\\n        for ref in cls._subscribers.get(event, set()):\\n            handler = ref()\\n            if handler:\\n                handler(*args)\\n                alive.add(ref)\\n        cls._subscribers[event] = alive\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def load_children(parent_ids):\n    result = []\n    for pid in parent_ids:\n        children = Category.objects.filter(parent_id=pid)\n        result.append(list(children))\n    return result",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"對每個 parent_id 各查一次，應批次取得後按 parent_id 分組。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def load_children(parent_ids):\\n    all_children = Category.objects.filter(parent_id__in=parent_ids)\\n    grouped = {}\\n    for child in all_children:\\n        grouped.setdefault(child.parent_id, []).append(child)\\n    return [grouped.get(pid, []) for pid in parent_ids]\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def build_tree(node_ids):\n    nodes = []\n    for nid in node_ids:\n        node = Node.query.get(nid)\n        node.parent = Node.query.get(node.parent_id) if node.parent_id else None\n        nodes.append(node)\n    return nodes",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"雙層 N+1，先查 node 再查 parent，應批次取得。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def build_tree(node_ids):\\n    nodes = {n.id: n for n in Node.query.filter(Node.id.in_(node_ids))}\\n    parent_ids = {n.parent_id for n in nodes.values() if n.parent_id}\\n    parents = {p.id: p for p in Node.query.filter(Node.id.in_(parent_ids))}\\n    for node in nodes.values():\\n        node.parent = parents.get(node.parent_id)\\n    return list(nodes.values())\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def update_stats(event_type):\n    stats = load_stats()\n    stats[event_type] = stats.get(event_type, 0) + 1\n    save_stats(stats)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"讀取-修改-寫回不是原子操作，並發更新會造成計數遺失。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"import redis\\nr = redis.Redis()\\ndef update_stats(event_type):\\n    r.incr(f'stats:{event_type}')  # Redis INCR 是原子操作\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def process_webhook(payload):\n    user_id = payload['user_id']\n    amount = payload['amount']\n    charge_user(user_id, amount)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 payload 欄位存在性與型別，也未驗證 webhook 簽名。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def process_webhook(payload, signature):\\n    if not verify_signature(payload, signature):\\n        raise ValueError('Invalid webhook signature')\\n    user_id = payload.get('user_id')\\n    amount = payload.get('amount')\\n    if not isinstance(user_id, int) or not isinstance(amount, (int, float)) or amount <= 0:\\n        raise ValueError('Invalid payload fields')\\n    charge_user(user_id, amount)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\n\ndef generate_session_id():\n    return hex(random.getrandbits(128))[2:]",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"random.getrandbits 可預測，session ID 被猜測後攻擊者可劫持會話。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\n\\ndef generate_session_id():\\n    return secrets.token_hex(32)\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def set_expiry(days):\n    token.expires_at = datetime.now() + timedelta(days=days)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 days 為正整數且在合理範圍內。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def set_expiry(days):\\n    if not isinstance(days, int) or not (1 <= days <= 365):\\n        raise ValueError('Expiry must be between 1 and 365 days')\\n    token.expires_at = datetime.now() + timedelta(days=days)\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import requests\n\ndef fetch_many(urls):\n    sessions = []\n    for url in urls:\n        s = requests.Session()\n        sessions.append(s)\n        s.get(url)\n    return len(sessions)  # Session 從不關閉",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"每個 URL 建立一個新 Session 且不關閉，造成連線與記憶體洩漏。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"import requests\\n\\ndef fetch_many(urls):\\n    results = []\\n    with requests.Session() as session:\\n        for url in urls:\\n            results.append(session.get(url))\\n    return len(results)\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_post_comments_count(posts):\n    for post in posts:\n        post.comment_count = Comment.query.filter_by(post_id=post.id).count()\n    return posts",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"迴圈中對每篇 post 執行 COUNT，N 篇 = N 次查詢。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def get_post_comments_count(posts):\\n    post_ids = [p.id for p in posts]\\n    counts = dict(\\n        db.session.query(Comment.post_id, func.count())\\n        .filter(Comment.post_id.in_(post_ids))\\n        .group_by(Comment.post_id).all()\\n    )\\n    for post in posts:\\n        post.comment_count = counts.get(post.id, 0)\\n    return posts\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def count_logins(username):\n    result = db.execute(f\"SELECT COUNT(*) FROM login_logs WHERE user='{username}'\")\n    return result.fetchone()[0]",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"username 未經參數化，可導致 SQL 注入。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def count_logins(username):\\n    result = db.execute(\\\"SELECT COUNT(*) FROM login_logs WHERE user=?\\\", (username,))\\n    return result.fetchone()[0]\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "logs = []\n\ndef log_request(req):\n    logs.append({\n        'time': time.time(),\n        'body': req.body,  # 可能很大\n        'headers': dict(req.headers)\n    })\n    if len(logs) > 10000:\n        logs.pop(0)  # pop(0) 是 O(n) 操作",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"兩個問題：1) 儲存完整 body 佔用大量記憶體；2) pop(0) 是 O(n) 應用 deque。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"from collections import deque\\n\\nlogs = deque(maxlen=1000)\\n\\ndef log_request(req):\\n    logs.append({\\n        'time': time.time(),\\n        'path': req.path,\\n        'method': req.method,\\n        'size': len(req.body or b'')\\n    })\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "task_queue = []\n\ndef add_task(task):\n    task_queue.append(task)\n\ndef run_next():\n    if task_queue:\n        task = task_queue[0]\n        task_queue.pop(0)  # O(n) pop\n        task()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"pop(0) 是 O(n) 操作，應使用 deque 的 popleft() 達到 O(1)。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"from collections import deque\\n\\ntask_queue = deque()\\n\\ndef add_task(task):\\n    task_queue.append(task)\\n\\ndef run_next():\\n    if task_queue:\\n        task_queue.popleft()()\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef transfer_funds(from_acct, to_acct, amount, pin):\n    logging.info(f'Transfer: {from_acct} -> {to_acct}, amount={amount}, pin={pin}')\n    execute_transfer(from_acct, to_acct, amount, pin)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"PIN 碼寫入 log，屬於嚴重的安全漏洞。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef transfer_funds(from_acct, to_acct, amount, pin):\\n    logging.info(f'Transfer initiated: {from_acct} -> {to_acct}, amount={amount}')\\n    execute_transfer(from_acct, to_acct, amount, pin)\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import os\n\ndef delete_temp(name):\n    os.remove(f'/tmp/uploads/{name}')",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"name 可含 '../' 刪除任意檔案，例如刪除系統關鍵檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"import os\\nfrom pathlib import Path\\n\\nTMP_DIR = Path('/tmp/uploads').resolve()\\n\\ndef delete_temp(name):\\n    target = (TMP_DIR / name).resolve()\\n    if not str(target).startswith(str(TMP_DIR)):\\n        raise PermissionError('Access denied')\\n    target.unlink()\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef save_ssn(user_id, ssn):\n    logging.info(f'Saving SSN for user {user_id}: {ssn}')\n    User.update(user_id, ssn=ssn)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"社會安全號碼（SSN）屬於高度敏感個人資料，不應寫入 log，違反個資法規。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef save_ssn(user_id, ssn):\\n    logging.info(f'SSN updated for user {user_id}')\\n    User.update(user_id, ssn=ssn)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_users_with_roles(user_ids):\n    users = []\n    for uid in user_ids:\n        u = db.query(User).get(uid)\n        u.roles = db.query(Role).filter(Role.id.in_(\n            db.query(UserRole.role_id).filter_by(user_id=uid)\n        )).all()\n        users.append(u)\n    return users",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"多對多關係的 N+1，逐一查詢每個 user 的 roles。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def get_users_with_roles(user_ids):\\n    return db.query(User).options(\\n        subqueryload(User.roles)\\n    ).filter(User.id.in_(user_ids)).all()\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def insert_feedback(user_id, message):\n    sql = f\"INSERT INTO feedback (user_id, message) VALUES ({user_id}, '{message}')\"\n    db.execute(sql)\n    db.commit()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"message 可能包含單引號破壞 SQL，需參數化。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def insert_feedback(user_id, message):\\n    sql = \\\"INSERT INTO feedback (user_id, message) VALUES (?, ?)\\\"\\n    db.execute(sql, (user_id, message))\\n    db.commit()\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def upload_to_s3(file_path):\n    s3 = boto3.client('s3',\n        aws_access_key_id='AKIAIOSFODNN7EXAMPLE',\n        aws_secret_access_key='wJalrXUtnFEMI/K7MDENG/bPxRfiCY')\n    s3.upload_file(file_path, 'my-bucket', file_path)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"AWS 存取金鑰硬編碼，攻擊者可用此金鑰存取所有 AWS 資源，費用損失可能極大。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"def upload_to_s3(file_path):\\n    s3 = boto3.client('s3')  # 從 IAM Role 或 ~/.aws/credentials 自動取得\\n    s3.upload_file(file_path, os.environ['S3_BUCKET'], file_path)\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "cache = {}\n\ndef get_or_create(key, factory):\n    if key not in cache:\n        cache[key] = factory()  # 可能重複初始化\n    return cache[key]",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"多執行緒下可能重複執行 factory()，應加鎖或使用 setdefault。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"import threading\\ncache = {}\\nlock = threading.Lock()\\n\\ndef get_or_create(key, factory):\\n    with lock:\\n        if key not in cache:\\n            cache[key] = factory()\\n        return cache[key]\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def remove_tag(post_id, tag):\n    db.execute(f\"DELETE FROM post_tags WHERE post_id={post_id} AND tag='{tag}'\")\n    db.commit()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"tag 字串未參數化，可被注入。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def remove_tag(post_id, tag):\\n    db.execute(\\\"DELETE FROM post_tags WHERE post_id=? AND tag=?\\\", (post_id, tag))\\n    db.commit()\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "history = []\n\ndef add_to_history(item):\n    history.append(item)\n    return history",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"history 無限累積，未設上限，大量請求後耗盡記憶體。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"from collections import deque\\n\\nhistory = deque(maxlen=1000)  # 最多保留 1000 筆\\n\\ndef add_to_history(item):\\n    history.append(item)\\n    return list(history)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def list_files(directory):\n    path = f'/uploads/{directory}'\n    return os.listdir(path)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"directory 可含路徑遍歷列出任意目錄，洩露系統結構。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"from pathlib import Path\\n\\nBASE = Path('/uploads').resolve()\\n\\ndef list_files(directory):\\n    target = (BASE / directory).resolve()\\n    if not str(target).startswith(str(BASE)):\\n        raise PermissionError('Access denied')\\n    return [f.name for f in target.iterdir() if target.is_dir()]\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef oauth_callback(code, state, client_secret):\n    logging.info(f'OAuth callback: code={code} state={state} secret={client_secret}')\n    return exchange_code(code, client_secret)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"OAuth code 與 client_secret 寫入 log，code 可被重放攻擊利用。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef oauth_callback(code, state, client_secret):\\n    logging.info(f'OAuth callback received, state={state}')\\n    return exchange_code(code, client_secret)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "shared_list = []\n\ndef append_item(item):\n    shared_list.append(item)\n\ndef process_all():\n    for item in shared_list:  # 遍歷時可能被修改\n        process(item)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"遍歷 list 時另一個執行緒可能 append，導致 RuntimeError。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"import threading\\nshared_list = []\\nlock = threading.Lock()\\n\\ndef append_item(item):\\n    with lock:\\n        shared_list.append(item)\\n\\ndef process_all():\\n    with lock:\\n        items = shared_list.copy()\\n    for item in items:\\n        process(item)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\n\ndef generate_otp():\n    return str(random.randint(0, 999999)).zfill(6)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"random 模組不具密碼學安全性，OTP 可被預測。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\n\\ndef generate_otp():\\n    return str(secrets.randbelow(1000000)).zfill(6)\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def load_model(path):\n    import pickle\n    with open(path, 'rb') as f:\n        return pickle.load(f)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 FileNotFoundError、pickle.UnpicklingError，也有安全疑慮（pickle 反序列化）。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def load_model(path):\\n    import pickle\\n    try:\\n        with open(path, 'rb') as f:\\n            return pickle.load(f)\\n    except FileNotFoundError:\\n        raise\\n    except Exception as e:\\n        raise RuntimeError(f'Failed to load model: {e}') from e\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def connect():\n    db = MySQLdb.connect(host='localhost', user='root', passwd='password123')\n    return db",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"資料庫密碼硬編碼在原始碼中，一旦 repo 洩漏即暴露所有憑證。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef connect():\\n    db = MySQLdb.connect(\\n        host=os.environ['DB_HOST'],\\n        user=os.environ['DB_USER'],\\n        passwd=os.environ['DB_PASSWORD']\\n    )\\n    return db\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import gc\n\nobject_registry = {}\n\ndef register(name, obj):\n    object_registry[name] = obj\n    gc.disable()  # 停用垃圾回收！\n    return name",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"停用 GC 會導致循環引用的物件永遠無法釋放，記憶體持續增長。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"import weakref\\n\\nobject_registry = {}\\n\\ndef register(name, obj):\\n    object_registry[name] = weakref.ref(obj)\\n    return name\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def use_coupon(coupon_id, user_id):\n    coupon = Coupon.get(coupon_id)\n    if coupon.used:\n        raise ValueError('Already used')\n    coupon.used = True\n    coupon.user_id = user_id\n    db.save(coupon)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"並發請求可能同時通過 if coupon.used 檢查，導致優惠券被重複使用。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"def use_coupon(coupon_id, user_id):\\n    updated = Coupon.query.filter_by(id=coupon_id, used=False).update(\\n        {'used': True, 'user_id': user_id}\\n    )\\n    if updated == 0:\\n        raise ValueError('Coupon already used or not found')\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def upload(file):\n    path = f'/uploads/{file.filename}'\n    file.save(path)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證副檔名與 MIME type，可上傳惡意執行檔；filename 可能包含路徑遍歷字元。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"import os\\nfrom werkzeug.utils import secure_filename\\nALLOWED = {'png', 'jpg', 'pdf'}\\ndef upload(file):\\n    ext = file.filename.rsplit('.', 1)[-1].lower()\\n    if ext not in ALLOWED:\\n        raise ValueError(f'File type not allowed: {ext}')\\n    filename = secure_filename(file.filename)\\n    file.save(os.path.join('/uploads', filename))\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "vote_counts = {}\n\ndef vote(post_id):\n    if post_id in vote_counts:\n        vote_counts[post_id] += 1\n    else:\n        vote_counts[post_id] = 1",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"dict 讀寫在多執行緒下有競態，應使用 Counter 或加鎖。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"from collections import defaultdict\\nimport threading\\nvote_counts = defaultdict(int)\\nlock = threading.Lock()\\n\\ndef vote(post_id):\\n    with lock:\\n        vote_counts[post_id] += 1\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\n\ndef generate_token():\n    return str(random.randint(100000, 999999))",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"random 模組使用 Mersenne Twister，輸出可被預測，不應用於安全用途。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\n\\ndef generate_token():\\n    return secrets.token_urlsafe(32)\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def cache_get(key):\n    return redis_client.get(key).decode('utf-8')",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"若 key 不存在 redis 回傳 None，呼叫 .decode() 會拋出 AttributeError。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def cache_get(key):\\n    value = redis_client.get(key)\\n    return value.decode('utf-8') if value is not None else None\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef api_request(url, headers, body):\n    logging.debug(f'Request: {url} headers={headers} body={body}')\n    return requests.post(url, headers=headers, json=body)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"headers 可能含 Authorization token，body 可能含敏感資料，不應全部 log。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef api_request(url, headers, body):\\n    safe_headers = {k: v for k, v in headers.items() if k.lower() != 'authorization'}\\n    logging.debug(f'Request: {url} headers={safe_headers}')\\n    return requests.post(url, headers=headers, json=body)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef verify_credit_card(card_data):\n    logging.debug(f'Verifying card: {card_data}')\n    return payment_gateway.verify(card_data)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"完整信用卡資料（含卡號、到期日、CVV）寫入 log，嚴重違反 PCI DSS。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef verify_credit_card(card_data):\\n    safe = {'last_four': card_data.get('number', '')[-4:], 'type': card_data.get('type')}\\n    logging.debug(f'Verifying card: {safe}')\\n    return payment_gateway.verify(card_data)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_user_file(user_id, filename):\n    path = f'/data/users/{user_id}/{filename}'\n    return open(path, 'rb').read()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"user_id 與 filename 均可含路徑遍歷，可存取其他使用者的檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"from pathlib import Path\\n\\nDATA_DIR = Path('/data/users').resolve()\\n\\ndef get_user_file(user_id, filename):\\n    user_dir = (DATA_DIR / str(int(user_id))).resolve()\\n    target = (user_dir / filename).resolve()\\n    if not str(target).startswith(str(user_dir)):\\n        raise PermissionError('Access denied')\\n    return target.read_bytes()\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def export_report(format):\n    return generate_report(format)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 format 是否為允許值，可能被傳入任意字串。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"ALLOWED_FORMATS = {'pdf', 'csv', 'xlsx'}\\ndef export_report(format):\\n    if format not in ALLOWED_FORMATS:\\n        raise ValueError(f'Invalid format: {format}')\\n    return generate_report(format)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\nimport string\n\ndef generate_password(length=12):\n    chars = string.ascii_letters + string.digits\n    return ''.join(random.choice(chars) for _ in range(length))",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"random.choice 不適合生成密碼，應使用 secrets.choice。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\nimport string\\n\\ndef generate_password(length=12):\\n    chars = string.ascii_letters + string.digits + string.punctuation\\n    return ''.join(secrets.choice(chars) for _ in range(length))\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "rate_limit = {}\n\ndef is_allowed(user_id):\n    count = rate_limit.get(user_id, 0)\n    if count >= 10:\n        return False\n    rate_limit[user_id] = count + 1\n    return True",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"多執行緒下 rate_limit dict 操作非原子性，可能超出速率限制。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"import threading\\nfrom collections import defaultdict\\nrate_limit = defaultdict(int)\\nlock = threading.Lock()\\n\\ndef is_allowed(user_id):\\n    with lock:\\n        if rate_limit[user_id] >= 10:\\n            return False\\n        rate_limit[user_id] += 1\\n        return True\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def parse_date(date_str):\n    from datetime import datetime\n    return datetime.strptime(date_str, '%Y-%m-%d')",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 ValueError，當日期格式錯誤時程式崩潰。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def parse_date(date_str):\\n    from datetime import datetime\\n    try:\\n        return datetime.strptime(date_str, '%Y-%m-%d')\\n    except ValueError:\\n        raise ValueError(f'Invalid date format: {date_str!r}, expected YYYY-MM-DD')\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def create_user(email, username):\n    db.insert('users', email=email, username=username)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 email 格式與 username 長度、字元限制。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"import re\\ndef create_user(email, username):\\n    if not re.match(r'^[^@]+@[^@]+\\\\.[^@]+$', email):\\n        raise ValueError('Invalid email format')\\n    if not (3 <= len(username) <= 30) or not re.match(r'^[\\\\w-]+$', username):\\n        raise ValueError('Username must be 3-30 alphanumeric chars')\\n    db.insert('users', email=email, username=username)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import numpy as np\n\ndef compute(n):\n    results = []\n    for i in range(n):\n        arr = np.zeros((1000, 1000))  # 每次 8MB\n        results.append(arr.sum())\n    return results",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"每次迴圈建立 8MB 陣列，n 次迭代 = 8n MB；results 儲存 sum 即可，不需保留陣列。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"import numpy as np\\n\\ndef compute(n):\\n    arr = np.zeros((1000, 1000))\\n    return [arr.sum() for _ in range(n)]  # 重用同一陣列\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "SECRET_KEY = 'mysecretkey12345'\nAPI_TOKEN = 'tok_abcdef1234567890'",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"金鑰直接寫在程式碼中，版本控制歷史中永久存在，應從環境變數讀取。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\nSECRET_KEY = os.environ['SECRET_KEY']\\nAPI_TOKEN = os.environ['API_TOKEN']\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "results = []\n\ndef process_stream(stream):\n    for chunk in stream:\n        result = process(chunk)\n        results.append(result)  # 永遠不清除\n    return len(results)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"results list 累積所有處理結果但不清除，串流資料量大時耗盡記憶體。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"def process_stream(stream):\\n    count = 0\\n    for chunk in stream:\\n        result = process(chunk)\\n        save_to_db(result)  # 處理後直接存儲，不累積\\n        count += 1\\n    return count\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "from PIL import Image\n\ndef resize_all(image_paths):\n    images = []\n    for path in image_paths:\n        img = Image.open(path)\n        images.append(img.resize((100, 100)))\n    return images",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"所有圖片同時載入記憶體，大量圖片時耗盡記憶體；Image 物件未關閉。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"from PIL import Image\\n\\ndef resize_all(image_paths):\\n    results = []\\n    for path in image_paths:\\n        with Image.open(path) as img:\\n            results.append(img.resize((100, 100)).tobytes())\\n    return results\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def save_upload(filename, content):\n    path = os.path.join('/uploads', filename)\n    with open(path, 'wb') as f:\n        f.write(content)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"攻擊者可上傳到任意路徑，例如 '../www/shell.php'，覆蓋系統檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"import os\\nfrom pathlib import Path\\nfrom werkzeug.utils import secure_filename\\n\\nUPLOAD_DIR = Path('/uploads').resolve()\\n\\ndef save_upload(filename, content):\\n    safe_name = secure_filename(filename)\\n    if not safe_name:\\n        raise ValueError('Invalid filename')\\n    path = UPLOAD_DIR / safe_name\\n    path.write_bytes(content)\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def delete_record(table, record_id):\n    db.execute(f\"DELETE FROM {table} WHERE id={record_id}\")\n    db.commit()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"table 名稱直接拼入 SQL，無法用參數化查詢防護，需用白名單驗證 table 名稱。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"ALLOWED_TABLES = {'users', 'orders', 'products'}\\ndef delete_record(table, record_id):\\n    if table not in ALLOWED_TABLES:\\n        raise ValueError(f'Invalid table: {table}')\\n    db.execute(f\\\"DELETE FROM {table} WHERE id=?\\\", (record_id,))\\n    db.commit()\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def set_timeout(seconds):\n    config.timeout = seconds",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 timeout 為合理的正數，可能設為 0 或極大值。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def set_timeout(seconds):\\n    if not isinstance(seconds, (int, float)) or seconds <= 0 or seconds > 300:\\n        raise ValueError('Timeout must be between 0 and 300 seconds')\\n    config.timeout = seconds\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def verify_token(token):\n    return hmac.compare_digest(token, 'static_webhook_secret_abc')",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"webhook secret 硬編碼，一旦原始碼外洩攻擊者可偽造請求。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef verify_token(token):\\n    secret = os.environ['WEBHOOK_SECRET']\\n    return hmac.compare_digest(token, secret)\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\n\ndef generate_reset_token():\n    return ''.join([str(random.randint(0, 9)) for _ in range(8)])",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"8 位數字 token 只有 10^8 種可能，且 random 可預測，攻擊者可暴力破解帳號重設連結。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\n\\ndef generate_reset_token():\\n    return secrets.token_urlsafe(32)  # 256 bits 隨機\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef db_connect(dsn):\n    logging.info(f'Connecting to: {dsn}')  # dsn 含帳密\n    return create_engine(dsn)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"DSN 字串含資料庫帳號密碼，寫入 log 會洩露憑證。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\nfrom urllib.parse import urlparse\\n\\ndef db_connect(dsn):\\n    parsed = urlparse(dsn)\\n    safe = f'{parsed.scheme}://***@{parsed.hostname}/{parsed.path.lstrip(\\\"/\\\")}'\\n    logging.info(f'Connecting to: {safe}')\\n    return create_engine(dsn)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def download(request):\n    filename = request.args.get('file')\n    return send_file(f'./downloads/{filename}')",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"未限制 filename，攻擊者可用路徑遍歷讀取伺服器任意檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"from werkzeug.utils import safe_join\\nimport os\\n\\ndef download(request):\\n    filename = request.args.get('file')\\n    try:\\n        path = safe_join('./downloads', filename)\\n    except NotFound:\\n        abort(404)\\n    return send_file(path)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\n\ndef generate_backup_codes(n=8):\n    return [str(random.randint(10000000, 99999999)) for _ in range(n)]",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"備用驗證碼使用不安全亂數，且若攻擊者取得一個碼可推算其他碼。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\n\\ndef generate_backup_codes(n=8):\\n    return [secrets.token_hex(4).upper() for _ in range(n)]\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def deduct_credits(user_id, amount):\n    user = User.get(user_id)\n    if user.credits >= amount:\n        user.credits -= amount\n        db.save(user)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"讀取與更新之間沒有鎖定，並發請求可能造成信用點數重複扣除。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"def deduct_credits(user_id, amount):\\n    with db.transaction():\\n        user = User.query.with_for_update().get(user_id)\\n        if user.credits < amount:\\n            raise ValueError('Insufficient credits')\\n        user.credits -= amount\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def rate_post(post_id, rating):\n    db.insert('ratings', post_id=post_id, rating=rating)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 rating 範圍，可能寫入任意數值。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def rate_post(post_id, rating):\\n    if not isinstance(rating, (int, float)) or not (1 <= rating <= 5):\\n        raise ValueError(f'Rating must be between 1 and 5, got: {rating}')\\n    db.insert('ratings', post_id=post_id, rating=rating)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def update_email(user_id, new_email):\n    db.execute(f\"UPDATE users SET email='{new_email}' WHERE id={user_id}\")\n    db.commit()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"email 與 user_id 皆未參數化，可能被注入。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def update_email(user_id, new_email):\\n    db.execute(\\\"UPDATE users SET email=? WHERE id=?\\\", (new_email, user_id))\\n    db.commit()\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_orders_with_users(order_ids):\n    orders = Order.objects.filter(id__in=order_ids)\n    for order in orders:\n        print(order.user.name)  # 每筆訂單都觸發一次 user 查詢\n    return orders",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"每次存取 order.user 都會發出一次 SQL，N 筆訂單 = N+1 次查詢，效能極差。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def get_orders_with_users(order_ids):\\n    orders = Order.objects.filter(id__in=order_ids).select_related('user')\\n    for order in orders:\\n        print(order.user.name)  # 已預先 JOIN，不再額外查詢\\n    return orders\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\n\ndef generate_nonce():\n    return random.getrandbits(64)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Nonce 用於防重放攻擊，使用可預測亂數導致攻擊者可偽造 nonce。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\n\\ndef generate_nonce():\\n    return secrets.randbits(128)\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "STRIPE_API_KEY = 'sk_live_abcdefghijklmnopqrstuvwx'\n\ndef charge(amount):\n    stripe.api_key = STRIPE_API_KEY\n    return stripe.Charge.create(amount=amount, currency='usd')",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Stripe live 金鑰硬編碼，一旦洩漏可被用於未授權付款。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef charge(amount):\\n    stripe.api_key = os.environ['STRIPE_SECRET_KEY']\\n    return stripe.Charge.create(amount=amount, currency='usd')\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def list_comments(post_ids):\n    result = []\n    for post_id in post_ids:\n        comments = db.query('SELECT * FROM comments WHERE post_id=?', (post_id,))\n        result.extend(comments)\n    return result",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"在迴圈中逐一查詢，N 個 post_id 產生 N 次查詢，應用 IN 一次取得。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def list_comments(post_ids):\\n    placeholders = ','.join('?' * len(post_ids))\\n    return db.query(f'SELECT * FROM comments WHERE post_id IN ({placeholders})', post_ids)\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def check_subscriptions(user_ids):\n    result = {}\n    for uid in user_ids:\n        active = Subscription.query.filter_by(user_id=uid, active=True).count() > 0\n        result[uid] = active\n    return result",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"對每個 user 各查一次 COUNT，應改用一次批次查詢。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def check_subscriptions(user_ids):\\n    active_ids = set(\\n        row[0] for row in\\n        db.session.query(Subscription.user_id)\\n        .filter(Subscription.user_id.in_(user_ids), Subscription.active==True).all()\\n    )\\n    return {uid: uid in active_ids for uid in user_ids}\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def search_products(keyword):\n    sql = \"SELECT * FROM products WHERE name LIKE '%\" + keyword + \"%'\"\n    return db.execute(sql).fetchall()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"字串拼接 SQL，攻擊者可輸入 `%'; DROP TABLE products; --` 破壞資料庫。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def search_products(keyword):\\n    sql = \\\"SELECT * FROM products WHERE name LIKE ?\\\"\\n    return db.execute(sql, (f'%{keyword}%',)).fetchall()\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_author_stats(post_ids):\n    stats = []\n    for post_id in post_ids:\n        post = Post.objects.get(id=post_id)\n        author = User.objects.get(id=post.author_id)  # 兩層 N+1\n        stats.append({'post': post.title, 'author': author.name})\n    return stats",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"雙層 N+1：先查 post 再查 author，應用 select_related 一次 JOIN。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def get_author_stats(post_ids):\\n    posts = Post.objects.filter(id__in=post_ids).select_related('author')\\n    return [{'post': p.title, 'author': p.author.name} for p in posts]\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def create_post(title, content):\n    db.insert('posts', title=title, content=content)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未限制 title 與 content 長度，可能導致資料庫欄位溢出或 DoS。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def create_post(title, content):\\n    if not title or len(title) > 200:\\n        raise ValueError('Title must be 1-200 chars')\\n    if not content or len(content) > 50000:\\n        raise ValueError('Content must be 1-50000 chars')\\n    db.insert('posts', title=title, content=content)\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def set_age(age):\n    user.age = age\n    db.save(user)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 age 的型別與範圍，可能寫入負數或字串。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def set_age(age):\\n    if not isinstance(age, int) or not (0 <= age <= 150):\\n        raise ValueError(f'Invalid age: {age}')\\n    user.age = age\\n    db.save(user)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import threading\n\ndef spawn_worker(task):\n    t = threading.Thread(target=task)\n    t.start()\n    # 沒有 join，thread 物件不會被回收",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"Thread 未 join 且未設為 daemon，可能造成資源洩漏與程式無法正常退出。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"import threading\\nfrom concurrent.futures import ThreadPoolExecutor\\n\\n_pool = ThreadPoolExecutor(max_workers=4)\\n\\ndef spawn_worker(task):\\n    return _pool.submit(task)\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def connect_db(dsn):\n    conn = psycopg2.connect(dsn)\n    return conn",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 OperationalError，資料庫連線失敗時直接拋出未處理例外。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def connect_db(dsn, retries=3):\\n    for attempt in range(retries):\\n        try:\\n            return psycopg2.connect(dsn)\\n        except psycopg2.OperationalError as e:\\n            if attempt == retries - 1:\\n                raise RuntimeError(f'DB connection failed after {retries} retries') from e\\n            time.sleep(2 ** attempt)\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def run_subprocess(cmd):\n    import subprocess\n    result = subprocess.run(cmd, capture_output=True)\n    return result.stdout.decode()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 FileNotFoundError（命令不存在）與解碼錯誤。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def run_subprocess(cmd):\\n    import subprocess\\n    try:\\n        result = subprocess.run(cmd, capture_output=True, timeout=30)\\n        return result.stdout.decode('utf-8', errors='replace')\\n    except FileNotFoundError:\\n        raise RuntimeError(f'Command not found: {cmd[0]}')\\n    except subprocess.TimeoutExpired:\\n        raise TimeoutError(f'Command timed out: {cmd}')\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import sqlite3\n\ndef query(sql):\n    conn = sqlite3.connect('app.db')\n    result = conn.execute(sql).fetchall()\n    return result  # conn 未關閉",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"資料庫連線未關閉，長時間下連線數耗盡，資料庫拒絕服務。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"import sqlite3\\n\\ndef query(sql, params=()):\\n    with sqlite3.connect('app.db') as conn:\\n        return conn.execute(sql, params).fetchall()\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_user(user_id):\n    query = f\"SELECT * FROM users WHERE id = {user_id}\"\n    return db.execute(query).fetchone()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"直接將 user_id 嵌入 SQL 字串，攻擊者可輸入 `1 OR 1=1` 取得所有使用者資料。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def get_user(user_id):\\n    query = \\\"SELECT * FROM users WHERE id = ?\\\"\\n    return db.execute(query, (user_id,)).fetchone()\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def check_permission(user_id, resource):\n    q = f\"SELECT 1 FROM permissions WHERE uid={user_id} AND resource='{resource}'\"\n    return db.execute(q).fetchone() is not None",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"權限查詢存在注入漏洞，一旦繞過即可取得未授權資源。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def check_permission(user_id, resource):\\n    q = \\\"SELECT 1 FROM permissions WHERE uid=? AND resource=?\\\"\\n    return db.execute(q, (user_id, resource)).fetchone() is not None\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def check_and_create_user(username):\n    if not User.exists(username):\n        User.create(username)  # 兩個請求同時通過 if，重複建立",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"check-then-act 模式，並發下可能建立重複使用者。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"def check_and_create_user(username):\\n    try:\\n        User.create(username)  # 依賴資料庫唯一約束\\n    except IntegrityError:\\n        raise ValueError(f'Username already exists: {username}')\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def load_user_avatar(user_id, filename):\n    avatar_dir = f'/avatars/{user_id}/'\n    return open(avatar_dir + filename, 'rb').read()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"filename 可含 '../' 存取其他使用者目錄或系統檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"from pathlib import Path\\nfrom werkzeug.utils import secure_filename\\n\\nAVATAR_ROOT = Path('/avatars').resolve()\\n\\ndef load_user_avatar(user_id, filename):\\n    user_dir = (AVATAR_ROOT / str(int(user_id))).resolve()\\n    safe_name = secure_filename(filename)\\n    target = (user_dir / safe_name).resolve()\\n    if not str(target).startswith(str(user_dir)):\\n        raise PermissionError()\\n    return target.read_bytes()\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def paginate(page, per_page):\n    offset = page * per_page\n    return db.query(offset=offset, limit=per_page)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 page 與 per_page 為正整數，per_page 過大可能導致 DoS。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def paginate(page, per_page):\\n    page = max(0, int(page))\\n    per_page = max(1, min(int(per_page), 100))\\n    offset = page * per_page\\n    return db.query(offset=offset, limit=per_page)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def transfer(from_id, to_id, amount):\n    sender = Account.get(from_id)\n    if sender.balance >= amount:\n        time.sleep(0.01)  # 模擬處理延遲\n        sender.balance -= amount\n        Account.get(to_id).balance += amount\n        db.save()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"檢查餘額與扣款之間存在時間差，並發請求可能造成雙重扣款（TOCTOU 問題）。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"from sqlalchemy import text\\ndef transfer(from_id, to_id, amount):\\n    with db.transaction():\\n        # 使用 SELECT FOR UPDATE 鎖定行\\n        sender = Account.query.with_for_update().get(from_id)\\n        if sender.balance < amount:\\n            raise ValueError('Insufficient balance')\\n        sender.balance -= amount\\n        Account.query.with_for_update().get(to_id).balance += amount\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def redirect_to(url):\n    return redirect(url)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 URL 是否為允許的域名，可能導致 Open Redirect 攻擊。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"from urllib.parse import urlparse\\nALLOWED_HOSTS = {'example.com', 'www.example.com'}\\ndef redirect_to(url):\\n    parsed = urlparse(url)\\n    if parsed.netloc and parsed.netloc not in ALLOWED_HOSTS:\\n        raise ValueError(f'Redirect to external host not allowed: {url}')\\n    return redirect(url)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def parse_int(value):\n    return int(value)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 ValueError，當 value 非數字時程式崩潰。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def parse_int(value):\\n    try:\\n        return int(value)\\n    except (ValueError, TypeError) as e:\\n        raise ValueError(f'Cannot convert to int: {value!r}') from e\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def send_otp(phone):\n    otp = generate_otp()\n    sms.send(phone, f'Your OTP: {otp}')",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 phone 格式，可能發送到無效號碼；也未有速率限制。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"import re\\ndef send_otp(phone):\\n    if not re.match(r'^\\\\+?[1-9]\\\\d{7,14}$', phone):\\n        raise ValueError(f'Invalid phone number: {phone}')\\n    if is_rate_limited(phone):\\n        raise RateLimitError('Too many OTP requests')\\n    otp = generate_otp()\\n    sms.send(phone, f'Your OTP: {otp}')\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef process_form(form_data):\n    logging.debug(f'Form submitted: {form_data}')\n    return save(form_data)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"form_data 可能含密碼、個人資料等敏感欄位，應過濾後再 log。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"SENSITIVE_FIELDS = {'password', 'card_number', 'cvv', 'ssn', 'token'}\\n\\ndef process_form(form_data):\\n    safe = {k: '***' if k in SENSITIVE_FIELDS else v for k, v in form_data.items()}\\n    logging.debug(f'Form submitted: {safe}')\\n    return save(form_data)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def write_report(name, content):\n    filename = name.replace(' ', '_') + '.txt'\n    with open(f'reports/{filename}', 'w') as f:\n        f.write(content)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"只替換空格不足以防止路徑遍歷，name 仍可含 '../'。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"from pathlib import Path\\nfrom werkzeug.utils import secure_filename\\n\\nREPORTS_DIR = Path('reports').resolve()\\n\\ndef write_report(name, content):\\n    filename = secure_filename(name + '.txt')\\n    path = REPORTS_DIR / filename\\n    path.write_text(content)\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "ADMIN_PASSWORD = 'admin'\nDEFAULT_USER = 'admin'",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"預設帳密硬編碼，且密碼過於簡單，即使是測試環境也不應這樣做。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\nADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')\\nif not ADMIN_PASSWORD:\\n    raise EnvironmentError('ADMIN_PASSWORD must be set')\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def set_color(hex_color):\n    theme.primary_color = hex_color",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證是否為合法 hex 顏色，可能寫入惡意字串。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"import re\\ndef set_color(hex_color):\\n    if not re.match(r'^#[0-9A-Fa-f]{6}$', hex_color):\\n        raise ValueError(f'Invalid hex color: {hex_color}')\\n    theme.primary_color = hex_color\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\n\ndef generate_captcha_code():\n    return str(random.randint(1000, 9999))",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"CAPTCHA 使用可預測亂數，攻擊者可自動化猜測。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\n\\ndef generate_captcha_code():\\n    return str(secrets.randbelow(9000) + 1000)\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def include_snippet(name):\n    code = open(f'snippets/{name}.py').read()\n    exec(code)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"路徑遍歷 + exec，攻擊者可執行任意 Python 程式碼，是最嚴重的漏洞組合。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"# 不應使用 exec 動態執行程式碼。若需要載入片段，改用模組系統：\\nimport importlib\\n\\ndef include_snippet(name):\\n    if not re.match(r'^[a-z][a-z0-9_]*$', name):\\n        raise ValueError('Invalid snippet name')\\n    module = importlib.import_module(f'snippets.{name}')\\n    return module\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def download_file(url, dest):\n    r = requests.get(url)\n    with open(dest, 'wb') as f:\n        f.write(r.content)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理網路錯誤、未檢查 HTTP 狀態碼、未處理寫入失敗。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def download_file(url, dest):\\n    try:\\n        r = requests.get(url, timeout=30, stream=True)\\n        r.raise_for_status()\\n        with open(dest, 'wb') as f:\\n            for chunk in r.iter_content(8192):\\n                f.write(chunk)\\n    except requests.RequestException as e:\\n        raise RuntimeError(f'Download failed: {e}') from e\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def set_birth_date(date_str):\n    user.birth_date = date_str",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未解析或驗證日期格式，寫入任意字串可能導致後續錯誤。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"from datetime import date, datetime\\ndef set_birth_date(date_str):\\n    try:\\n        d = datetime.strptime(date_str, '%Y-%m-%d').date()\\n    except ValueError:\\n        raise ValueError(f'Invalid date: {date_str}')\\n    if d > date.today():\\n        raise ValueError('Birth date cannot be in the future')\\n    user.birth_date = d\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def fetch_data(url):\n    response = requests.get(url)\n    return response.json()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理網路錯誤（ConnectionError）、逾時（Timeout）及非 JSON 回應。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def fetch_data(url):\\n    try:\\n        response = requests.get(url, timeout=10)\\n        response.raise_for_status()\\n        return response.json()\\n    except requests.Timeout:\\n        raise TimeoutError(f'Request timed out: {url}')\\n    except requests.RequestException as e:\\n        raise RuntimeError(f'Request failed: {e}')\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_order(order_id, status):\n    sql = f\"SELECT * FROM orders WHERE id={order_id} AND status='{status}'\"\n    return db.execute(sql)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"兩個欄位都直接拼入字串，雙重注入風險。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def get_order(order_id, status):\\n    sql = \\\"SELECT * FROM orders WHERE id=? AND status=?\\\"\\n    return db.execute(sql, (order_id, status))\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "cache = {}\n\ndef get_data(key):\n    if key not in cache:\n        cache[key] = fetch_from_db(key)\n    return cache[key]",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"cache dict 無限增長，從不清除，長時間運行後會耗盡記憶體。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"from functools import lru_cache\\n\\n@lru_cache(maxsize=1024)\\ndef get_data(key):\\n    return fetch_from_db(key)\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_latest_activity(user_ids):\n    return {uid: Activity.query.filter_by(user_id=uid).order_by(Activity.created_at.desc()).first() for uid in user_ids}",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"dict comprehension 中隱藏 N+1，對每個 user 各查一次。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"from sqlalchemy import func\\ndef get_latest_activity(user_ids):\\n    subq = db.session.query(\\n        Activity.user_id,\\n        func.max(Activity.created_at).label('max_at')\\n    ).filter(Activity.user_id.in_(user_ids)).group_by(Activity.user_id).subquery()\\n    activities = db.session.query(Activity).join(\\n        subq, (Activity.user_id==subq.c.user_id) & (Activity.created_at==subq.c.max_at)\\n    ).all()\\n    return {a.user_id: a for a in activities}\"\n    }\n  ],\n  \"overall_score\": 6,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import uuid\nimport random\n\ndef generate_api_key():\n    return str(uuid.UUID(int=random.getrandbits(128)))",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"UUID 生成使用 random 而非 uuid.uuid4()（使用 os.urandom），安全性不足。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import uuid\\n\\ndef generate_api_key():\\n    return str(uuid.uuid4())  # 使用 os.urandom，密碼學安全\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def serve_static(path):\n    full_path = os.path.join('/static', path)\n    return open(full_path, 'rb').read()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"path 可含 '../' 且 open() 未關閉（資源洩漏），存在路徑遍歷漏洞。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"from pathlib import Path\\n\\nSTATIC_DIR = Path('/static').resolve()\\n\\ndef serve_static(path):\\n    target = (STATIC_DIR / path).resolve()\\n    if not str(target).startswith(str(STATIC_DIR)):\\n        raise PermissionError('Access denied')\\n    return target.read_bytes()\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def update_score(player, score):\n    db.execute(f\"UPDATE leaderboard SET score={score} WHERE player='{player}'\")\n    db.commit()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"score 與 player 皆未參數化，雙重注入風險。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def update_score(player, score):\\n    db.execute(\\\"UPDATE leaderboard SET score=? WHERE player=?\\\", (score, player))\\n    db.commit()\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_product_prices(cart_items):\n    total = 0\n    for item in cart_items:\n        product = Product.query.get(item.product_id)  # N 次查詢\n        total += product.price * item.quantity\n    return total",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"對每個購物車商品個別查詢 Product，應批次取得後用 dict 快取。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def get_product_prices(cart_items):\\n    product_ids = [i.product_id for i in cart_items]\\n    products = {p.id: p for p in Product.query.filter(Product.id.in_(product_ids))}\\n    return sum(products[i.product_id].price * i.quantity for i in cart_items)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef store_token(user_id, access_token, refresh_token):\n    logging.debug(f'Tokens for {user_id}: access={access_token} refresh={refresh_token}')\n    cache.set(f'token:{user_id}', access_token)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"access_token 與 refresh_token 完整寫入 log，可被用於冒充使用者。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef store_token(user_id, access_token, refresh_token):\\n    logging.debug(f'Token stored for user {user_id}')\\n    cache.set(f'token:{user_id}', access_token)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_order_details(order_ids):\n    orders = []\n    for oid in order_ids:\n        order = Order.objects.get(id=oid)\n        items = OrderItem.objects.filter(order_id=oid)\n        orders.append({'order': order, 'items': list(items)})\n    return orders",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"雙層 N+1，對每個 order 各查一次 OrderItem，應批次查詢。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def get_order_details(order_ids):\\n    orders = {o.id: o for o in Order.objects.filter(id__in=order_ids)}\\n    items_qs = OrderItem.objects.filter(order_id__in=order_ids)\\n    items_map = {}\\n    for item in items_qs:\\n        items_map.setdefault(item.order_id, []).append(item)\\n    return [{'order': orders[oid], 'items': items_map.get(oid, [])} for oid in order_ids]\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_item(lst, index):\n    return lst[index]",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 IndexError 與 TypeError，呼叫方無法得到有意義的錯誤。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def get_item(lst, index):\\n    try:\\n        return lst[index]\\n    except IndexError:\\n        raise IndexError(f'Index {index} out of range (len={len(lst)})')\\n    except TypeError as e:\\n        raise TypeError(f'Invalid index type: {e}') from e\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+    "metadata": {
+      "problem_type": "沒有處理 Exception",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def set_username(username):\n    user.username = username\n    db.save(user)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證長度、允許字元及唯一性，可能使用特殊字元或超長字串。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"import re\\ndef set_username(username):\\n    if not isinstance(username, str) or not (3 <= len(username) <= 20):\\n        raise ValueError('Username must be 3-20 chars')\\n    if not re.match(r'^[a-zA-Z0-9_]+$', username):\\n        raise ValueError('Username can only contain alphanumeric and underscore')\\n    if db.exists('users', username=username):\\n        raise ValueError('Username already taken')\\n    user.username = username\\n    db.save(user)\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def process_zip(zip_path):\n    import zipfile\n    with zipfile.ZipFile(zip_path) as z:\n        for name in z.namelist():\n            z.extract(name, '/uploads')  # Zip Slip 漏洞",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Zip Slip 漏洞：zip 內的檔案路徑可含 '../' 解壓到任意位置。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"import zipfile\\nfrom pathlib import Path\\n\\nOUTPUT_DIR = Path('/uploads').resolve()\\n\\ndef process_zip(zip_path):\\n    with zipfile.ZipFile(zip_path) as z:\\n        for name in z.namelist():\\n            target = (OUTPUT_DIR / name).resolve()\\n            if not str(target).startswith(str(OUTPUT_DIR)):\\n                raise ValueError(f'Zip Slip detected: {name}')\\n            z.extract(name, OUTPUT_DIR)\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def enrich_events(events):\n    for event in events:\n        event.location = Location.objects.get(id=event.location_id)\n        event.organizer = User.objects.get(id=event.organizer_id)\n    return events",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"雙欄位 N+1，對每個 event 分別查 location 與 organizer。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def enrich_events(events):\\n    loc_ids = {e.location_id for e in events}\\n    org_ids = {e.organizer_id for e in events}\\n    locations = {l.id: l for l in Location.objects.filter(id__in=loc_ids)}\\n    organizers = {u.id: u for u in User.objects.filter(id__in=org_ids)}\\n    for event in events:\\n        event.location = locations[event.location_id]\\n        event.organizer = organizers[event.organizer_id]\\n    return events\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import json\n\ndef parse_all(filenames):\n    all_data = []\n    for fname in filenames:\n        with open(fname) as f:\n            all_data.append(json.load(f))  # 所有 JSON 同時載入記憶體\n    return all_data",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"所有 JSON 檔案同時載入記憶體，若檔案眾多或龐大將耗盡記憶體。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 generator 等技巧避免記憶體無限增長。\",\n      \"fixed_code\": \"import json\\n\\ndef parse_all(filenames):\\n    for fname in filenames:\\n        with open(fname) as f:\\n            yield json.load(f)  # 使用 generator 逐一處理\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在記憶體洩漏或無限增長的資料結構，長時間運行後會導致 OOM 崩潰。\"\n}",
+    "metadata": {
+      "problem_type": "記憶體洩漏",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def github_api(repo):\n    token = 'ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'\n    headers = {'Authorization': f'token {token}'}\n    return requests.get(f'https://api.github.com/repos/{repo}', headers=headers)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"GitHub Personal Access Token 硬編碼，可被用於存取帳號所有 repo。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef github_api(repo):\\n    headers = {'Authorization': f'token {os.environ[\\\"GITHUB_TOKEN\\\"]}'}\\n    return requests.get(f'https://api.github.com/repos/{repo}', headers=headers)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_posts_with_tags():\n    posts = Post.query.all()\n    result = []\n    for post in posts:\n        tags = Tag.query.filter_by(post_id=post.id).all()  # N 次額外查詢\n        result.append({'post': post, 'tags': tags})\n    return result",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"對每篇文章個別查詢 tags，N 篇文章產生 N+1 次 SQL。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def get_posts_with_tags():\\n    posts = Post.query.options(joinedload(Post.tags)).all()\\n    return [{'post': p, 'tags': p.tags} for p in posts]\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef create_user(data):\n    logging.info(f'Creating user: {data}')  # data 含密碼\n    return User.create(**data)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"data dict 可能包含 password、token 等敏感欄位，全部寫入 log。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef create_user(data):\\n    safe_data = {k: v for k, v in data.items() if k not in ('password', 'token', 'secret')}\\n    logging.info(f'Creating user: {safe_data}')\\n    return User.create(**data)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import sqlite3\ndef run_query(user_input):\n    conn = sqlite3.connect('app.db')\n    conn.execute(\"SELECT * FROM data WHERE value='\" + user_input + \"'\")\n    conn.close()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"直接執行使用者輸入的字串，最嚴重的注入場景。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"import sqlite3\\ndef run_query(user_input):\\n    conn = sqlite3.connect('app.db')\\n    conn.execute(\\\"SELECT * FROM data WHERE value=?\\\", (user_input,))\\n    conn.close()\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def backup_file(src):\n    dst = f'/backup/{os.path.basename(src)}'\n    shutil.copy(src, dst)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"basename 只取最後部分，但 src 本身可指向任意系統路徑，src 未驗證。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"from pathlib import Path\\n\\nALLOWED_SRC = Path('/data').resolve()\\nBACKUP_DIR = Path('/backup').resolve()\\n\\ndef backup_file(src):\\n    src_path = Path(src).resolve()\\n    if not str(src_path).startswith(str(ALLOWED_SRC)):\\n        raise PermissionError('Source not in allowed directory')\\n    dst = BACKUP_DIR / src_path.name\\n    shutil.copy(src_path, dst)\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import os\n\ndef get_pid_file():\n    if not os.path.exists('/var/run/app.pid'):\n        with open('/var/run/app.pid', 'w') as f:\n            f.write(str(os.getpid()))\n        return True\n    return False",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"TOCTOU：exists() 與 open() 之間可能有其他程序建立檔案。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"import os\\n\\ndef get_pid_file():\\n    try:\\n        fd = os.open('/var/run/app.pid', os.O_CREAT | os.O_EXCL | os.O_WRONLY)\\n        with os.fdopen(fd, 'w') as f:\\n            f.write(str(os.getpid()))\\n        return True\\n    except FileExistsError:\\n        return False\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def set_language(lang):\n    user.language = lang",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證語言代碼是否合法，可能寫入任意字串。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"SUPPORTED_LANGS = {'zh-TW', 'zh-CN', 'en', 'ja', 'ko'}\\ndef set_language(lang):\\n    if lang not in SUPPORTED_LANGS:\\n        raise ValueError(f'Unsupported language: {lang}')\\n    user.language = lang\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_template(name):\n    with open(f'templates/{name}.html') as f:\n        return f.read()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"name 可含路徑遍歷字元，讀取模板目錄以外的檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"import os\\nfrom pathlib import Path\\n\\nTPL_DIR = Path('templates').resolve()\\n\\ndef get_template(name):\\n    path = (TPL_DIR / f'{name}.html').resolve()\\n    if not str(path).startswith(str(TPL_DIR)):\\n        raise ValueError('Invalid template name')\\n    return path.read_text()\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_user_profiles(user_ids):\n    users = []\n    for uid in user_ids:\n        user = User.objects.get(id=uid)  # 每個 id 查一次\n        users.append(user)\n    return users",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"對每個 user_id 各發一次查詢，應改用 filter(id__in=...)。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def get_user_profiles(user_ids):\\n    return list(User.objects.filter(id__in=user_ids))\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef reset_password(user_id, new_password):\n    logging.info(f'Password reset for user {user_id}: new_password={new_password}')\n    User.update_password(user_id, new_password)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"新密碼明文寫入 log。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef reset_password(user_id, new_password):\\n    logging.info(f'Password reset for user {user_id}')\\n    User.update_password(user_id, new_password)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_jwt():\n    return jwt.encode({'user': 'admin'}, 'hardcoded_secret', algorithm='HS256')",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"JWT 簽名金鑰硬編碼，攻擊者可偽造任意 token。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef get_jwt():\\n    secret = os.environ['JWT_SECRET']\\n    return jwt.encode({'user': 'admin'}, secret, algorithm='HS256')\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def set_role(user_id, role):\n    db.update('users', {'role': role}, id=user_id)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 role 是否為合法值，攻擊者可將自己設為 admin。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"VALID_ROLES = {'user', 'moderator', 'admin'}\\ndef set_role(user_id, role):\\n    if role not in VALID_ROLES:\\n        raise ValueError(f'Invalid role: {role}')\\n    db.update('users', {'role': role}, id=user_id)\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"缺乏輸入驗證，可能導致資料損毀、安全漏洞或系統異常行為。\"\n}",
+    "metadata": {
+      "problem_type": "沒有輸入驗證",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_doc(category, filename):\n    return open(f'docs/{category}/{filename}').read()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"兩層路徑均可遍歷，可讀取 docs 目錄以外的任意檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"from pathlib import Path\\n\\nDOCS_DIR = Path('docs').resolve()\\n\\ndef get_doc(category, filename):\\n    path = (DOCS_DIR / category / filename).resolve()\\n    if not str(path).startswith(str(DOCS_DIR)):\\n        raise PermissionError('Access denied')\\n    return path.read_text()\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import logging\n\ndef generate_and_send_otp(phone):\n    otp = generate_otp()\n    logging.info(f'OTP for {phone}: {otp}')\n    sms.send(phone, f'Your OTP: {otp}')",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"OTP 寫入 log，能存取 log 的人可用 OTP 冒充使用者登入。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import logging\\n\\ndef generate_and_send_otp(phone):\\n    otp = generate_otp()\\n    logging.info(f'OTP sent to {phone[-4:].rjust(len(phone), \\\"*\\\")}')\\n    sms.send(phone, f'Your OTP: {otp}')\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"敏感資訊寫入 log 可能違反法規（GDPR、PCI DSS）並造成資料洩漏。\"\n}",
+    "metadata": {
+      "problem_type": "敏感資訊寫入 Log",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\n\ndef generate_2fa_secret():\n    alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'\n    return ''.join(random.choices(alphabet, k=32))",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"2FA secret 使用不安全亂數，可能被預測。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\n\\ndef generate_2fa_secret():\\n    alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'\\n    return ''.join(secrets.choice(alphabet) for _ in range(32))\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def generate_invoice_number():\n    last = Invoice.query.order_by(Invoice.id.desc()).first()\n    return (last.id + 1) if last else 1",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"並發下可能產生重複的發票號碼，應改用資料庫序列或加鎖。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"from sqlalchemy import Sequence\\ndef generate_invoice_number():\\n    seq = Sequence('invoice_number_seq')\\n    return db.session.execute(seq)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def show_notifications(user_id):\n    notifs = Notification.query.filter_by(user_id=user_id).all()\n    for n in notifs:\n        sender = User.query.get(n.sender_id)  # N 次查詢\n        print(f'{sender.name}: {n.message}')\n    return notifs",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"每筆通知都查詢一次 sender，應批次取得所有 sender。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def show_notifications(user_id):\\n    notifs = Notification.query.filter_by(user_id=user_id).all()\\n    sender_ids = {n.sender_id for n in notifs}\\n    senders = {u.id: u for u in User.query.filter(User.id.in_(sender_ids))}\\n    for n in notifs:\\n        print(f'{senders[n.sender_id].name}: {n.message}')\\n    return notifs\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_comments(post_id, limit):\n    sql = f\"SELECT * FROM comments WHERE post_id={post_id} LIMIT {limit}\"\n    return db.execute(sql).fetchall()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"limit 未驗證型別，若傳入字串可能注入；應確保為整數。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def get_comments(post_id, limit):\\n    limit = int(limit)\\n    sql = \\\"SELECT * FROM comments WHERE post_id=? LIMIT ?\\\"\\n    return db.execute(sql, (post_id, limit)).fetchall()\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "session_store = {}\n\ndef create_session(user_id):\n    token = generate_token()\n    session_store[token] = user_id\n    return token",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"dict 操作在多執行緒下可能有競態，且 dict 不適合生產環境的 session 儲存。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"import threading\\nsession_store = {}\\nlock = threading.Lock()\\n\\ndef create_session(user_id):\\n    token = secrets.token_urlsafe(32)\\n    with lock:\\n        session_store[token] = user_id\\n    return token\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import random\n\ndef generate_salt():\n    return str(random.getrandbits(32))",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Salt 使用不安全亂數且只有 32 bits，太短且可預測。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import os\\n\\ndef generate_salt():\\n    return os.urandom(16)  # 128 bits 安全 salt\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+    "metadata": {
+      "problem_type": "不安全的亂數生成",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "tickets_left = 100\n\ndef buy_ticket(user_id):\n    global tickets_left\n    if tickets_left > 0:\n        tickets_left -= 1\n        create_order(user_id)\n        return True\n    return False",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"多執行緒下 tickets_left 操作非原子性，可能超賣。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"import threading\\ntickets_left = 100\\nlock = threading.Lock()\\n\\ndef buy_ticket(user_id):\\n    with lock:\\n        if tickets_left > 0:\\n            tickets_left -= 1\\n            create_order(user_id)\\n            return True\\n    return False\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_by_email(email):\n    return db.execute(\"SELECT * FROM users WHERE email='\" + email + \"'\").fetchone()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"字串拼接注入漏洞，應使用參數化查詢。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def get_by_email(email):\\n    return db.execute(\\\"SELECT * FROM users WHERE email=?\\\", (email,)).fetchone()\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在 SQL Injection 漏洞，需立即修正，使用參數化查詢取代字串拼接。\"\n}",
+    "metadata": {
+      "problem_type": "SQL Injection",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "import os\n\ndef safe_write(path, data):\n    if not os.path.exists(path):\n        with open(path, 'w') as f:\n            f.write(data)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"存在 TOCTOU 競態：exists() 與 open() 之間可能被其他程序建立檔案。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"import os\\n\\ndef safe_write(path, data):\\n    try:\\n        fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)\\n        with os.fdopen(fd, 'w') as f:\\n            f.write(data)\\n    except FileExistsError:\\n        pass  # 已存在，跳過\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在競態條件，在並發環境下可能導致資料不一致或安全漏洞。\"\n}",
+    "metadata": {
+      "problem_type": "競態條件",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def read_file(filename):\n    path = f'/var/www/files/{filename}'\n    with open(path) as f:\n        return f.read()",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"filename 可包含 '../' 讓攻擊者讀取任意系統檔案，例如 '../../etc/passwd'。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"import os\\nfrom pathlib import Path\\n\\nBASE_DIR = Path('/var/www/files')\\n\\ndef read_file(filename):\\n    path = (BASE_DIR / filename).resolve()\\n    if not str(path).startswith(str(BASE_DIR)):\\n        raise PermissionError('Access denied')\\n    return path.read_text()\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def get_invoice_lines(invoice_ids):\n    invoices = Invoice.query.filter(Invoice.id.in_(invoice_ids)).all()\n    for inv in invoices:\n        inv.lines = InvoiceLine.query.filter_by(invoice_id=inv.id).all()  # N+1\n    return invoices",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"效能問題\",\n      \"severity\": \"中\",\n      \"description\": \"已批次取得 invoices，但 lines 仍逐一查詢，應改用 subqueryload。\",\n      \"suggestion\": \"使用 select_related/prefetch_related（Django）或 joinedload/subqueryload（SQLAlchemy），或改用 IN 一次批次查詢。\",\n      \"fixed_code\": \"def get_invoice_lines(invoice_ids):\\n    return Invoice.query.options(\\n        subqueryload(Invoice.lines)\\n    ).filter(Invoice.id.in_(invoice_ids)).all()\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在 N+1 查詢問題，隨資料量成長效能會急遽下降，需改用批次查詢。\"\n}",
+    "metadata": {
+      "problem_type": "N+1 查詢問題",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def slack_notify(msg):\n    webhook = 'https://hooks.slack.com/services/T00/B00/xxxxxxxxxxx'\n    requests.post(webhook, json={'text': msg})",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Slack Webhook URL 硬編碼，外洩後任何人都能發送訊息到你的 Slack 頻道。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef slack_notify(msg):\\n    webhook = os.environ['SLACK_WEBHOOK_URL']\\n    requests.post(webhook, json={'text': msg})\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+    "metadata": {
+      "problem_type": "硬編碼密碼",
+      "source": "handcrafted"
+    }
+  },
+  {
+    "instruction": "請對以下 Python 程式碼做 code review",
+    "input": "def render_template(tpl_name):\n    content = open(f'./tpl/{tpl_name}').read()\n    return render(content)",
+    "output": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"tpl_name 可含路徑遍歷讀取伺服器敏感檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"from pathlib import Path\\n\\nTPL_DIR = Path('./tpl').resolve()\\n\\ndef render_template(tpl_name):\\n    path = (TPL_DIR / tpl_name).resolve()\\n    if not str(path).startswith(str(TPL_DIR)):\\n        raise ValueError('Invalid template')\\n    return render(path.read_text())\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"路徑遍歷漏洞可讓攻擊者讀取或寫入伺服器任意檔案，必須立即修正。\"\n}",
+    "metadata": {
+      "problem_type": "路徑遍歷漏洞",
+      "source": "handcrafted"
+    }
+  }
+]

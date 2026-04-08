@@ -11,9 +11,11 @@ import os
 import json
 import time
 import requests
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
 # ── 設定 ──────────────────────────────────────────────────────────────────
 
@@ -52,7 +54,7 @@ TARGET_REPOS = [
 ]
 
 MAX_PRS_PER_REPO = 100  # 從 30 提高到 100
-OUTPUT_PATH = "github_pr_training_data.json"
+OUTPUT_PATH = str(BASE_DIR / "github_pr_training_data.json")
 
 # ── API ───────────────────────────────────────────────────────────────────
 

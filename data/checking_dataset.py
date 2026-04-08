@@ -1,7 +1,10 @@
 import json
+from pathlib import Path
 from collections import Counter
 
-with open("combined_training_data.json", encoding="utf-8") as f:
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+with open(BASE_DIR / "combined_training_data.json", encoding="utf-8") as f:
     data = json.load(f)
 
 print(f"總筆數：{len(data)}")

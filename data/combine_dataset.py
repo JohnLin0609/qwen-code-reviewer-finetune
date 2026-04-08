@@ -1,11 +1,14 @@
 import json
 import random
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 讀入兩份資料
-with open("code_review_training_data.json", encoding="utf-8") as f:
+with open(BASE_DIR / "training_data" / "code_review_training_data.json", encoding="utf-8") as f:
     synthetic = json.load(f)
 
-with open("github_pr_training_data.json", encoding="utf-8") as f:
+with open(BASE_DIR / "github_pr_training_data.json", encoding="utf-8") as f:
     github = json.load(f)
 
 print(f"合成資料：{len(synthetic)} 筆")
@@ -16,7 +19,7 @@ combined = synthetic + github
 random.shuffle(combined)
 
 # 存檔
-with open("combined_training_data.json", "w", encoding="utf-8") as f:
+with open(BASE_DIR / "combined_training_data.json", "w", encoding="utf-8") as f:
     json.dump(combined, f, ensure_ascii=False, indent=2)
 
 print(f"合併後：{len(combined)} 筆")

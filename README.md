@@ -154,13 +154,13 @@ pip install unsloth trl transformers datasets peft bitsandbytes accelerate
 
 ```bash
 # Collect data (needs GITHUB_TOKEN in .env)
-python fetch_github_pr.py
+python data/fetch_github_pr.py
 
 # Merge datasets
-python combine_dataset.py
+python data/combine_dataset.py
 
 # Clean (9-pass pipeline)
-python claude_clean.py
+python data/claude_clean.py
 
 # Train
 accelerate launch --config_file accelerate_config.yaml train.py
@@ -181,17 +181,23 @@ python compare.py
 ## Project Structure
 
 ```
-├── fetch_github_pr.py                 # GitHub API data collection (20 repos)
-├── code_review_training_data.json     # 200 hand-crafted single-issue examples
-├── multi_issue_training_data.json     # 103 hand-crafted multi-issue examples
-├── combine_dataset.py                 # Merge all data sources
-├── claude_clean.py                    # 9-pass cleaning pipeline
-├── checking_dataset.py                # Dataset quality inspector
 ├── train.py                           # QLoRA + Unsloth + Accelerate training
-├── accelerate_config.yaml             # Accelerate config (single GPU, bf16)
 ├── inference.py                       # Inference testing
 ├── compare.py                         # Fine-tuned vs base model comparison
-└── code-review-model/
+├── accelerate_config.yaml             # Accelerate config (single GPU, bf16)
+├── data/
+│   ├── fetch_github_pr.py             # GitHub API data collection (20 repos)
+│   ├── combine_dataset.py             # Merge all data sources
+│   ├── claude_clean.py                # 9-pass cleaning pipeline
+│   ├── checking_dataset.py            # Dataset quality inspector
+│   └── review_result.py              # Light cleaning (v1)
+├── eval/
+│   ├── metrics.py                     # Quantitative evaluation
+│   └── compare-0.txt                  # Saved comparison output
+├── training_data/
+│   ├── code_review_training_data.json # 200 hand-crafted single-issue examples
+│   └── multi_issue_training_data.json # 103 hand-crafted multi-issue examples
+└── code-review-model/                 # (generated, gitignored)
     ├── lora/                          # LoRA adapter weights (~155 MB)
     └── merged/                        # Full merged model (~15 GB)
 ```
