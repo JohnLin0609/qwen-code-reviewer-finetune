@@ -13,6 +13,11 @@ import torch
 from datasets import Dataset
 from unsloth import FastLanguageModel
 from trl import SFTTrainer, SFTConfig
+from accelerate import Accelerator
+
+# ── Accelerate（DDP-ready：單卡/多卡不需改 code）────────────────────────────
+accelerator = Accelerator(mixed_precision="bf16")
+print(f"裝置：{accelerator.device}, 程序數：{accelerator.num_processes}")
 
 # ── 設定 ──────────────────────────────────────────────────────────────────
 
@@ -39,8 +44,8 @@ print("載入模型...")
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name=MODEL_NAME,
     max_seq_length=MAX_SEQ_LEN,
-    load_in_4bit=True,       # QLoRA，省一半顯存
-    dtype=None,              # 自動偵測
+    load_in_4bit=True,                    # QLoRA，省一半顯存
+    dtype=torch.bfloat16,                 # bf16 在 Ampere+ GPU 更快
 )
 
 # 加上 LoRA
@@ -120,11 +125,12 @@ trainer = SFTTrainer(
         output_dir=OUTPUT_DIR,
         report_to="none",    # 改成 "wandb" 可以用 wandb 追蹤
         seed=42,
-        # ── Accelerate ──
-        torch_compile=True,           # Ada GPU 支援，加速 ~20%
-        optim="adamw_8bit",           # 8-bit optimizer，省 VRAM 且速度相近
-        dataloader_pin_memory=True,   # 加速 CPU→GPU 傳輸
-        dataloader_num_workers=4,     # 平行載入資料
+        # ── Accelerate / 記憶體優化 ──
+        torch_compile=True,                # Ada GPU 支援，JIT 編譯加速 ~20%
+        optim="paged_adamw_32bit",         # paged optimizer，自動 offload 到 CPU
+        dataloader_pin_memory=True,        # 加速 CPU→GPU 傳輸（減少 PCIe 延遲）
+        dataloader_num_workers=4,          # 平行載入資料，避免 GPU idle
+        ddp_find_unused_parameters=False,  # DDP 優化：已知所有參數都會使用
     ),
 )
 

@@ -44,7 +44,7 @@ def review_code(code: str) -> str:
     with torch.no_grad():
         output = model.generate(
             input_ids=input_ids,
-            max_new_tokens=512,
+            max_new_tokens=1024,
             temperature=0.7,
             top_p=0.9,
             do_sample=True,
@@ -59,26 +59,39 @@ def review_code(code: str) -> str:
 # ── 測試案例 ──────────────────────────────────────────────────────────────
 
 test_cases = [
-    # SQL Injection
+    # 單一問題：SQL Injection
     """
 def get_user(user_id):
     query = f"SELECT * FROM users WHERE id = {user_id}"
     return db.execute(query).fetchone()
 """,
-    # 硬編碼密碼
+    # 多重問題：SQL Injection + 硬編碼密碼 + 連線洩漏
     """
-def connect():
-    return psycopg2.connect(
-        host="localhost",
-        user="admin",
-        password="supersecret123"
-    )
+def get_user(user_id):
+    query = f"SELECT * FROM users WHERE id = {user_id}"
+    conn = psycopg2.connect(host='db.prod.internal', user='root', password='admin123')
+    return conn.execute(query).fetchone()
 """,
-    # 沒有 exception handling
+    # 多重問題：Command Injection + 敏感資訊寫入 Log + 無錯誤處理
     """
-def read_config(path):
-    with open(path) as f:
-        return json.load(f)
+import subprocess
+import logging
+
+def deploy(repo_url, branch, token):
+    logging.info(f'Deploying {repo_url} branch={branch} token={token}')
+    cmd = f'git clone -b {branch} https://{token}@{repo_url} /deploy'
+    subprocess.call(cmd, shell=True)
+""",
+    # 多重問題：路徑遍歷 + 無檔案類型驗證 + 無大小限制
+    """
+from flask import request
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    f = request.files['file']
+    path = f'/uploads/{f.filename}'
+    f.save(path)
+    return f'Saved to {path}'
 """,
 ]
 

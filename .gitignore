@@ -1,10 +1,24 @@
+# Virtual environment
 .venv/
-claude_workspace/
+
+# Model outputs
 code-review-model/
 train_logs/
 unsloth_compiled_cache/
+
+# Large data files (tracked separately)
 claude_cleaned_training_data.json
 cleaned_training_data.json
 code_review_training_data.json
 combined_training_data.json
 github_pr_training_data.json
+
+# Intermediate batch files
+multi_issue_batch*.json
+
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
