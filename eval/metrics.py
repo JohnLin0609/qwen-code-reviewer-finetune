@@ -129,7 +129,8 @@ def greet(name: str) -> str:
 WORKER_SCRIPT = '''
 import warnings; warnings.filterwarnings("ignore")
 import sys, json, torch
-from unsloth import FastLanguageModel
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from peft import PeftModel
 
 model_path    = sys.argv[1]
 samples_file  = sys.argv[2]
@@ -140,12 +141,34 @@ is_fewshot    = sys.argv[5] == "true"
 with open(samples_file) as f:
     samples = json.load(f)
 
-model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name=model_path,
-    max_seq_length=2048,
+# Load with transformers + PEFT (supports KV cache, unlike Unsloth fast path)
+bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.bfloat16,
 )
-FastLanguageModel.for_inference(model)
+
+import os
+is_lora = os.path.exists(os.path.join(model_path, "adapter_config.json"))
+
+if is_lora:
+    # Load base model + LoRA adapter
+    from json import load as jload
+    with open(os.path.join(model_path, "adapter_config.json")) as f:
+        adapter_cfg = jload(f)
+    base_model_name = adapter_cfg.get("base_model_name_or_path", "Qwen/Qwen2.5-Coder-7B-Instruct")
+    base_model = AutoModelForCausalLM.from_pretrained(
+        base_model_name, quantization_config=bnb_config, device_map="auto",
+    )
+    model = PeftModel.from_pretrained(base_model, model_path)
+    tokenizer = AutoTokenizer.from_pretrained(base_model_name)
+else:
+    model = AutoModelForCausalLM.from_pretrained(
+        model_path, quantization_config=bnb_config, device_map="auto",
+    )
+    tokenizer = AutoTokenizer.from_pretrained(model_path)
+
+model.eval()
 
 FEW_SHOT_EXAMPLES = [
     ("def get_user(u): return db.execute(f\\"SELECT * FROM users WHERE id = {u}\\").fetchone()",
@@ -164,19 +187,21 @@ def build_messages(code, fewshot=False):
     return messages
 
 results = []
-for sample in samples:
+for i, sample in enumerate(samples):
     code = sample["input"]
     messages = build_messages(code, fewshot=is_fewshot)
     inputs = tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True, return_tensors="pt")
     if hasattr(inputs, "input_ids"):
-        input_ids = inputs.input_ids.to("cuda")
+        input_ids = inputs.input_ids.to(model.device)
     else:
-        input_ids = inputs.to("cuda")
+        input_ids = inputs.to(model.device)
     prompt_len = input_ids.shape[1]
     with torch.no_grad():
-        out = model.generate(input_ids=input_ids, max_new_tokens=512, temperature=0.1, do_sample=False, use_cache=False)
+        out = model.generate(input_ids=input_ids, max_new_tokens=512, temperature=0.1, do_sample=False, use_cache=True)
     generated = out[0][prompt_len:]
     results.append(tokenizer.decode(generated, skip_special_tokens=True))
+    if (i + 1) % 10 == 0:
+        print(f"  [{i+1}/{len(samples)}] samples done", flush=True)
 
 with open(output_file, "w", encoding="utf-8") as f:
     json.dump(results, f, ensure_ascii=False)
@@ -341,45 +366,49 @@ def evaluate_model(
 
     results = {"label": label, "model_path": model_path}
 
-    # ── Text quality on test set ──────────────────────────────────────────
+    # ── Phase 1: Run ALL GPU inference first ─────────────────────────────
+    predictions = None
+    json_preds = None
     if test_samples:
         print(f"  Running inference on {len(test_samples)} test samples...")
         predictions = run_inference(model_path, test_samples, is_fewshot=is_fewshot)
         if predictions is None:
             print("  Skipping text metrics (inference failed)")
         else:
-            references = [s["output"] for s in test_samples]
-            print("  Computing CodeBLEU...")
-            results["codebleu"]   = compute_codebleu(predictions, references)
-            print("  Computing BERTScore...")
-            results["bertscore"]  = compute_bertscore(predictions, references)
-            print("  Computing ROUGE-L...")
-            results["rougeL"]     = compute_rougeL(predictions, references)
             json_samples = [s for s in test_samples if _is_json_output(s["output"])]
             if json_samples:
                 json_preds = run_inference(model_path, json_samples, is_fewshot)
-                if json_preds:
-                    results["json_validity"] = compute_json_validity(json_preds)
-            print(f"  CodeBLEU={results.get('codebleu')}  BERTScore={results.get('bertscore')}  ROUGE-L={results.get('rougeL')}")
 
-    # ── Bug detection rate ────────────────────────────────────────────────
     print(f"  Running {len(SECURITY_TEST_CASES)} security test cases...")
     sec_inputs   = [{"input": code.strip()} for _, code, _ in SECURITY_TEST_CASES]
     sec_keywords = [kws for _, _, kws in SECURITY_TEST_CASES]
     sec_preds    = run_inference(model_path, sec_inputs, is_fewshot)
+
+    print(f"  Running {len(CLEAN_TEST_CASES)} clean code test cases...")
+    clean_inputs = [{"input": code.strip()} for _, code in CLEAN_TEST_CASES]
+    clean_preds  = run_inference(model_path, clean_inputs, is_fewshot)
+
+    # ── Phase 2: Compute metrics (CPU-bound, no GPU needed) ──────────────
+    if predictions is not None:
+        references = [s["output"] for s in test_samples]
+        print("  Computing CodeBLEU...")
+        results["codebleu"]   = compute_codebleu(predictions, references)
+        print("  Computing BERTScore...")
+        results["bertscore"]  = compute_bertscore(predictions, references)
+        print("  Computing ROUGE-L...")
+        results["rougeL"]     = compute_rougeL(predictions, references)
+        if json_preds:
+            results["json_validity"] = compute_json_validity(json_preds)
+        print(f"  CodeBLEU={results.get('codebleu')}  BERTScore={results.get('bertscore')}  ROUGE-L={results.get('rougeL')}")
+
     if sec_preds:
         results["bug_detection_rate"] = compute_bug_detection_rate(sec_preds, sec_keywords)
         print(f"  Bug detection rate: {results['bug_detection_rate']:.1%}")
-        # Save individual results for inspection
         results["security_details"] = [
             {"test": name, "detected": any(kw.lower() in pred.lower() for kw in kws), "prediction": pred[:300]}
             for (name, _, kws), pred in zip(SECURITY_TEST_CASES, sec_preds)
         ]
 
-    # ── False positive rate ───────────────────────────────────────────────
-    print(f"  Running {len(CLEAN_TEST_CASES)} clean code test cases...")
-    clean_inputs = [{"input": code.strip()} for _, code in CLEAN_TEST_CASES]
-    clean_preds  = run_inference(model_path, clean_inputs, is_fewshot)
     if clean_preds:
         results["false_positive_rate"] = compute_false_positive_rate(clean_preds)
         print(f"  False positive rate: {results['false_positive_rate']:.1%}")

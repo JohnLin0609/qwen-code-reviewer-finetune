@@ -22,7 +22,7 @@ print(f"裝置：{accelerator.device}, 程序數：{accelerator.num_processes}")
 # ── 設定 ──────────────────────────────────────────────────────────────────
 
 MODEL_NAME   = "Qwen/Qwen2.5-Coder-7B-Instruct"
-DATA_PATH    = "claude_cleaned_training_data.json"
+DATA_PATH    = "claude_cleaned_training_data_v4.json"
 OUTPUT_DIR   = "./code-review-model"
 MAX_SEQ_LEN  = 2048
 

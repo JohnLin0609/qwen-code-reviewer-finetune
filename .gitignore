@@ -1,5 +1,8 @@
-# Virtual environment
+# Virtual environments
 .venv/
+.venvs/
+venv/
+env/
 
 # Model outputs
 code-review-model/
@@ -10,9 +13,28 @@ unsloth_compiled_cache/
 *.json
 !training_data/*.json
 
+# External libraries / third-party projects (cloned, not ours)
+PurpleLlama/
+
+# Logs
+*.log
+
 # Secrets
 .env
+.env.*
+!.env.example
 
 # Python
 __pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
