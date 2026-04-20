@@ -71,7 +71,7 @@ Free-form markdown, verbose, mixes Simplified/Traditional Chinese, no severity r
 | Actionability | `fixed_code` in every issue | Multiple alternatives, sometimes overwhelming |
 | Severity scoring | `overall_score` (1-10) | No scoring |
 
-## Pipeline
+## Data Pipeline
 
 ```
 GitHub API (20 repos, 2,977 PRs)     303 Hand-crafted Examples
@@ -79,10 +79,15 @@ GitHub API (20 repos, 2,977 PRs)     303 Hand-crafted Examples
          v                                    v
     combine_dataset.py ──────────────> combined (3,177)
                                               |
-                                    claude_clean.py (9-pass)
+                                    claude_clean.py (9-pass deep cleaning)
                                               |
                                               v
-                                    Training Data (2,683)
+                                     v2 dataset (2,683)  ◀── model trained on this
+                                              |
+                                    fix_dataset.py (post-processing)
+                                              |
+                                              v
+                                     v3 dataset (1,546)  ◀── ready for next run
                                               |
                                     accelerate launch train.py
                                               |
@@ -94,6 +99,8 @@ GitHub API (20 repos, 2,977 PRs)     303 Hand-crafted Examples
 
 ## Training Data
 
+### v2 — Current (used for model training)
+
 | Source | Count | % |
 |---|---|---|
 | GitHub inline comments | 2,080 | 77.5% |
@@ -102,9 +109,23 @@ GitHub API (20 repos, 2,977 PRs)     303 Hand-crafted Examples
 | Hand-crafted multi-issue | 103 | 3.8% |
 | **Total** | **2,683** | |
 
-**Data sources**: django, flask, fastapi, requests, httpx, cpython, celery, numpy, pandas, scikit-learn, pytorch, transformers, pydantic, sqlalchemy, aiohttp, pytest, starlette, poetry, pip, scrapy
+### v3 — Post-processed (ready for retraining)
 
-### 9-Pass Cleaning Pipeline (`claude_clean.py`)
+Same 4 sources but after `fix_dataset.py` applies three additional fixes:
+
+| Metric | v2 | v3 |
+|---|---|---|
+| Total records | 2,683 | **1,546** |
+| GitHub inline comments | 2,080 | 1,052 |
+| GitHub review bodies | 300 | 191 |
+| Hand-crafted single-issue | 200 | 200 |
+| Hand-crafted multi-issue | 103 | 103 |
+| Chinese instructions | 100% | ~55% |
+| English instructions | 0% | ~45% |
+
+**Data sources (20 repos)**: django, flask, fastapi, requests, httpx, cpython, celery, numpy, pandas, scikit-learn, pytorch, transformers, pydantic, sqlalchemy, aiohttp, pytest, starlette, poetry, pip, scrapy
+
+### 9-Pass Cleaning Pipeline (`data/claude_clean.py`)
 
 1. Bot/automated comment removal (sqla-tester, Copilot, Codecov, etc.)
 2. Low-quality output removal (< 25 chars, bare URLs, trivial responses)
@@ -113,8 +134,16 @@ GitHub API (20 repos, 2,977 PRs)     303 Hand-crafted Examples
 5. Weak question-only comments (preserving genuine review questions)
 6. Input quality checks (min length, truncation)
 7. Output normalization (Gerrit suffix cleanup, whitespace)
-8. Deduplication (exact + near-duplicate on first 150 chars)
+8. Deduplication (exact + near-duplicate on first 150 chars of output)
 9. Final validation (field completeness, length checks)
+
+### Post-processing (`data/fix_dataset.py`)
+
+Runs after the 9-pass cleaner to fix three remaining issues:
+
+1. **Deduplicate by input** — The 9-pass cleaner dedups by output text, but 542 inputs still appear multiple times with different reviews. Keep only the longest review for each unique input. Removes 1,137 records.
+2. **Instruction format hints** — Add JSON-vs-free-text format hints to the instruction so the model knows which output style to use in which context.
+3. **Language diversity** — Randomly replace ~45% of instructions with English variants (Chinese-only training generalizes poorly to English prompts).
 
 ## Training Configuration
 
@@ -159,8 +188,11 @@ python data/fetch_github_pr.py
 # Merge datasets
 python data/combine_dataset.py
 
-# Clean (9-pass pipeline)
+# Clean (9-pass pipeline) — outputs v2
 python data/claude_clean.py
+
+# Post-process (dedup + English instructions) — outputs v3
+python data/fix_dataset.py
 
 # Train
 accelerate launch --config_file accelerate_config.yaml train.py
@@ -188,9 +220,10 @@ python compare.py
 ├── data/
 │   ├── fetch_github_pr.py             # GitHub API data collection (20 repos)
 │   ├── combine_dataset.py             # Merge all data sources
-│   ├── claude_clean.py                # 9-pass cleaning pipeline
+│   ├── claude_clean.py                # 9-pass cleaning pipeline → v2
+│   ├── fix_dataset.py                 # Post-processing (dedup + EN) → v3
 │   ├── checking_dataset.py            # Dataset quality inspector
-│   └── review_result.py              # Light cleaning (v1)
+│   └── review_result.py               # Light cleaning (v1, superseded)
 ├── eval/
 │   ├── metrics.py                     # Quantitative evaluation
 │   └── compare-0.txt                  # Saved comparison output
