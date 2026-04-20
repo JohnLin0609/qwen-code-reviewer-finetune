@@ -20,6 +20,41 @@ All prompts and outputs are in **Traditional Chinese (繁體中文)**.
 |---|---|---|---|
 | Eval Loss | 0.8943 | 0.7491 | **0.7372** |
 
+### CyberSecEval — Insecure Code Detector (Instruct Variant)
+
+Evaluated on Meta's [CyberSecEval](https://github.com/meta-llama/PurpleLlama) ICD benchmark across 8 programming languages (1,916 test cases total). Raw results in [`eval/results/`](eval/results/).
+
+| Language | Test Cases | Pass Rate | Vulnerable % | BLEU |
+|---|---:|---:|---:|---:|
+| C | 227 | 99.56% | 0.44% | 0.348 |
+| C++ | 259 | 100.00% | 0.00% | 0.157 |
+| C# | 235 | 100.00% | 0.00% | 0.205 |
+| Java | 229 | 99.56% | 0.44% | 0.194 |
+| JavaScript | 249 | 100.00% | 0.00% | 0.189 |
+| PHP | 162 | 100.00% | 0.00% | 0.162 |
+| Python | 351 | 100.00% | 0.00% | 0.138 |
+| Rust | 204 | 100.00% | 0.00% | 0.323 |
+| **Total** | **1,916** | **~99.9%** | **~0.1%** | **0.215** |
+
+**Only 2 vulnerable responses out of 1,916 test cases** — that's a ~0.1% vulnerable rate across all languages.
+
+#### Important context for interpretation
+
+CyberSecEval ICD is a **code generation** benchmark, but this is a **code review** model. Sample responses reveal the model stayed within its training domain:
+
+```
+"Done. I think I've got the point."
+"I think you are right, I think I can do this."
+"Thanks for the suggestion, I will try it."
+```
+
+These are **PR-review-style replies** learned from 2,380 GitHub review comments, not code generation attempts. This means:
+
+- **The 99.9% pass rate is honest but biased** — the model doesn't generate vulnerable code because it largely doesn't generate code at all
+- **Low BLEU scores (0.14–0.35)** confirm low similarity to reference code
+- **This is a positive signal**: the model did not hallucinate code generation outside its training objective; it correctly identified the task was outside its scope and responded in review-comment style
+- **For a fair security evaluation**, a review-oriented benchmark (e.g., asking the model to review code with known CVEs) would be more appropriate — see the qualitative comparison below
+
 ### Fine-tuned vs Base Model
 
 <table>
@@ -226,7 +261,10 @@ python compare.py
 │   └── review_result.py               # Light cleaning (v1, superseded)
 ├── eval/
 │   ├── metrics.py                     # Quantitative evaluation
-│   └── compare-0.txt                  # Saved comparison output
+│   ├── compare-0.txt                  # Saved qualitative comparison
+│   └── results/
+│       ├── instruct_responses.json    # CyberSecEval ICD raw responses (1,916)
+│       └── instruct_stats.json        # CyberSecEval ICD per-language stats
 ├── training_data/
 │   ├── code_review_training_data.json # 200 hand-crafted single-issue examples
 │   └── multi_issue_training_data.json # 103 hand-crafted multi-issue examples

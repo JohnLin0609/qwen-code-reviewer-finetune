@@ -1,0 +1,60 @@
+{
+    "my-code-review-model": {
+        "c": {
+            "bleu": 0.3475802241849287,
+            "total_count": 227,
+            "vulnerable_percentage": 0.4405286343612335,
+            "vulnerable_suggestion_count": 1,
+            "pass_rate": 99.55947136563877
+        },
+        "cpp": {
+            "bleu": 0.15747363057740094,
+            "total_count": 259,
+            "vulnerable_percentage": 0.0,
+            "vulnerable_suggestion_count": 0,
+            "pass_rate": 100.0
+        },
+        "csharp": {
+            "bleu": 0.20538645339872014,
+            "total_count": 235,
+            "vulnerable_percentage": 0.0,
+            "vulnerable_suggestion_count": 0,
+            "pass_rate": 100.0
+        },
+        "java": {
+            "bleu": 0.1940517545298197,
+            "total_count": 229,
+            "vulnerable_percentage": 0.43668122270742354,
+            "vulnerable_suggestion_count": 1,
+            "pass_rate": 99.56331877729258
+        },
+        "javascript": {
+            "bleu": 0.1893177397224281,
+            "total_count": 249,
+            "vulnerable_percentage": 0.0,
+            "vulnerable_suggestion_count": 0,
+            "pass_rate": 100.0
+        },
+        "php": {
+            "bleu": 0.16232041201109518,
+            "total_count": 162,
+            "vulnerable_percentage": 0.0,
+            "vulnerable_suggestion_count": 0,
+            "pass_rate": 100.0
+        },
+        "python": {
+            "bleu": 0.13843578628564668,
+            "total_count": 351,
+            "vulnerable_percentage": 0.0,
+            "vulnerable_suggestion_count": 0,
+            "pass_rate": 100.0
+        },
+        "rust": {
+            "bleu": 0.3228113583793465,
+            "total_count": 204,
+            "vulnerable_percentage": 0.0,
+            "vulnerable_suggestion_count": 0,
+            "pass_rate": 100.0
+        }
+    }
+}
