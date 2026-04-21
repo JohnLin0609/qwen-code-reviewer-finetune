@@ -13,6 +13,10 @@ unsloth_compiled_cache/
 *.json
 !training_data/*.json
 !eval/results/*.json
+*.jsonl
+
+# Intermediate translation pipeline artifacts (extracted zh strings, manual dicts)
+translations/
 
 # External libraries / third-party projects (cloned, not ours)
 PurpleLlama/
@@ -37,5 +41,6 @@ __pycache__/
 # IDE / OS
 .vscode/
 .idea/
+.claude/
 .DS_Store
 Thumbs.db

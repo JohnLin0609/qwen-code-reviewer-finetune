@@ -22,8 +22,8 @@ print(f"裝置：{accelerator.device}, 程序數：{accelerator.num_processes}")
 # ── 設定 ──────────────────────────────────────────────────────────────────
 
 MODEL_NAME   = "Qwen/Qwen2.5-Coder-7B-Instruct"
-DATA_PATH    = "claude_cleaned_training_data_v4.json"
-OUTPUT_DIR   = "./code-review-model"
+DATA_PATH    = "training_data_v7_final.jsonl"             # v7: 1,064 chat-format entries (391 fixed v6 + 673 synthetic)
+OUTPUT_DIR   = "./code-review-model-v7"                   # separate output — keep previous models available
 MAX_SEQ_LEN  = 2048
 
 # LoRA 超參數
@@ -32,7 +32,7 @@ LORA_ALPHA   = 32
 LORA_DROPOUT = 0.05
 
 # 訓練超參數
-EPOCHS       = 3
+EPOCHS       = 4       # bumped from 3: v7 has ~40% of v5 samples, more epochs compensate
 BATCH_SIZE   = 1       # 8GB VRAM 用 1
 GRAD_ACCUM   = 16      # 等效 batch = 1 * 16 = 16
 LR           = 2e-4
@@ -68,21 +68,16 @@ model.print_trainable_parameters()
 # ── 準備資料 ──────────────────────────────────────────────────────────────
 
 print("載入資料...")
+raw = []
 with open(DATA_PATH, encoding="utf-8") as f:
-    raw = json.load(f)
+    for line in f:
+        line = line.strip()
+        if line:
+            raw.append(json.loads(line))
 
-# 轉成 Qwen chat 格式
+# v7 已經是 chat 格式 (messages 欄位已包含 system/user/assistant)
 def format_sample(sample):
-    instruction = sample["instruction"]
-    code        = sample["input"]
-    review      = sample["output"]
-
-    messages = [
-        {"role": "system",    "content": "你是資深軟體工程師，專精程式碼審查與資安。請提供具體、有建設性的 code review。"},
-        {"role": "user",      "content": f"{instruction}：\n\n```python\n{code}\n```"},
-        {"role": "assistant", "content": review},
-    ]
-    return {"text": tokenizer.apply_chat_template(messages, tokenize=False)}
+    return {"text": tokenizer.apply_chat_template(sample["messages"], tokenize=False)}
 
 print("格式化資料...")
 formatted = [format_sample(s) for s in raw]
