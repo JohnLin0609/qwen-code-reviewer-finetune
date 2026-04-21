@@ -4,7 +4,7 @@ Fine-tuning **Qwen2.5-Coder-7B-Instruct** via QLoRA to build a security-focused 
 
 Current dataset (**v7**) covers **7 languages**: Python, JavaScript, Java, C, Go, PHP, Rust. Outputs are in **English**. Earlier versions (v1–v4) were Traditional Chinese; v5 introduced the Chinese → English migration.
 
-> **Note:** v7 training has not yet run. Training-metrics and eval sections below reflect the **v5 model**. A v7 results update will follow after the next training run completes.
+> **v7 model trained** — best checkpoint at epoch 2 with eval_loss **0.3378** (55% lower than v5's 0.7372). See [Results](#results) below.
 
 ## Highlights
 
@@ -19,13 +19,47 @@ Current dataset (**v7**) covers **7 languages**: Python, JavaScript, Java, C, Go
 
 ## Results
 
-### Training Metrics (v5 model — current checkpoint)
+### Training Metrics
 
-| Metric | Epoch 1 | Epoch 2 | Epoch 3 |
-|---|---|---|---|
-| Eval Loss | 0.8943 | 0.7491 | **0.7372** |
+| Version | Epoch 1 | Epoch 2 | Epoch 3 | Epoch 4 | Best |
+|---|---|---|---|---|---|
+| v5 (2,683 samples) | 0.8943 | 0.7491 | **0.7372** | — | Epoch 3 |
+| **v7 (1,064 samples)** | 0.3845 | **0.3378** | 0.3422 | 0.3587 | **Epoch 2** |
 
-> v7 training targets 4 epochs (bumped from 3, compensating for the smaller 1,064-entry dataset). Results will be added after the next run.
+> v7 delivers a **~54% lower eval loss** than v5 despite using only 40% of the samples — the cleaner synthetic data, structured JSON output, and consistent English format pay off. `load_best_model_at_end=True` preserves the epoch-2 checkpoint as the shipped weights.
+
+### Quantitative Benchmark (v7)
+
+Run on 20 held-out samples from `training_data_v7_final.jsonl` plus 7 security test cases and 4 clean-code test cases (`eval/metrics.py`).
+
+| Metric | Fine-tuned v7 | Base Qwen2.5-Coder-7B |
+|---|---:|---:|
+| BERTScore F1 | **0.891** | — |
+| ROUGE-L | 0.4215 | — |
+| JSON validity | 95.0% | — |
+| Bug Detection Rate (security cases) | **100.0%** (7/7) | — |
+| Avg issues flagged per test case | **2.00** (n=5) | 1.00 (n=5) |
+
+The avg-issues row is computed from `compare.py`'s 5 side-by-side security test cases: the fine-tuned model consistently surfaces a secondary issue (missing error handling, connection leak, info disclosure, etc.) in addition to the primary vulnerability, while the base model usually flags only the headline issue.
+
+**Bug detection breakdown** — all 7 security cases correctly flagged:
+
+| Case | Detected | First 80 chars |
+|---|---|---|
+| SQL Injection | ✅ | `{"issues": [{"type": "SQL Injection", "severity": "Medium", ...` |
+| Hardcoded Password | ✅ | `{"issues": [{"type": "Hardcoded Credentials", "severity": "Medium", ...` |
+| Missing Exception Handling | ✅ | `{"issues": [{"type": "Missing Error Handling", "severity": "Medium", ...` |
+| Race Condition | ✅ | `{"issues": [{"type": "Race Condition (TOCTOU)", "severity": "Medium", ...` |
+| Path Traversal | ✅ | `{"issues": [{"type": "Path Traversal", "severity": "Medium", ...` |
+| Command Injection | ✅ | `{"issues": [{"type": "Command Injection", "severity": "Medium", ...` |
+| Insecure Deserialization | ✅ | `{"issues": [{"type": "Insecure Deserialization", "severity": "Medium", ...` |
+
+Raw results saved to [`results/benchmark_v7.json`](results/benchmark_v7.json).
+
+> **Caveats**
+> - **CodeBLEU** metric could not run (library bug: `Fraction.__new__() got an unexpected keyword argument '_normalize'` — incompatibility with Python 3.12+). Not a model issue.
+> - **False Positive Rate** showed 100%, but this is a **metric artifact**, not a regression. The current FPR heuristic is a naive keyword search (`"issue"`, `"error"`, `"severity"`) that matches JSON keys present in every response (e.g. `"issues": []`). A JSON-parsing FPR would compare `len(issues)==0` vs flagged — that test has not been re-run.
+> - **Severity calibration** — the v7 model tends to output `"Medium"` for many vulnerabilities that the handcrafted data labels `"High"`. This is visible across all 7 security cases and reflects the severity distribution in the synthetic training data (38% High / 38% Medium / 24% Low). A follow-up targeted at raising High-severity recall could rebalance this.
 
 ### CyberSecEval — Insecure Code Detector (Instruct Variant)
 
@@ -62,56 +96,68 @@ These are **PR-review-style replies** learned from 2,380 GitHub review comments,
 - **This is a positive signal**: the model did not hallucinate code generation outside its training objective; it correctly identified the task was outside its scope and responded in review-comment style
 - **For a fair security evaluation**, a review-oriented benchmark (e.g., asking the model to review code with known CVEs) would be more appropriate — see the qualitative comparison below
 
-### Fine-tuned vs Base Model
+### Fine-tuned (v7) vs Base Model
 
-<table>
-<tr><th>Input</th><th>Fine-tuned Output</th><th>Base Model Output</th></tr>
-<tr>
-<td>
+Both models receive the same English system prompt describing the required JSON schema. Example on an SQL-injection case:
 
+**Input:**
 ```python
 def get_user(user_id):
     query = f"SELECT * FROM users WHERE id = {user_id}"
     return db.execute(query).fetchone()
 ```
 
-</td>
-<td>
-
-Structured JSON with severity rating, specific fix, and corrected code:
+**Fine-tuned (v7) — catches 2 issues:**
 ```json
 {
-  "issues": [{
-    "type": "安全漏洞",
-    "severity": "高",
-    "description": "user_id 未參數化，可能被注入。",
-    "suggestion": "改用參數化查詢",
-    "fixed_code": "..."
-  }],
-  "overall_score": 2,
-  "summary": "存在 SQL Injection 漏洞..."
+  "issues": [
+    {
+      "type": "SQL Injection",
+      "severity": "Medium",
+      "description": "user_id is concatenated directly into the SQL string without parameterization. An attacker can inject SQL like 1 OR 1=1;-- to bypass authentication or extract data.",
+      "suggestion": "Use parameterized queries (placeholders) instead of string concatenation.",
+      "fixed_code": "def get_user(user_id):\n    query = \"SELECT * FROM users WHERE id = ?\"\n    return db.execute(query, (user_id,)).fetchone()"
+    },
+    {
+      "type": "Missing Error Handling",
+      "severity": "Low",
+      "description": "No exception handling — database errors will crash the application silently.",
+      "suggestion": "Wrap database operations in try-except blocks to handle connection failures, timeouts, and operational exceptions gracefully.",
+      "fixed_code": "try:\n    return db.execute(query, (user_id,)).fetchone()\nexcept sqlite3.Error as e:\n    logger.error(f\"Database error: {e}\")\n    raise"
+    }
+  ],
+  "overall_score": 4,
+  "summary": "VULNERABILITY FOUND: SQL injection via string concatenation (CWE-89). Use parameterized queries immediately."
 }
 ```
 
-</td>
-<td>
-
-Free-form markdown, verbose, mixes Simplified/Traditional Chinese, no severity rating, no structured format.
-
-</td>
-</tr>
-</table>
+**Base model (Qwen2.5-Coder-7B-Instruct) — catches only the primary issue, wraps in markdown fences:**
+````
+```json
+{
+  "issues": [{
+    "type": "Security Vulnerability",
+    "severity": "High",
+    "description": "SQL Injection vulnerability...",
+    "suggestion": "Use parameterized queries to prevent SQL injection attacks.",
+    "fixed_code": "def get_user(user_id): query = 'SELECT * FROM users WHERE id = ?' return db.execute(query, (user_id,)).fetchone()"
+  }],
+  "overall_score": 3,
+  "summary": "The code contains a significant security vulnerability..."
+}
+```
+````
 
 **Key improvements over base model:**
 
-| Aspect | Fine-tuned | Base (Qwen2.5-Coder-7B) |
+| Aspect | Fine-tuned (v7) | Base (Qwen2.5-Coder-7B) |
 |---|---|---|
-| Output format | Structured JSON | Free-form markdown |
-| Multi-issue detection | 2-5 issues per review | Often misses secondary issues |
-| Security focus | Prioritizes vulnerabilities | Buries security among general suggestions |
-| Language consistency | Consistent Traditional Chinese | Mixes Simplified/Traditional |
-| Actionability | `fixed_code` in every issue | Multiple alternatives, sometimes overwhelming |
-| Severity scoring | `overall_score` (1-10) | No scoring |
+| Raw JSON output | No markdown fences — ready to parse | Wraps JSON in ` ```json ... ``` ` fences |
+| Multi-issue detection | 2-5 issues per review | Often only the primary vulnerability |
+| Reliability issues | Catches missing error handling, connection leaks | Focuses only on security |
+| Type vocabulary | Specific ("SQL Injection", "Hardcoded Credentials") | Generic ("Security Vulnerability") |
+| Fix code formatting | Multi-line with proper `\n` escapes | Sometimes one-line with lost indentation |
+| Descriptions | Concrete attack examples (`1 OR 1=1;--`) | Abstract restatement |
 
 ## Data Pipeline
 

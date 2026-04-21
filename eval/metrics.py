@@ -47,8 +47,20 @@ from tqdm import tqdm
 
 # ── Config ────────────────────────────────────────────────────────────────────
 BASE_MODEL     = "Qwen/Qwen2.5-Coder-7B-Instruct"
-FINETUNED_PATH = "./code-review-model/lora"
-SYSTEM_PROMPT  = "你是資深軟體工程師，專精程式碼審查與資安。請提供具體、有建設性的 code review。"
+FINETUNED_PATH = "./code-review-model-v7/lora"
+SYSTEM_PROMPT  = (
+    "You are a senior software engineer and security expert performing code review. "
+    "Analyze the given code for security vulnerabilities, bugs, and reliability issues. "
+    "Always respond in valid JSON format with this structure: "
+    "{\"issues\": [{\"type\": \"Security Vulnerability | Reliability Issue | Code Quality\", "
+    "\"severity\": \"High | Medium | Low\", "
+    "\"description\": \"Clear description of the issue\", "
+    "\"suggestion\": \"How to fix it\", "
+    "\"fixed_code\": \"The corrected code\"}], "
+    "\"overall_score\": <1-10>, "
+    "\"summary\": \"Brief overall assessment\"}. "
+    "If no issues found, return empty issues array with high overall_score."
+)
 MAX_NEW_TOKENS = 512
 TEMPERATURE    = 0.1   # Low temp for deterministic evaluation
 TEST_SAMPLE_N  = 100   # Max samples from auto test set
@@ -172,18 +184,18 @@ model.eval()
 
 FEW_SHOT_EXAMPLES = [
     ("def get_user(u): return db.execute(f\\"SELECT * FROM users WHERE id = {u}\\").fetchone()",
-     "SQL Injection: user_id 未參數化，使用參數化查詢取代字串拼接。"),
+     "{\\"issues\\":[{\\"type\\":\\"Security Vulnerability\\",\\"severity\\":\\"High\\",\\"description\\":\\"user_id is concatenated into SQL, enabling injection.\\",\\"suggestion\\":\\"Use parameterized queries.\\",\\"fixed_code\\":\\"db.execute('SELECT * FROM users WHERE id = ?', (u,))\\"}],\\"overall_score\\":2,\\"summary\\":\\"SQL injection via string concatenation.\\"}"),
     ("password = \\"hardcoded123\\"",
-     "硬編碼密碼: 使用環境變數 os.environ 或 Secret Manager 管理敏感資訊。"),
+     "{\\"issues\\":[{\\"type\\":\\"Security Vulnerability\\",\\"severity\\":\\"High\\",\\"description\\":\\"Hardcoded credential in source.\\",\\"suggestion\\":\\"Load from environment variable or secret manager.\\",\\"fixed_code\\":\\"password = os.environ['DB_PASSWORD']\\"}],\\"overall_score\\":3,\\"summary\\":\\"Hardcoded password leak risk.\\"}"),
 ]
 
 def build_messages(code, fewshot=False):
     messages = [{"role": "system", "content": system_prompt}]
     if fewshot:
         for ex_code, ex_review in FEW_SHOT_EXAMPLES:
-            messages.append({"role": "user",      "content": f"請對以下 Python 程式碼做 code review：\\n\\n```python\\n{ex_code}\\n```"})
+            messages.append({"role": "user",      "content": f"Review this Python code for security vulnerabilities:\\n\\n{ex_code}"})
             messages.append({"role": "assistant", "content": ex_review})
-    messages.append({"role": "user", "content": f"請對以下 Python 程式碼做 code review：\\n\\n```python\\n{code}\\n```"})
+    messages.append({"role": "user", "content": f"Review this Python code for security vulnerabilities:\\n\\n{code}"})
     return messages
 
 results = []
@@ -308,47 +320,89 @@ def compute_false_positive_rate(predictions: list[str]) -> float:
 
 # ── Test set loading / building ───────────────────────────────────────────────
 
+def _chat_to_legacy(entry: dict) -> dict | None:
+    """Convert v6/v7 chat-format entry → legacy {input, output, metadata}.
+    Strips the 'Review this <lang> code...' prefix from user content if present."""
+    msgs = entry.get("messages", [])
+    user = next((m["content"] for m in msgs if m.get("role") == "user"), "")
+    asst = next((m["content"] for m in msgs if m.get("role") == "assistant"), "")
+    if not user or not asst:
+        return None
+    if "\n\n" in user:
+        code = user.split("\n\n", 1)[1]
+    else:
+        code = user
+    return {"input": code, "output": asst, "metadata": entry.get("metadata", {})}
+
+
 def load_test_set(test_file: str | None, n: int) -> list[dict]:
-    """Load test set from file, or build one from training data."""
+    """Load test set from file, or build one from training data. Supports
+    legacy JSON {instruction, input, output} and new JSONL chat format."""
+    import random
+    rng = random.Random(42)
+
+    # Explicit test file
     if test_file and Path(test_file).exists():
         samples = []
         with open(test_file, encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line:
-                    samples.append(json.loads(line))
+            first = f.readline()
+            f.seek(0)
+            is_array = first.lstrip().startswith("[")
+            if is_array:
+                samples = json.load(f)
+            else:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        samples.append(json.loads(line))
+        if samples and "messages" in samples[0]:
+            samples = [s for s in (_chat_to_legacy(e) for e in samples) if s]
         print(f"Loaded {len(samples)} test samples from {test_file}")
+        rng.shuffle(samples)
         return samples[:n]
 
-    # Build from training data: prefer handcrafted (structured output) + diverse github
-    data_paths = [
-        "claude_cleaned_training_data.json",
-        "claude_cleaned_training_data_v3.json",
+    # Auto-discover in order of preference (newest first)
+    preferred = [
+        ("training_data_v7_final.jsonl", "jsonl"),
+        ("training_data_v6_final.jsonl", "jsonl"),
+        ("claude_cleaned_training_data_v5_en.json", "json"),
+        ("claude_cleaned_training_data_v3.json", "json"),
+        ("claude_cleaned_training_data.json", "json"),
     ]
     data = None
-    for path in data_paths:
+    found_path = None
+    found_fmt = None
+    for path, fmt in preferred:
         if Path(path).exists():
-            with open(path, encoding="utf-8") as f:
-                data = json.load(f)
-            print(f"Building test set from {path} ({len(data)} samples)")
+            found_path = path
+            found_fmt = fmt
             break
 
-    if data is None:
+    if not found_path:
         print("No data file found. Using only the security test cases.")
         return []
 
-    # Sample proportionally: 50% handcrafted, 50% GitHub
-    import random
-    rng = random.Random(42)
-    handcrafted = [d for d in data if "handcrafted" in d["metadata"].get("source", "")]
-    github      = [d for d in data if "github"      in d["metadata"].get("source", "")]
+    with open(found_path, encoding="utf-8") as f:
+        if found_fmt == "json":
+            data = json.load(f)
+        else:
+            data = [json.loads(line) for line in f if line.strip()]
+
+    if data and "messages" in data[0]:
+        data = [s for s in (_chat_to_legacy(e) for e in data) if s]
+
+    print(f"Building test set from {found_path} ({len(data)} samples)")
+
+    # Sample proportionally: 50% handcrafted, 50% other
+    handcrafted = [d for d in data if "handcrafted" in d.get("metadata", {}).get("source", "")]
+    other       = [d for d in data if "handcrafted" not in d.get("metadata", {}).get("source", "")]
 
     n_hc = min(n // 2, len(handcrafted))
-    n_gh = min(n - n_hc, len(github))
-    selected = rng.sample(handcrafted, n_hc) + rng.sample(github, n_gh)
+    n_other = min(n - n_hc, len(other))
+    selected = rng.sample(handcrafted, n_hc) + rng.sample(other, n_other)
     rng.shuffle(selected)
 
-    print(f"Test set: {n_hc} handcrafted + {n_gh} GitHub = {len(selected)} samples")
+    print(f"Test set: {n_hc} handcrafted + {n_other} other = {len(selected)} samples")
     return selected
 
 

@@ -10,10 +10,23 @@ warnings.filterwarnings("ignore")
 import torch
 from unsloth import FastLanguageModel
 
-MODEL_PATH  = "./code-review-model/lora"
+MODEL_PATH  = "./code-review-model-v7/lora"
 MAX_SEQ_LEN = 2048
 
-# 載入 fine-tuned 模型（Unsloth 載入省 VRAM）
+SYSTEM_PROMPT = (
+    "You are a senior software engineer and security expert performing code review. "
+    "Analyze the given code for security vulnerabilities, bugs, and reliability issues. "
+    "Always respond in valid JSON format with this structure: "
+    "{\"issues\": [{\"type\": \"Security Vulnerability | Reliability Issue | Code Quality\", "
+    "\"severity\": \"High | Medium | Low\", "
+    "\"description\": \"Clear description of the issue\", "
+    "\"suggestion\": \"How to fix it\", "
+    "\"fixed_code\": \"The corrected code\"}], "
+    "\"overall_score\": <1-10>, "
+    "\"summary\": \"Brief overall assessment\"}. "
+    "If no issues found, return empty issues array with high overall_score."
+)
+
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name=MODEL_PATH,
     max_seq_length=MAX_SEQ_LEN,
@@ -22,10 +35,10 @@ model, tokenizer = FastLanguageModel.from_pretrained(
 FastLanguageModel.for_inference(model)
 
 
-def review_code(code: str) -> str:
+def review_code(code: str, language: str = "Python") -> str:
     messages = [
-        {"role": "system",  "content": "你是資深軟體工程師，專精程式碼審查與資安。請提供具體、有建設性的 code review。"},
-        {"role": "user",    "content": f"請對以下 Python 程式碼做 code review：\n\n```python\n{code}\n```"},
+        {"role": "system",  "content": SYSTEM_PROMPT},
+        {"role": "user",    "content": f"Review this {language} code for security vulnerabilities:\n\n{code}"},
     ]
     inputs = tokenizer.apply_chat_template(
         messages,

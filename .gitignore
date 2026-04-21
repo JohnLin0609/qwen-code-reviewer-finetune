@@ -5,7 +5,7 @@ venv/
 env/
 
 # Model outputs
-code-review-model/
+code-review-model*/
 train_logs/
 unsloth_compiled_cache/
 
