@@ -23,6 +23,7 @@ PurpleLlama/
 
 # Logs
 *.log
+*.txt
 
 # Secrets
 .env

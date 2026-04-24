@@ -1,62 +1,0 @@
-🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
-Unsloth: Your Flash Attention 2 installation seems to be broken. Using Xformers instead. No performance changes will be seen.
-🦥 Unsloth Zoo will now patch everything to make training faster!
-==((====))==  Unsloth 2026.3.15: Fast Qwen2 patching. Transformers: 5.3.0.
-   \\   /|    NVIDIA RTX 2000 Ada Generation Laptop GPU. Num GPUs = 1. Max memory: 7.625 GB. Platform: Linux.
-O^O/ \_/ \    Torch: 2.10.0+cu128. CUDA: 8.9. CUDA Toolkit: 12.8. Triton: 3.6.0
-\        /    Bfloat16 = TRUE. FA [Xformers = 0.0.35. FA2 = False]
- "-____-"     Free license: http://github.com/unslothai/unsloth
-Unsloth: Fast downloading is enabled - ignore downloading bars which are red colored!
-Loading weights:   0%|          | 0/339 [00:00<?, ?it/s]Loading weights:   0%|          | 1/339 [00:00<03:37,  1.55it/s]Loading weights:   1%|          | 2/339 [00:01<03:30,  1.60it/s]Loading weights:   4%|▎         | 12/339 [00:01<00:24, 13.18it/s]Loading weights:   8%|▊         | 28/339 [00:01<00:09, 33.28it/s]Loading weights:  15%|█▍        | 50/339 [00:01<00:04, 63.48it/s]Loading weights:  19%|█▉        | 65/339 [00:01<00:03, 78.89it/s]Loading weights:  26%|██▌       | 88/339 [00:01<00:02, 106.83it/s]Loading weights:  31%|███▏      | 106/339 [00:01<00:01, 123.07it/s]Loading weights:  36%|███▌      | 122/339 [00:02<00:01, 130.23it/s]Loading weights:  41%|████      | 138/339 [00:02<00:01, 130.41it/s]Loading weights:  47%|████▋     | 158/339 [00:02<00:01, 145.04it/s]Loading weights:  54%|█████▎    | 182/339 [00:02<00:00, 159.30it/s]Loading weights:  59%|█████▊    | 199/339 [00:02<00:00, 150.85it/s]Loading weights:  64%|██████▎   | 216/339 [00:02<00:00, 151.02it/s]Loading weights:  68%|██████▊   | 232/339 [00:02<00:00, 148.43it/s]Loading weights:  74%|███████▍  | 252/339 [00:02<00:00, 161.74it/s]Loading weights:  79%|███████▉  | 269/339 [00:02<00:00, 151.17it/s]Loading weights:  84%|████████▍ | 285/339 [00:03<00:00, 150.65it/s]Loading weights:  89%|████████▉ | 302/339 [00:03<00:00, 149.42it/s]Loading weights:  94%|█████████▍| 318/339 [00:03<00:00, 146.55it/s]Loading weights: 100%|██████████| 339/339 [00:03<00:00, 100.17it/s]
-Unsloth 2026.3.15 patched 28 layers with 0 QKV layers, 0 O layers and 0 MLP layers.
-The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
-Both `max_new_tokens` (=1024) and `max_length`(=32768) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
-Both `max_new_tokens` (=1024) and `max_length`(=32768) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
-Both `max_new_tokens` (=1024) and `max_length`(=32768) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
-Both `max_new_tokens` (=1024) and `max_length`(=32768) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
-
-============================================================
-測試 1
-程式碼：def get_user(user_id):
-    query = f"SELECT * FROM users WHERE id = {user_id}"
-    return db.execute(query).fetchone()
-
-Code Review：
-{"issues": [{"type": "SQL Injection", "severity": "Medium", "description": "user_id is concatenated directly into the SQL string without parameterization. An attacker can inject SQL such as 1 OR 1=1 to bypass authentication or extract data.", "suggestion": "Use parameterized queries (prepared statements) with placeholders like ? or %s instead of string concatenation. Most database libraries support this natively.", "fixed_code": "def get_user(user_id):\n    query = \"SELECT * FROM users WHERE id = ?\"\n    return db.execute(query, (user_id,)).fetchone()"}, {"type": "Missing Error Handling", "severity": "Low", "description": "No try/except block catches database connection failures or query errors. Unhandled exceptions will crash the application.", "suggestion": "Wrap database operations in try-except blocks and provide meaningful error messages.", "fixed_code": "try:\n    result = db.execute(query, (user_id,)).fetchone()\nexcept DatabaseError as e:\n    logger.error(f\"Database error: {e}\")\n    raise"}], "overall_score": 4, "summary": "VULNERABILITY FOUND: SQL injection via string concatenation (CWE-89) plus missing exception handling."}
-
-============================================================
-測試 2
-程式碼：def get_user(user_id):
-    query = f"SELECT * FROM users WHERE id = {user_id}"
-    conn = psycopg2.connect(host='db.prod.internal', user='root', password='admin123')
-    return conn.execute(query).fetchone()
-
-Code Review：
-{"issues": [{"type": "SQL Injection", "severity": "Medium", "description": "User input (user_id) is concatenated directly into the SQL string using an f-string. An attacker can inject malicious SQL by passing user_id like 1 OR 1=1; -- or ' OR 'x'='x. This bypasses authentication and authorization checks.", "suggestion": "Use parameterized queries (prepared statements) with placeholders (? or %s) and pass user inputs as separate arguments to execute(). This prevents injection attacks.", "fixed_code": "def get_user(user_id):\n    query = \"SELECT * FROM users WHERE id = ?\"\n    conn = psycopg2.connect(host='db.prod.internal', user='root', password='admin123')\n    return conn.execute(query, (user_id,)).fetchone()"}, {"type": "Hardcoded Credentials", "severity": "Low", "description": "Database credentials ('root'/'admin123') are hardcoded in source code, making them vulnerable to exposure via version control, backups, or accidental commits.", "suggestion": "Load credentials from environment variables or a secure configuration file outside the repository.", "fixed_code": "import os\nconn = psycopg2.connect(\n    host=os.environ['DB_HOST'],\n    user=os.environ['DB_USER'],\n    password=os.environ['DB_PASS']\n)"}, {"type": "Missing Connection Close", "severity": "Low", "description": "Database connection is not explicitly closed after use, leading to connection leaks over time.", "suggestion": "Use a context manager or call close() on the connection object.", "fixed_code": "with conn:\n    result = conn.execute(query, (user_id,)).fetchone()}"], "overall_score": 4, "summary": "VULNERABILITY FOUND: SQL injection via f-string (CWE-89), hardcoded database credentials (CWE-798), and missing connection close (CWE-404)."}
-
-============================================================
-測試 3
-程式碼：import subprocess
-import logging
-
-def deploy(repo_url, branch, token):
-    logging.info(f'Deploying {repo_url} branch={branch} token={token}')
-    cmd = f'git clone -b {branch} https://{token}@{repo_url} /deploy'
-    subprocess.call(cmd, shell=True)
-
-Code Review：
-{"issues": [{"type": "Command Injection", "severity": "Medium", "description": "User-supplied input (repo_url, branch, token) is concatenated into a shell command string without proper escaping or validation. An attacker can inject arbitrary commands by crafting malicious input like `https://github.com/attacker/repo; rm -rf /`. Even though shell=True is used, the risk remains because git commands accept arguments that can be passed separately.", "suggestion": "Pass arguments as a list to subprocess.call() instead of constructing a shell string. Use shlex.quote() to escape individual parameters if necessary, but better to use the list form which avoids shell interpretation entirely.", "fixed_code": "subprocess.call(['git', 'clone', '-b', branch, f'https://{token}@{repo_url}', '/deploy'])"}, {"type": "Information Disclosure", "severity": "Low", "description": "Token is logged directly at INFO level, exposing sensitive credentials in application logs.", "suggestion": "Never log tokens or passwords. Log only non-sensitive deployment details.", "fixed_code": "logging.info(f'Deploying repository from {repo_url}')"}], "overall_score": 3, "summary": "VULNERABILITY FOUND: Command injection via unescaped user input in shell=True context (CWE-78). Also insecure logging of credentials."}
-
-============================================================
-測試 4
-程式碼：from flask import request
-
-@app.route('/upload', methods=['POST'])
-def upload():
-    f = request.files['file']
-    path = f'/uploads/{f.filename}'
-    f.save(path)
-    return f'Saved to {path}'
-
-Code Review：
-{"issues": [{"type": "Path Traversal", "severity": "Medium", "description": "User-supplied filename is used directly in file save path without validation or normalization. An attacker can use '../' sequences (e.g., '../../../etc/passwd') to write files outside the intended uploads directory.", "suggestion": "Validate that the filename contains only safe characters (alphanumeric, hyphen, underscore), does not contain relative path components ('..'), and resolve to an absolute path within the designated uploads directory before saving.", "fixed_code": "import os\nfrom werkzeug.utils import secure_filename\n\nUPLOAD_DIR = '/var/www/uploads'\n\nfilename = secure_filename(request.files['file'].filename)\nsafe_path = os.path.join(UPLOAD_DIR, filename)\nf.save(safe_path)"}, {"type": "Information Disclosure", "severity": "Low", "description": "Return message includes full path, potentially leaking server filesystem details to attackers.", "suggestion": "Return generic success message without exposing file paths.", "fixed_code": "return 'File uploaded successfully'", "overall_score": 3}]}
