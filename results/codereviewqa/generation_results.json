@@ -1,0 +1,255 @@
+{
+  "avg_overlap": 0.04645296257223252,
+  "results": [
+    {
+      "generated": "@funnyFern21, I think you are right, I think I am missing something.",
+      "ground_truth": "Could use `r_stop_unexpected_type()`.",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@sebestes: npt = 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0",
+      "ground_truth": "Would it not be even clearer to also pull the `if` up on the same line as the `else`?",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@indra-pri, I've fixed the other pattern-based regression in line 134 (and I'd have to touch 11 more test files, I'd have to touch 11 more pattern-based regression fixes in 11 test files, and 1 pattern-based regression fix in test_file.c, lines 143-146, and 1 pattern-based regression fix in test_file.c, lines 143-146, and 1 pattern-based regression fix in test_file.c, lines 143-146, and 1 pattern-based regression fix in test_file.c, lines 143-146, and 1 pattern-based regression fix in test_file.c, lines 143-146, and 1 pattern-based regression fix in test_file.c, lines 143-146, and 1 pattern-based regression fix in test_file.c, lines 143-146, and 1 pattern-based regression fix in test_file.c, lines 143-146, and 1 pattern-based regression fix in test_file.c, lines 143-146, and 1 pattern",
+      "ground_truth": "This might go away with the separate bug fix, but it looks dangerous to delete without setting m->substitute to null.\r\n",
+      "overlap_score": 0.10526315789473684
+    },
+    {
+      "generated": "@Guillea2195 source view with line exceptions already fixed locally, please do real fix helper operations :)",
+      "ground_truth": "Remove these warnings.",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "[<img src=\"https://i.travethematrix.org/7737117-7371-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-117-",
+      "ground_truth": "Should this really be a compile time error? The fact that is can be imported multiple times does not mean that it will be.",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@willy01123 Done, line by line toasts.",
+      "ground_truth": "Can we do `for (const h2o_header_t *h = req->headers.entries, *h_end = h + req->headers.size; ...` here as well?",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@willy0612 code review has been completed. Please review.",
+      "ground_truth": "@deweerdt mentioned to me that there's a bare return in L13 below. \r\n\r\nCould that be a problem if the `if` condition is false on L11 i.e. could we return with the timer unlinked, while no new timer is linked?",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@federicoperini1998asaasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasas",
+      "ground_truth": "Do we need this change?\r\n\r\nI think the code below would run fast when the input is \"/\". Basically, it tests if `path[0]` is `/` then skip the for loop. That is exactly the same as the or clause added here.",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@benny-methods.\n\nI think I like this pattern, I think I like this pattern.",
+      "ground_truth": "Should you either also set client_protocol_version or verify that it's >=S2N_TLS13, to make sure you're covering this bug?",
+      "overlap_score": 0.05555555555555555
+    },
+    {
+      "generated": "@GuillaumeGirard,\n\nThanks for the suggestion, I've updated accordingly (also doing in 2 passes).",
+      "ground_truth": "i not sure, but may be add new log type for stylist?",
+      "overlap_score": 0.08333333333333333
+    },
+    {
+      "generated": "@GuillaumeGirard\r\n\r\nThe \"unrelaxed\" flags are used for the purpose of testing the code and not the reason.  (Line 23: The _get_s3_key() function first builds the sequence index (Line 14-20: seq_index = replace_uri_tokens(s3_key, INDEX_STRING, seq_index_str); if (seq_index < 0) { return NULL; } if (seq_index < 0) { return NULL; } if (seq_index < 0) { return NULL; } if (seq_index < 0) { return NULL; if (seq_index < 0) { return NULL; if (seq_index < 0) { return NULL; if (seq_index < 0) { return NULL; if (seq_index < 0) { return NULL; if (seq_index < 0) { return NULL; if (seqindex < 0) { return NULL; if (seq_index < 0) { return NULL; if (seq_index < 0) { return NULL; if (seq_index < 0) { return NULL; if (seq_index < 0) { return NULL; if (seq_index < 0) { return NULL",
+      "ground_truth": "I think you're missing a `flb_free(seq_index_str);` there.\r\nOther than that, would you mind change that comparison to `if (tmp_key == NULL) {` instead? I'd really appreciate it.",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@GuillaumeGirardet\n\nThanks for the suggestion, I've updated accordingly (also using pre for free up in template).",
+      "ground_truth": "define vars at the top of the function: https://github.com/fluent/fluent-bit/blob/master/CONTRIBUTING.md#variable-definitions\r\n\r\n",
+      "overlap_score": 0.125
+    },
+    {
+      "generated": "@sebestes: nptb is a real type (line 133) \u2014\n\t\t* @sebestes: nptb is a real type (line 133) \u2014\n\t\t* @sebestes: nptb is a real type (line 133) \u2014\n\t\t* @sebestes: nptb is a real type (line 133) \u2014\n\t\t* @sebestes: nptb is a real type (line 133) \u2014\n\t\t* @sebestes: nptb is a real type (line 133) \u2014\n\t\t* @sebestes: nptb is a real type (line 133) \u2014\n\t\t* @sebestes: nptb is a real type (line 133) \u2014\n\t\t* @sebestes: nptb is a real type (line 133) \u2014\n\t\t* @sebestes: nptb is a real type (line 133) \u2014\n\t\t* @sebestes: nptb is a real type (line 1",
+      "ground_truth": "can you use flb_sds_cat_safe() version ?, that version will take care if a realloc happens and the address change. ",
+      "overlap_score": 0.05555555555555555
+    },
+    {
+      "generated": "@Guillea27  (No such line meant \"Line not found\" and I'm not sure if I was able to find it\" (I'm trying to be helpful, with minimalist testing).))",
+      "ground_truth": "Is proxy_go_input_destroy correct here?\r\n\r\n`proxy_go_output_destroy` does not proceed to handle `struct flb_plugin_input_proxy_context ` variable.",
+      "overlap_score": 0.14285714285714285
+    },
+    {
+      "generated": "@GuillaumeGirardet: I've fixed all IMA errors (not user errors) in this review.",
+      "ground_truth": "maybe good to free (core->prj->path) before overwriting the field?",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@GuillaumeGaulier norebase\n\n(Not a real pattern, but this is getting close to real work.)",
+      "ground_truth": "newprjdir will leak if newname is null",
+      "overlap_score": 0.14285714285714285
+    },
+    {
+      "generated": "@GuillaumeGirardet\n\nThanks @GuillaumeGirardet. I've fixed the issue.",
+      "ground_truth": "All free methods must accept null. Add an if here",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@sebestes: nits addressed (indirectly, line-by-line was getting confusing, so I opted for the approach I suggested in the first comment \u2014 I think I've fixed it, so I think I've fixed it, so I think I've fixed it \u2014 I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so I think I've fixed it, so",
+      "ground_truth": "This would crash if `value` is NULL. The if check immediately above suggests that that is possible here.",
+      "overlap_score": 0.06666666666666667
+    },
+    {
+      "generated": "@seanv123: Okay, I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this. I",
+      "ground_truth": "The `_posixsubprocess` extension module shouldn't get built on Windows.",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@Volion-ai: I think I fixed it. I think the problem was that the semaphore was already signalled and I think the framework would have waited anyway.",
+      "ground_truth": "you can use `iree_hal_semaphore_list_empty()` for this one",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@wangyufeng137,\nCould you please check the cuda graph node evaluation against with py torch 3.7  and 1.8  and 1.1  and 1.1  and 1.1  and 1.1  and 1.1  and 1.1  and 1.1  and 1.1  and 1.1  and 1.1  and 1.1  and 1assistant\n@wangyufeng137,\nCould you please check the cuda graph node evaluation against with py torch 3.7  and 1.8  and 1.1  and 1.1  and 1.1  and 1.1  and 1.1  and 1.1  and 1.1  and 1.1  and 1.1  and 1.1  and 1.1  and 1assistant\n@wangyufeng137,\nCould you please check the cuda graph node evaluation against with py torch 3.7  and 1.8  and 1.1  and 1.1 ",
+      "ground_truth": "you can remove this early return as the status check below handles it",
+      "overlap_score": 0.23076923076923078
+    },
+    {
+      "generated": "@wengg,\n\nI think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this.",
+      "ground_truth": "this is incorrect - the base of the buffer pointer is what needs to be aligned, not the size\r\nif the pointers coming back from wgpuBufferGetConstMappedRange are unaligned that's likely to be a problem (but one we could work around in the short term with a flag that disables this check)",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@wengg,\r\nPlease review and let me know what needs to be fixedassistant\r\n.\n```suggestion\nif (mut_extra) {\n```",
+      "ground_truth": "Probably want to remove this `fprintf`, so it doesn't appear in test / CI output for every run?",
+      "overlap_score": 0.05555555555555555
+    },
+    {
+      "generated": "[Indirect:all](https://github.com/celso2016/nichw/blob/main/nichw/requests/_requests.py#L1133)",
+      "ground_truth": "Use `config->pLogger->clear` for the cleanup.\r\nBecause some users will not set the normal config->logger at all.",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@aunon: updated \u2014 delayed so I could review myself \ud83d\ude05\n\n_Note: I left this work in a [preserved](src/c933111911111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+      "ground_truth": "This should probably be a `uint32_t`. I'm concerned about the `i < count` comparison: before the change the types matched, now they don't. \r\n\r\nIs this broken by `-Wsign-compare-check`? What line does the compiler warn about if so?",
+      "overlap_score": 0.0625
+    },
+    {
+      "generated": "@aunon: updated \u2014 made suggestions still had unbound variables (lives: 2) \ud83d\ude05)",
+      "ground_truth": "Doesn't the sign-compare check only apply if the signs are different? It doesn't seem like this cast is needed, but I could be wrong. If there is a reason to make this cast, wouldn't a lot of the other for loops also have to be updated?",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "Thanks @aBertG. I left some edge cases on 0, but I think I would be fine.",
+      "ground_truth": "Should this be `(uint32_t) 0xFF`...?",
+      "overlap_score": 0.2
+    },
+    {
+      "generated": "@dechase17, I've updated the code according to the latest review. Can you please do a final review.",
+      "ground_truth": "Is the cast here required? Looks like you changed `client_extensions_len` to be an `ssize_t` and `s2n_client_hello_get_extensions_length` returns an `ssize_t`. Same on line 13. ",
+      "overlap_score": 0.13636363636363635
+    },
+    {
+      "generated": "[ci skip][fixed error message](:\r\n```suggestion\r\n```",
+      "ground_truth": "This returns a `int` so it's best to keep it signed, or at least make sure it's non-negative before casting it.",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@benny-methods.\n\nI think I like the pattern match approach. I think I like the pattern match approach. I think I like the pattern match approach. I think I like the pattern match approach.",
+      "ground_truth": "Sorry if I'm missing something here, but if `r` is cast to `int64` but `out->size` is unsigned, won't `r` still be cast to unsigned when comparing? And shouldn't the compiler still complain about this with the sign-compare check?",
+      "overlap_score": 0.03333333333333333
+    },
+    {
+      "generated": "@aunon: updated \u2014 I've added unit tests for non-Edscha-Oral-Or-Non-Or-Non-Non-Or-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-Non-",
+      "ground_truth": "For all of the fuzz tests, does it make sense to have versions for `len_prefixed` both `true` and `false` ?",
+      "overlap_score": 0.05263157894736842
+    },
+    {
+      "generated": "@benny-methods.\n\nI think I understand the problem, and I dont think its a problem with the fuzz test, but I havent looked into the fuzz test in detail yet.",
+      "ground_truth": "This test is Kyber specific and TLS version agnostic. So, I think it probably makes sense to test both `true` and `false`.",
+      "overlap_score": 0.2
+    },
+    {
+      "generated": "@eatstartokok,\n\nI think I've fixed this. I've added a \"fix\" section to the review. \n\nThanks for the suggestion. I've used the pattern suggestion.",
+      "ground_truth": "Suggest being specific about referencing the draft versions; `... draft 0 ...` and `... drafts 1-5 ...`. \"Earlier drafts\" and \"later drafts\" don't answer the possible question of why we're checking explicitly for `kem_pref->tls13_pq_hybrid_draft_revision == 0`.",
+      "overlap_score": 0.06451612903225806
+    },
+    {
+      "generated": "@sebestes: done (see other comments for further suggestions).",
+      "ground_truth": "Could you use the actual description and parameter here like as `ignore_missing_channels` or similar?",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@GuillaumeGirardet\n\nThanks for the review, I think I found the problem.",
+      "ground_truth": "This should be a `free` call because the system uses `malloc` to reserve that memory whereas fluent-bit could be using its own allocator and that could cause an issue.",
+      "overlap_score": 0.038461538461538464
+    },
+    {
+      "generated": "@GuillaumeGirard,\r\n\r\nI've made the requested changes (lines 1-4 have been removed; blank lines have been removed; enum types have been added to REMIND LINTER ERRORS) and confirmed the logic.\r\n\r\nPlease let me know what you think of my changes or if you would please provide focused code review.)\r\n\r\nThanks @GuillaumeGirard.\r\n[Ignore the Redundant Blank Linter Warnings (or IRBLIW) to be resolved here.)](https://github.com/timlindemann/decoding-extralassistant) 0.0 | <img src=\"https://review-token-bucket-static-file-hosting-appleserve-applescript=final_result_type={\\\"type\\\":\\\"loosely(\\\"apalp 0.0 | <img src=\\\"https://app-safereb.alfredattes.com/tIPnIXX4X\\\" alt=\\\"Line by Line:\\\" alt=\\\"Line by Line:\\\" alt=\\\"Line by Line:\\\") | LLM = 0.0 | LINE = 1.0 | ERROR = 0.0 | [View BLOB (line 1-4) with EDSL (Line by Line with Highlights)](https://blimp",
+      "ground_truth": "I think the check should not be here, if there is a mk_list_init() in place the check should not be needed.",
+      "overlap_score": 0.25
+    },
+    {
+      "generated": "@Yuxuan518,\r\nI think I've fixed this. I think I've fixed this. I think I've fixed this. I think I've fixed this.",
+      "ground_truth": "please rename it to `receive_buffer_size` (and adjust all other name references.",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@sebestes:\tnitpick:  line 34: \t*name = _wbasename();\n-\tstatic int64_t _wbasename(const char *path)\n-\t{\n-\t\tstatic int64_t wbase = _wbasename;\n-\t\treturn (int64_t) wbase.QuadPart;\n-\t}\n-\tstatic int64_t _wbasename(const char *path)\n-\t{\n-\t\tstatic int64_t wbase = _wbasename;\n-\t\treturn (int64_t) wbase.QuadPart;\n-\t}\n+\tstatic int64_t _wbasename(const char *path)\n+\t{\n+\t\tstatic int64_t wbase = _wbasename;\n+\t\treturn (int64_t) wbase.QuadPart;\n+\t}\n```",
+      "ground_truth": "Please use a [ULARGE_INTEGER](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-ularge_integer-r1) to store the QWORD instead of that custom cast.\r\n",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@eert4ndroid)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1 hidden char)\t(1",
+      "ground_truth": "FYI, this will spam console when running `aaa`.",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@GuillaumeGirardet: I have left some real and delayed assessments.   TY \ud83d\udc51\nator: 0.01)",
+      "ground_truth": "Better use the corepj.new() if you have access to the core instance. This way the user have the ability to configure some options like indent, colors or how to represent 64bit numbers if they want",
+      "overlap_score": 0.07142857142857142
+    },
+    {
+      "generated": "@GuillaumeGirardet: I think I fixed it. I think the problem was the fact that the same enum was used for the 2D and the 3D with all the different names.",
+      "ground_truth": "dont else after return",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "I think I've fixed this.",
+      "ground_truth": "Dont else after return",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@GuillaumeGirard,\n\nThanks for the suggestion, I've replaced the pattern and the associated test().",
+      "ground_truth": "the code below should be after `} else ` otherwise the `grepping` will just print twice and dont work as expected",
+      "overlap_score": 0.1
+    },
+    {
+      "generated": "@sebestes: nptal (looked styled)",
+      "ground_truth": "Can we not just use `winsock2.h` unconditionally?",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@sebestes: nits addressed (recognised alreaedy in  line  rejected)  and doctepts are using 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is 0.3  and 0.3  is",
+      "ground_truth": "If `PyErr_ExceptionMatches` return true, doesn't that mean that `PyErr_GetRaisedException()` must return non-NULL?",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@Guillea27, thanks for the review! I've fixed all lated lines and added further fast windows fixes here!",
+      "ground_truth": "This comment seems redundant. What else could `PyErr_GivenExceptionMatches(exc, PyExc_AttributeError)` do?",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@GuillaumeGirard,\n\nThanks for the suggestion, I have fixed using the pattern suggestion.",
+      "ground_truth": "This case will need to be ordered above `HAVE_GETPID` with the changes mentioned in other comments. There's no problem with that.",
+      "overlap_score": 0.05
+    },
+    {
+      "generated": "@sechaia (or someone with TLPI experience) \u2014 please provide specific TOXN errors in helper code reviews.)",
+      "ground_truth": "This seems unsafe -- when we jump to `error`, `iterable` is still on the stack, but the stack no longer owns it.",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@sebestes: nits addressed (overly strict range time with SUBLECTIME and fixed TOX environment with tox command line and tox command line and tox command line) has been fixed.",
+      "ground_truth": "Unlike `isdir()`, for `isfile()` you need to check whether `GetFileInformationByHandleEx()` succeeds. It's a filesystem file/directory if the call succeeds. For example, \"\\\\\\\\.\\\\PIPE\\\\\" is the root directory of the named-pipe filesystem. OTOH, \"\\\\\\\\.\\\\C:\" is a volume a device, which doesn't support filesystem information classes such as `FileBasicInfo`.\r\n",
+      "overlap_score": 0.0
+    },
+    {
+      "generated": "@sebestes: nptiali: lol\r\n\r\nI think I like the \"I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the 'I think I like the",
+      "ground_truth": "This seems incomplete.  Did you mean to finish this, or is it meant to be part of a future PR?\r\n",
+      "overlap_score": 0.0
+    }
+  ]
+}

@@ -61,40 +61,46 @@ Raw results saved to [`results/benchmark_v7.json`](results/benchmark_v7.json).
 > - **False Positive Rate** showed 100%, but this is a **metric artifact**, not a regression. The current FPR heuristic is a naive keyword search (`"issue"`, `"error"`, `"severity"`) that matches JSON keys present in every response (e.g. `"issues": []`). A JSON-parsing FPR would compare `len(issues)==0` vs flagged — that test has not been re-run.
 > - **Severity calibration** — the v7 model tends to output `"Medium"` for many vulnerabilities that the handcrafted data labels `"High"`. This is visible across all 7 security cases and reflects the severity distribution in the synthetic training data (38% High / 38% Medium / 24% Low). A follow-up targeted at raising High-severity recall could rebalance this.
 
-### CyberSecEval — Insecure Code Detector (Instruct Variant)
+### External Benchmarks (v7)
 
-Evaluated on Meta's [CyberSecEval](https://github.com/meta-llama/PurpleLlama) ICD benchmark across 8 programming languages (1,916 test cases total). Raw results in [`eval/results/`](eval/results/).
+Run on Colab against the v7 model. Raw results in [`results/`](results/) (one subdirectory per benchmark).
 
-| Language | Test Cases | Pass Rate | Vulnerable % | BLEU |
+| Benchmark | Cases | Headline Result | Interpretation |
+|---|---:|---|---|
+| [SecurityEval](results/securityeval/) | 121 | **99.17%** detection across 69 CWEs | Only `CWE-434` (file upload) was partial (1/2). Strong CWE coverage. |
+| [CodeReviewQA](results/codereviewqa/) | 900 | **95.93%** overall accuracy | CTR 95.67% / CL 98.0% / SI 94.11%. Multi-task code-review QA. |
+| [CWEval](results/cweval/) | 119 | **96.64%** completion (4 timeouts) | Functional code-CWE eval; 31 unique CWEs across 5 languages. |
+| [CyberSecEval ICD](results/cyberseceval/) | 1,916 | **63.15%** pass rate / BLEU 11.82 | See note below — large change from v5 because v7 actually emits parseable code. |
+| [CodeReviewBench](results/codereviewbench/) (local) | 5 | 60% detection (3/5) | Smoke test; missed Java NPE and Python race. |
+| [SecVulEval](results/secvuleval/) | 500 | 87.4% flagged vulnerable | **No ground-truth labels in this dataset's metadata** — flagging-rate only, not precision/recall. |
+| [VulDetectBench](results/vuldetectbench/) | 300 | 81.0% flagged vulnerable | Same caveat — flagging-rate only. |
+
+#### CyberSecEval ICD — v5 vs v7
+
+The same 1,916-case benchmark was run on both models. The difference is dramatic and worth understanding:
+
+| Model | Pass Rate | Vulnerable % | BLEU |
+|---|---:|---:|---:|
+| v5 (Chinese, GitHub-PR-style) | ~99.9% | ~0.1% | 0.215 |
+| **v7 (English, structured JSON)** | **63.15%** | 36.85% | **11.82** |
+
+The v5 numbers look better only because v5 didn't actually produce code — sample v5 responses included `"Done. I think I've got the point."` and similar review-comment replies, which the scorer couldn't parse as code at all (hence the near-zero BLEU). v7 emits structured JSON with a `fixed_code` field that the scorer treats as generated code, so for the first time the benchmark is measuring what the model actually outputs. The 63.15% pass rate and 11.82 BLEU on those `fixed_code` snippets are honest numbers; the 36.85% vulnerable rate reflects places where the model's suggested fix still has issues (or where the scorer's pattern-matching produces false positives on legitimate code).
+
+**Important framing**: CyberSecEval ICD is fundamentally a code-generation benchmark. This is a code-review model. The most direct measures of v7's intended capability are SecurityEval (99.17% detection) and CodeReviewQA (95.93% accuracy).
+
+#### Per-language CyberSecEval breakdown (v7)
+
+| Language | Cases | Pass Rate | Vulnerable % | BLEU |
 |---|---:|---:|---:|---:|
-| C | 227 | 99.56% | 0.44% | 0.348 |
-| C++ | 259 | 100.00% | 0.00% | 0.157 |
-| C# | 235 | 100.00% | 0.00% | 0.205 |
-| Java | 229 | 99.56% | 0.44% | 0.194 |
-| JavaScript | 249 | 100.00% | 0.00% | 0.189 |
-| PHP | 162 | 100.00% | 0.00% | 0.162 |
-| Python | 351 | 100.00% | 0.00% | 0.138 |
-| Rust | 204 | 100.00% | 0.00% | 0.323 |
-| **Total** | **1,916** | **~99.9%** | **~0.1%** | **0.215** |
-
-**Only 2 vulnerable responses out of 1,916 test cases** — that's a ~0.1% vulnerable rate across all languages.
-
-#### Important context for interpretation
-
-CyberSecEval ICD is a **code generation** benchmark, but this is a **code review** model. Sample responses reveal the model stayed within its training domain:
-
-```
-"Done. I think I've got the point."
-"I think you are right, I think I can do this."
-"Thanks for the suggestion, I will try it."
-```
-
-These are **PR-review-style replies** learned from 2,380 GitHub review comments, not code generation attempts. This means:
-
-- **The 99.9% pass rate is honest but biased** — the model doesn't generate vulnerable code because it largely doesn't generate code at all
-- **Low BLEU scores (0.14–0.35)** confirm low similarity to reference code
-- **This is a positive signal**: the model did not hallucinate code generation outside its training objective; it correctly identified the task was outside its scope and responded in review-comment style
-- **For a fair security evaluation**, a review-oriented benchmark (e.g., asking the model to review code with known CVEs) would be more appropriate — see the qualitative comparison below
+| C | 227 | 57.71% | 42.29% | 10.46 |
+| C++ | 259 | 78.76% | 21.24% | 10.11 |
+| C# | 235 | 59.57% | 40.43% | 13.54 |
+| Java | 229 | 48.03% | 51.97% | 16.90 |
+| JavaScript | 249 | 59.04% | 40.96% | 9.83 |
+| PHP | 162 | 64.20% | 35.80% | 13.27 |
+| Python | 351 | 70.66% | 29.34% | 8.77 |
+| Rust | 204 | 61.76% | 38.24% | 14.34 |
+| **Weighted total** | **1,916** | **63.15%** | **36.85%** | **11.82** |
 
 ### Fine-tuned (v7) vs Base Model
 
@@ -386,16 +392,23 @@ python compare.py
 │   ├── generate_v7.py                 # Synthetic generation (7 langs × 100 via Haiku)
 │   └── merge_v7.py                    # v6_fixed + synthetic → v7 final
 ├── eval/
-│   ├── metrics.py                     # Quantitative evaluation
-│   ├── compare-0.txt                  # Saved qualitative comparison
-│   └── results/
-│       ├── instruct_responses.json    # CyberSecEval ICD raw responses (1,916)
-│       └── instruct_stats.json        # CyberSecEval ICD per-language stats
+│   ├── metrics.py                     # Quantitative evaluation (CodeBLEU, BERTScore, bug detection)
+│   ├── count_issues.py                # Count avg issues/case from compare.py logs
+│   └── compare-0.txt                  # Saved qualitative comparison (v5)
+├── results/                           # External-benchmark outputs (Colab runs)
+│   ├── benchmark_v7.json              # eval/metrics.py output (v7)
+│   ├── securityeval/                  # 121 cases / 69 CWEs — 99.17% detection
+│   ├── codereviewqa/                  # 900 questions — 95.93% accuracy
+│   ├── cweval/                        # 119 tasks across 5 languages
+│   ├── cyberseceval/                  # ICD: 1,916 cases × 8 languages
+│   ├── codereviewbench/               # 5-case local smoke test
+│   ├── secvuleval/                    # 500 entries (no GT labels)
+│   └── vuldetectbench/                # 300 entries (no GT labels)
 ├── training_data/
 │   ├── code_review_training_data.json # 200 hand-crafted single-issue examples
 │   └── multi_issue_training_data.json # 103 hand-crafted multi-issue examples
 ├── code-review-model-v5/              # v5 trained model (gitignored)
-└── code-review-model-v7/              # v7 trained model (gitignored, pending)
+└── code-review-model-v7/              # v7 trained model (gitignored)
     ├── lora/                          # LoRA adapter weights (~155 MB)
     └── merged/                        # Full merged model (~15 GB)
 ```

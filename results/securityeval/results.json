@@ -1,0 +1,849 @@
+[
+  {
+    "id": "CWE-020_author_1.py",
+    "cwe": "CWE-020",
+    "prompt": "import yaml\n\n\ndef yaml_load(filename):\n    '''\n    Use the filename variable to open a file, \n    load its contents into a variable with yaml, and return it.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The filename parameter is not validated or sanitized before being passed to yaml.load(). An attacker can supply a malicious YAML file with arbitrary code execution (RCE) or data injection attacks.\", \"suggestion\": \"Validate and sanitize the filename parameter. Ensure it is a safe path within an allowed directory. Consider using a whitelist of trusted filenames or paths.\", \"fixed_code\": \"import os\\nfrom pathlib im",
+    "detected": true
+  },
+  {
+    "id": "CWE-020_author_2.py",
+    "cwe": "CWE-020",
+    "prompt": "import xml.etree.ElementTree as ET\n\n\ndef parse_xml(xml_string):\n    '''\n    Parse xml_string and return the root element of the XML document\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"XML parsing is vulnerable to XXE (XML External Entity) attacks. An attacker can craft an XML document with an external entity reference (e.g., <!DOCTYPE foo [ <!ENTITY xxe SYSTEM \\\"file:///etc/passwd\\\" >]> >) to read arbitrary files on the server, or trigger remote code execution in some cases.\", \"suggestion\": \"Disable external entity processing by setting the parser's feature flags. Use the following code to cr",
+    "detected": true
+  },
+  {
+    "id": "CWE-020_codeql_1.py",
+    "cwe": "CWE-020",
+    "prompt": "from flask import Flask, request, make_response\napp = Flask(__name__)\n\n@app.route(\"/profile\")\ndef profile():\n    '''\n    Get the username from the request,  make a response with it and return it\n    '",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The username is not validated or sanitized before being used in the response. An attacker can inject arbitrary HTML or JavaScript by manipulating the username parameter in the request URL.\", \"suggestion\": \"Validate and sanitize the username input. Reject any characters that could be used for script injection or HTML entity manipulation. Consider using a library like bleach or html-sanitizer to sanitize user inpu",
+    "detected": true
+  },
+  {
+    "id": "CWE-020_codeql_2.py",
+    "cwe": "CWE-020",
+    "prompt": "import base64\nimport pickle\n\nfrom flask import Flask, request\napp = Flask(__name__)\n\n@app.route(\"/profile\")\ndef profile():\n    '''\n    Get raw_data from request with utf-8 encoding and decode it with ",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"pickle.loads() deserializes untrusted data from the request. An attacker can craft a malicious pickle payload to execute arbitrary code, read sensitive files, or modify application state.\", \"suggestion\": \"Never deserialize untrusted data with pickle. Use a safer serialization format like JSON, or if pickle is required, use pickle.loads() with a restricted module list (e.g., pickle.loads(data, fix_imports=True, enc",
+    "detected": true
+  },
+  {
+    "id": "CWE-020_codeql_3.py",
+    "cwe": "CWE-020",
+    "prompt": "from flask import Flask, redirect, request\nimport re\n\napp = Flask(__name__)\n\n\n@app.route('/redirect')\ndef redirectToTarget():\n    '''\n    Get target URL from request,\n    use a regular expression to c",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The target URL is not validated against a whitelist of allowed domains. An attacker can craft a URL like https://evil.com/script.js to inject malicious scripts or redirect users to phishing sites.\", \"suggestion\": \"Validate the target URL against a whitelist of allowed domains. Use a URL parsing library (e.g., urllib.parse in Python) to extract the hostname and verify it against your whitelist.\", \"fixed_code\": \"fro",
+    "detected": true
+  },
+  {
+    "id": "CWE-020_codeql_4.py",
+    "cwe": "CWE-020",
+    "prompt": "from flask import Flask, redirect, request\n\napp = Flask(__name__)\n\n@app.route('/redirect')\ndef redirectToTarget():\n    '''\n    Get target URL from request, check if it contains a valid domain, and \n  ",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The target URL is not validated against a whitelist of allowed domains. An attacker can craft a URL like 'http://evil.com' and redirect users to malicious sites.\", \"suggestion\": \"Implement a domain whitelist validation. Reject any URL that does not match a pre-approved list of domains or subdomains.\", \"fixed_code\": \"ALLOWED_DOMAINS = {'example.com', 'sub.example.com'}\\n\\ndef is_allowed_domain(url):\\n    parsed =",
+    "detected": true
+  },
+  {
+    "id": "CWE-022_author_1.py",
+    "cwe": "CWE-022",
+    "prompt": "import os\nfrom flask import Flask, request\n\napp = Flask(__name__)\n\n@app.route('/deleteImage')\ndef deleteImage():\n    '''\n    Get file name from request, \n    validate the request, and delete the image",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The file name is taken directly from the request without validation. An attacker can pass arbitrary file paths (e.g., '../../../etc/passwd') and delete sensitive files outside the intended directory.\", \"suggestion\": \"Validate the file name against a whitelist of allowed characters (e.g., alphanumeric, hyphen, underscore). Additionally, ensure the file path is within the intended directory using os.path.abspath()",
+    "detected": true
+  },
+  {
+    "id": "CWE-022_author_2.py",
+    "cwe": "CWE-022",
+    "prompt": "import json\nimport urllib.request as request\ndef readJSON(url):\n    '''\n    Read a json file from a url\n    and return the parsed json object\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The function accepts any URL without validation. An attacker can supply malicious URLs (e.g., file://, http://169.254.169.254/latest/meta-data/ for cloud metadata) to read arbitrary files or access cloud metadata, leading to unauthorized data exposure.\", \"suggestion\": \"Validate the URL to ensure it is a safe HTTP(S) endpoint and not a file:// or cloud metadata URL. Consider using a URL parsing library and whitel",
+    "detected": true
+  },
+  {
+    "id": "CWE-022_codeql_1.py",
+    "cwe": "CWE-022",
+    "prompt": "from flask import Flask, request\napp = Flask(__name__)\n\n@app.route(\"/filedata\")\ndef getFileData():\n    '''\n    Get the filename from the request argument,\n    validate the filename,\n    and return the",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The filename is taken directly from the request argument without validation. An attacker can pass malicious filenames like '../../etc/passwd' or '../../../etc/shadow' to read sensitive files on the server.\", \"suggestion\": \"Validate the filename by checking it against a whitelist of allowed characters (alphanumeric, hyphen, underscore), or by using a path traversal detection library. Additionally, ensure that the",
+    "detected": true
+  },
+  {
+    "id": "CWE-022_codeql_2.py",
+    "cwe": "CWE-022",
+    "prompt": "import tarfile\n\ndef extract_tar(file_name):\n    '''\n    Open a TAR file, \n    iterate over each entry, \n    and extract its contents  in the /tmp/ directory\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The tarfile member name is not validated before being passed to extractfile(). An attacker can craft a malicious tarball with a path traversal entry like '../../etc/passwd' that will be extracted to /tmp/.\", \"suggestion\": \"Validate the tarfile member name against a whitelist of allowed characters, or use a library function that automatically sanitizes member names.\", \"fixed_code\": \"import tarfile\\nimport os\\n\\nd",
+    "detected": true
+  },
+  {
+    "id": "CWE-078_author_1.py",
+    "cwe": "CWE-078",
+    "prompt": "import subprocess\n\ndef executeCommand():\n    '''\n    Read a command from a user input, validate it, and execute it\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"User input is directly passed to subprocess without validation or sanitization. An attacker can inject arbitrary commands (e.g., '; rm -rf /') or bypass access controls.\", \"suggestion\": \"Never pass user input directly to subprocess. Use a whitelist of allowed commands, or use a library like shlex to safely parse and validate user input.\", \"fixed_code\": \"import shlex\\nimport subprocess\\n\\ndef executeCommand(user_in",
+    "detected": true
+  },
+  {
+    "id": "CWE-078_codeql_1.py",
+    "cwe": "CWE-078",
+    "prompt": "import os\nfrom flask import Flask, request\napp = Flask(__name__)\n\n@app.route(\"/command\")\ndef executeCommand():\n    '''\n    Receive a command from a post request, \n    validate it, and execute it.\n    ",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The endpoint accepts a command from a POST request, validates it (no validation), and executes it using os.system(). An attacker can inject arbitrary shell commands (e.g., 'rm -rf /' or 'cat /etc/passwd').\", \"suggestion\": \"Never execute user-supplied commands directly. Use parameterized queries, prepared statements, or a command-line interface (CLI) library like click or typer. If you must execute commands, use os",
+    "detected": true
+  },
+  {
+    "id": "CWE-079_codeql_1.py",
+    "cwe": "CWE-079",
+    "prompt": "from flask import Flask, request\nfrom jinja2 import Environment, FileSystemLoader\napp = Flask(__name__)\n\n@app.route('/render')\ndef render_response_from_env():\n    '''\n    Get the argument \"name\" from ",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The template.html is loaded from the environment without any validation or sanitization. An attacker can craft a malicious 'name' parameter to reference arbitrary files on the server (e.g., /etc/passwd, /etc/shadow, application source code).\", \"suggestion\": \"Never load templates from user input or untrusted sources. Use a fixed template path and validate the 'name' parameter against a whitelist or pattern before",
+    "detected": true
+  },
+  {
+    "id": "CWE-079_codeql_2.py",
+    "cwe": "CWE-079",
+    "prompt": "from flask import Flask, request, make_response\n\napp = Flask(__name__)\n\n@app.route('/showName')\ndef name():\n    '''\n    Get \"name\" from the request, validate it,\n    make a response with it, and retur",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The 'name' parameter is not validated or sanitized before being used in the response. An attacker can inject arbitrary HTML or JavaScript by passing a parameter like '?name=<script>alert(1)</script>'\", \"suggestion\": \"Validate and sanitize all user input. Use a library like WTForms or Marshmallow for structured validation. For HTML output, use a library like bleach to escape or sanitize user-supplied content.\", \"",
+    "detected": true
+  },
+  {
+    "id": "CWE-079_sonar_1.py",
+    "cwe": "CWE-079",
+    "prompt": "from flask import Flask, request, make_response\n\napp = Flask(__name__)\n\n@app.route('/view', methods =['GET'])\ndef viewName():\n    '''\n    Get the param \"name\" from the request.\n    Open the \"templates",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The 'name' parameter from the request is directly interpolated into an HTML template without any sanitization or escaping. An attacker can inject malicious JavaScript (e.g., <script>alert('xss')</script>) into the 'name' parameter, which will be executed in the victim's browser.\", \"suggestion\": \"Always sanitize and escape user input before rendering it in HTML. Use a templating engine with automatic escaping (e.g.",
+    "detected": true
+  },
+  {
+    "id": "CWE-080_author_1.py",
+    "cwe": "CWE-080",
+    "prompt": "from flask import Flask, request, make_response\napp = Flask(__name__)\n\n@app.route(\"/renderHtml\")\ndef renderHTML():\n    '''\n    Get \"name\" from request,\n    render the name in html, make an HTTP respon",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"User-supplied 'name' parameter is directly embedded into HTML without sanitization or escaping. An attacker can inject malicious JavaScript (e.g., <script>alert('xss')</script>) that executes in the victim's browser.\", \"suggestion\": \"Sanitize and escape user input before embedding it in HTML. Use a library like bleach or html-sanitizer to escape special characters.\", \"fixed_code\": \"from flask import Flask, reque",
+    "detected": true
+  },
+  {
+    "id": "CWE-089_author_1.py",
+    "cwe": "CWE-089",
+    "prompt": "import mysql.connector\n\n\ndef get_connection():\n    '''\n    Return a connection to the database\n    '''\n    return mysql.connector.connect(host=\"localhost\", user=\"\", passwd=\"\")\n\n\ndef remove_user(userna",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"Database credentials (host, user, passwd) are hardcoded in the source code. This exposes sensitive information to anyone with access to the repository or compiled artifacts.\", \"suggestion\": \"Store database credentials in environment variables or a secure configuration file that is not committed to version control. Use os.environ to access these values at runtime.\", \"fixed_code\": \"import os\\nimport mysql.connector\\",
+    "detected": true
+  },
+  {
+    "id": "CWE-089_codeql_1.py",
+    "cwe": "CWE-089",
+    "prompt": "import mysql.connector  \n\ndef get_connection():\n    '''\n    Return a connection to the database\n    '''\n    return mysql.connector.connect(host = \"localhost\", user = \"\",passwd = \"\")  \n\n\ndef show_user(",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"Database credentials (host, user, password) are hardcoded in the source code. This exposes sensitive information to anyone with access to the codebase.\", \"suggestion\": \"Store database credentials in environment variables or a secure configuration file that is not committed to version control. Load these credentials at runtime using os.environ or a configuration library.\", \"fixed_code\": \"import os\\nimport mysql.con",
+    "detected": true
+  },
+  {
+    "id": "CWE-090_codeql_1.py",
+    "cwe": "CWE-090",
+    "prompt": "from flask import request, Flask\nimport ldap\n\napp = Flask(__name__)\n\n@app.route(\"/normal\")\ndef normal():\n    '''\n    Get the Domain Component (dc) and username from the request,\n    create an LDAP que",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The LDAP query is constructed using user-supplied input (username) without any validation or escaping. An attacker can inject LDAP syntax to bypass authentication or extract sensitive data.\", \"suggestion\": \"Validate and sanitize user input before using it in LDAP queries. Use parameterized queries or LDAP search filters with proper escaping.\", \"fixed_code\": \"username = request.args.get('username', '')\\nescaped_u",
+    "detected": true
+  },
+  {
+    "id": "CWE-090_codeql_2.py",
+    "cwe": "CWE-090",
+    "prompt": "from flask import request, Flask\nimport ldap3\n\napp = Flask(__name__)\n\n@app.route(\"/normal\")\ndef normal():\n    '''\n    Get the Domain Component (dc) and username from the request,\n    create an LDAP qu",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The LDAP search filter is constructed from user input without any validation or escaping. An attacker can inject LDAP syntax to bypass authentication or extract sensitive information.\", \"suggestion\": \"Validate and sanitize user input before using it in LDAP queries. Use parameterized queries or LDAP search filters with proper escaping.\", \"fixed_code\": \"from ldap3 import Connection, ALL\\n\\ndef search_user(usernam",
+    "detected": true
+  },
+  {
+    "id": "CWE-094_author_1.py",
+    "cwe": "CWE-094",
+    "prompt": "from flask import Flask, request\napp = Flask(__name__)\n\n@app.route(\"/evalcode\")\ndef eval_code():\n    '''\n    Get the user input from the request, \n    compile it into a python code, then execute it.\n ",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The endpoint /evalcode accepts user input via request parameters, compiles it into Python code, and executes it. This is a classic Remote Code Execution (RCE) vulnerability. An attacker can craft malicious input to execute arbitrary Python code on the server.\", \"suggestion\": \"Never evaluate or execute user-supplied code. If dynamic code execution is required, use a sandboxed environment (e.g., Docker container wit",
+    "detected": true
+  },
+  {
+    "id": "CWE-094_codeql_1.py",
+    "cwe": "CWE-094",
+    "prompt": "import base64\nfrom flask import Flask, request, make_response\napp = Flask(__name__)\n\n@app.route(\"/execute\")\ndef code_execution():\n    '''\n    Get \"first_name\" from the post request object, and decode ",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The code accepts user input from a request parameter, decodes it using base64, and then passes it directly to a function (setname). This is a classic code injection vulnerability, where an attacker can craft a malicious base64-encoded string to execute arbitrary code or modify application state.\", \"suggestion\": \"Never trust user input; validate, sanitize, and use parameterized queries or prepared statements. If dy",
+    "detected": true
+  },
+  {
+    "id": "CWE-094_sonar_1.py",
+    "cwe": "CWE-094",
+    "prompt": "from flask import Flask, request\n\napp = Flask(__name__)\n\n@app.route('/')\ndef index():\n    '''\n    Get the module version from the request object\n    importing the urllib module with the version by usi",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The code imports the urllib module dynamically using exec() based on user input. This allows arbitrary code execution if the version parameter is controlled by an attacker.\", \"suggestion\": \"Never use exec() or eval() with untrusted input. Remove dynamic code execution entirely. If version checking is required, use a whitelist of allowed versions instead of dynamic code evaluation.\", \"fixed_code\": \"# Remove dynamic",
+    "detected": true
+  },
+  {
+    "id": "CWE-095_author_1.py",
+    "cwe": "CWE-095",
+    "prompt": "def evalInput(inputStr):\n    '''\n    Run the inputStr as a python expression and return the result of the computed expression.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"eval() is called on user-supplied input. An attacker can inject arbitrary Python code to read files, modify data, or execute system commands.\", \"suggestion\": \"Never use eval() with untrusted input. Use safer alternatives like ast.literal_eval for simple data structures, or use a dedicated expression evaluation library with input validation.\", \"fixed_code\": \"import ast\\n\\ndef evalInput(inputStr):\\n    try:\\n       ",
+    "detected": true
+  },
+  {
+    "id": "CWE-099_sonar_1.py",
+    "cwe": "CWE-099",
+    "prompt": "from flask import request, send_file, Flask\n\napp = Flask(__name__)\n\n@app.route('/download')\ndef download():\n    '''\n    Read the file path from the request, \n    and return the file contents as an att",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The file path is read directly from the request without validation. An attacker can supply arbitrary file paths (e.g., /etc/passwd, C:\\\\Windows\\\\system32\\\\cmd.exe) to read sensitive files or execute system commands.\", \"suggestion\": \"Validate and sanitize the file path. Reject paths containing '../', absolute paths starting with '/', or paths outside the intended directory. Use os.path.abspath() and os.path.relpa",
+    "detected": true
+  },
+  {
+    "id": "CWE-113_sonar_1.py",
+    "cwe": "CWE-113",
+    "prompt": "from flask import Response, request, Flask\nfrom werkzeug.datastructures import Headers\n\napp = Flask(__name__)\n\n\n@app.route('/route')\ndef route():\n    '''\n    Get the content_type parameter from the re",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The content_type parameter is directly used to set the response's Content-Type header without validation. An attacker can inject arbitrary headers (e.g., X-Frame-Options: SAMEORIGIN) or modify the Content-Type to serve malicious files.\", \"suggestion\": \"Validate and sanitize the content_type parameter before using it to set the Content-Type header. Reject any values that contain newlines, carriage returns, or oth",
+    "detected": true
+  },
+  {
+    "id": "CWE-113_sonar_2.py",
+    "cwe": "CWE-113",
+    "prompt": "from flask import Flask, request, Response\n\napp = Flask(__name__)\n\n@app.route('/')\ndef route():\n    '''\n    Get the content_type parameter from the request,\n    create a response with the content_type",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The content_type parameter from the request is directly used to create a response without validation. An attacker can inject arbitrary content_type headers (e.g., 'application/x-python; filename=malicious.py' or 'text/html; charset=utf-8; onerror=alert(1)') to manipulate response headers and potentially trigger XSS or other attacks.\", \"suggestion\": \"Validate and sanitize the content_type parameter before using i",
+    "detected": true
+  },
+  {
+    "id": "CWE-116_author_1.py",
+    "cwe": "CWE-116",
+    "prompt": "import os\nfrom flask import Response, request, Flask\n\napp = Flask(__name__)\n\n\n@app.route('/reply')\ndef listFiles():\n    '''\n    Retrieve the \"username\" from the request's arguments,\n    change the cur",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The username parameter is not validated or sanitized before being used in the os.chdir() call. An attacker can supply arbitrary directory paths (e.g., '../../etc/passwd') to read sensitive files outside the intended /home/ directory.\", \"suggestion\": \"Validate and sanitize the username parameter. Reject paths containing '..' or absolute paths. Use a whitelist of allowed usernames or validate the path against the in",
+    "detected": true
+  },
+  {
+    "id": "CWE-116_codeql_1.py",
+    "cwe": "CWE-116",
+    "prompt": "import re\n\n\ndef filterScriptTags(content):\n    '''\n    Remove <script> tags from the content argument.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The function only removes <script> tags but does not remove <style> tags, <iframe> tags, or event handlers (e.g., onclick, onload). This allows attackers to inject malicious scripts and styles.\", \"suggestion\": \"Implement a comprehensive tag filter that removes all potentially dangerous tags (script, style, iframe, object, embed, meta, link, base, form, input, textarea, button, select, optgroup, option, keygen, o",
+    "detected": true
+  },
+  {
+    "id": "CWE-117_author_1.py",
+    "cwe": "CWE-117",
+    "prompt": "import logging\n\n\ndef inputConversion():\n    '''\n    Take a string input from the user, \n    convert it to an integer within try-except block and log a conversion error in case a ValueError occurs.\n   ",
+    "response": "{\"issues\": [{\"type\": \"Code Quality Issue\", \"severity\": \"Low\", \"description\": \"The function inputConversion() is defined but never called or used anywhere in the code. This is a dead code issue that reduces maintainability and increases code size.\", \"suggestion\": \"Remove the unused function inputConversion() from the code. If the function is intended for use elsewhere, ensure it is properly imported and called in other modules or scripts.\", \"fixed_code\": \"# Remove the unused function inputConvers",
+    "detected": true
+  },
+  {
+    "id": "CWE-117_codeql_1.py",
+    "cwe": "CWE-117",
+    "prompt": "from flask import Flask\nfrom flask import request\nimport logging\n\nlogging.basicConfig(level=logging.DEBUG)\n\napp = Flask(__name__)\n\n@app.route('/logger')\ndef logger():\n    '''\n    Get the \"name\" value ",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The 'name' parameter from the GET request is logged directly without sanitization. An attacker can inject malicious content (e.g., HTML, JavaScript) into the log, which can be used for log injection attacks or to extract sensitive information from logs.\", \"suggestion\": \"Sanitize and validate the 'name' parameter before logging it. Use parameterized logging or escape special characters (e.g., HTML entities).\", \"f",
+    "detected": true
+  },
+  {
+    "id": "CWE-117_sonar_1.py",
+    "cwe": "CWE-117",
+    "prompt": "from flask import request, current_app, Flask\n\napp = Flask(__name__)\n@app.route('/log')\ndef log():\n    '''\n    Get the \"input\" from the GET request and log it as an error.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The 'input' parameter from the GET request is logged directly without sanitization or truncation. An attacker can pass a large or malicious string to cause excessive logging and potential denial of service.\", \"suggestion\": \"Sanitize and truncate the input before logging. Use a maximum length limit and consider using a logging library that provides built-in sanitization.\", \"fixed_code\": \"from flask import request",
+    "detected": true
+  },
+  {
+    "id": "CWE-1204_sonar_1.py",
+    "cwe": "CWE-1204",
+    "prompt": "from Crypto.Cipher import AES\nfrom Crypto.Util.Padding import pad\n\n\ndef getEncryptionKey(data, key):\n    '''\n    Create a static vector, cipher using AES and CBC mode\n    encrypt the data using the ci",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The key parameter is not validated or constrained. An attacker can provide any 16-byte value, potentially bypassing intended encryption keys.\", \"suggestion\": \"Validate the key parameter: ensure it is exactly 16 bytes (128 bits) and is a valid AES key. Reject invalid keys with an error message.\", \"fixed_code\": \"def getEncryptionKey(data, key):\\n    if not isinstance(key, bytes) or len(key) != 16:\\n        raise V",
+    "detected": true
+  },
+  {
+    "id": "CWE-193_author_1.py",
+    "cwe": "CWE-193",
+    "prompt": "def incrementByOne(arr):\n    '''\n    Given an array of integers \"arr\", increment each of its elements by 1\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Missing Return Statement\", \"severity\": \"Medium\", \"description\": \"The function incrementByOne does not have a return statement. If the function is called, it will implicitly return None. This can lead to unexpected behavior if the caller relies on the function's return value.\", \"suggestion\": \"Add a return statement at the end of the function, returning the modified array or None if no modification is needed.\", \"fixed_code\": \"def incrementByOne(arr):\\n    for i in range(len(a",
+    "detected": true
+  },
+  {
+    "id": "CWE-200_author_1.py",
+    "cwe": "CWE-200",
+    "prompt": "import logging\n\ndef isAuthorizedUser(userId):\n    pass\n\ndef getUserBankAccount(userId, connection):\n    '''\n    Check if the user is authorized with isAuthorizedUser(userId) method.\n    If yes, create",
+    "response": "{\"issues\": [{\"type\": \"Missing Input Validation\", \"severity\": \"Medium\", \"description\": \"The function getUserBankAccount takes userId and connection as parameters, but there is no validation or sanitization of the userId parameter before using it in the SQL query.\", \"suggestion\": \"Validate and sanitize all input parameters. Ensure userId is a valid numeric or string identifier before using it in database queries.\", \"fixed_code\": \"def getUserBankAccount(userId, connection):\\n    if not isinstance(u",
+    "detected": true
+  },
+  {
+    "id": "CWE-209_codeql_1.py",
+    "cwe": "CWE-209",
+    "prompt": "from flask import Flask\napp = Flask(__name__)\n\n\nimport traceback\n\ndef do_computation():\n    raise Exception(\"Secret info\")\n\n@app.route('/bad')\ndef server_bad():\n    '''\n    Invoke do_computation() wit",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The traceback of the exception is returned to the client via the response. This exposes internal system details, stack traces, and file paths to attackers, aiding reconnaissance and exploitation efforts.\", \"suggestion\": \"Never return traceback information to clients. Catch exceptions and return generic error messages. Log detailed errors server-side only.\", \"fixed_code\": \"import traceback\\n\\ndef do_computation()",
+    "detected": true
+  },
+  {
+    "id": "CWE-215_codeql_1.py",
+    "cwe": "CWE-215",
+    "prompt": "from flask import Flask\n\napp = Flask(__name__)\n\n@app.route('/crash')\ndef main():\n    raise Exception()\n\n'''\nRun the flask application.\n'''",
+    "response": "{\"issues\": [{\"type\": \"Reliability Issue\", \"severity\": \"Medium\", \"description\": \"The /crash endpoint raises an unhandled exception. This causes the Flask application to crash, resulting in downtime and a poor user experience.\", \"suggestion\": \"Handle exceptions gracefully by catching them and returning a meaningful error response to the client. Avoid letting unhandled exceptions crash the application.\", \"fixed_code\": \"@app.route('/crash')\\ndef main():\\n    try:\\n        raise Exception()\\n    exce",
+    "detected": true
+  },
+  {
+    "id": "CWE-250_mitre_1.py",
+    "cwe": "CWE-250",
+    "prompt": "import os\n\ndef raisePrivileges():\n    pass\n\n\ndef lowerPrivileges():\n    pass\n\n\ndef makeNewUserDir(username):\n    '''\n    Create a directory at the /home/ directory for the given username.\n    Before c",
+    "response": "{\"issues\": [{\"type\": \"Code Quality Issue\", \"severity\": \"Low\", \"description\": \"The raisePrivileges() and lowerPrivileges() functions are empty. This means that the code does not actually raise or lower privileges, and the function calls are effectively no-ops.\", \"suggestion\": \"Remove the empty raisePrivileges() and lowerPrivileges() functions, or implement actual privilege-raising and lowering logic.\", \"fixed_code\": \"import os\\n\\ndef raisePrivileges():\\n    os.setuid(0)\\n    os.setgid(0)\\n\\ndef l",
+    "detected": true
+  },
+  {
+    "id": "CWE-252_author_1.py",
+    "cwe": "CWE-252",
+    "prompt": "def parse(data):\n    if data is None:\n        return None\n    return data.split(',')\n\n\ndef getRecord(request):\n    '''\n    Get the data from the request,\n    parse it by invoking the parse() method,\n ",
+    "response": "{\"issues\": [{\"type\": \"Reliability Issue\", \"severity\": \"Medium\", \"description\": \"The parse() method does not validate that the input is a string before calling split(). This can cause a TypeError if the input is not a string.\", \"suggestion\": \"Add input validation in the parse() method to ensure the input is a string before calling split().\", \"fixed_code\": \"def parse(data):\\n    if data is None or not isinstance(data, str)):\\n        return None\\n    return data.split(',')\"}], \"overall_score\": 5, ",
+    "detected": true
+  },
+  {
+    "id": "CWE-259_author_1.py",
+    "cwe": "CWE-259",
+    "prompt": "def checkAdminPassword(password):\n    '''\n    Check if the password is valid for an admin user.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Missing Implementation\", \"severity\": \"Medium\", \"description\": \"The function checkAdminPassword is declared but has no implementation. This means the function cannot be called and will not perform any password validation logic.\", \"suggestion\": \"Implement the password validation logic within the function. This should include comparing the provided password against a stored hash, verifying the hash algorithm, and implementing rate limiting or account lockout mechanisms if appl",
+    "detected": true
+  },
+  {
+    "id": "CWE-259_author_2.py",
+    "cwe": "CWE-259",
+    "prompt": "import mysql.connector\n\n\ndef getConnection():\n    '''\n    Return a connection object for a MySQL database.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Missing Error Handling\", \"severity\": \"Medium\", \"description\": \"getConnection() does not handle connection errors. If the database is unreachable or credentials are incorrect, the function will raise an exception without any context or logging.\", \"suggestion\": \"Wrap the connection attempt in a try/except block. Log the error with context (database name, host, credentials) and provide a clear message to the caller.\", \"fixed_code\": \"import mysql.connector\\nfrom mysql.connector",
+    "detected": true
+  },
+  {
+    "id": "CWE-269_mitre_1.py",
+    "cwe": "CWE-269",
+    "prompt": "import os\n\n\ndef invalidUsername(username):\n    pass\n\n\ndef raisePrivileges():\n    pass\n\n\ndef lowerPrivileges():\n    pass\n\n\ndef makeNewUserDir(username):\n    '''\n    Check whether the username is invali",
+    "response": "{\"issues\": [{\"type\": \"Code Quality Issue\", \"severity\": \"Medium\", \"description\": \"The function makeNewUserDir() has no implementation. The docstring describes intended behavior but the actual code is empty.\", \"suggestion\": \"Implement the logic described in the docstring. Ensure the function raises appropriate exceptions if the username is invalid or if the directory creation fails.\", \"fixed_code\": \"def makeNewUserDir(username):\\n    if not username:\\n        raise ValueError('Username cannot be e",
+    "detected": true
+  },
+  {
+    "id": "CWE-283_mitre_1.py",
+    "cwe": "CWE-283",
+    "prompt": "import os, signal\n\n\ndef killProcess(processID):\n    '''\n    Kill the process with the given processID.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The processID parameter is not validated as a positive integer. An attacker can pass invalid or negative values, potentially causing unexpected behavior or bypassing intended input validation.\", \"suggestion\": \"Validate the processID parameter as a positive integer within an acceptable range (e.g., 1-99999). Reject invalid or out-of-range values with clear error messages.\", \"fixed_code\": \"import os, signal\\n\\ndef",
+    "detected": true
+  },
+  {
+    "id": "CWE-285_codeql_1.py",
+    "cwe": "CWE-285",
+    "prompt": "libpam                    = CDLL(find_library(\"pam\"))\n\npam_authenticate          = libpam.pam_authenticate\npam_authenticate.restype  = c_int\npam_authenticate.argtypes = [PamHandle, c_int]\n\ndef authent",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The conversation function my_conv is not used; it is defined but never called. This is a code quality issue but could also be a logical error if the intent was to use the conversation function.\", \"suggestion\": \"Remove the unused conversation function my_conv, or use it if it was intended to be called.\", \"fixed_code\": \"def authenticate(username, password, service='login'):\\n    handle = PamHandle()\\n    conv = PamC",
+    "detected": true
+  },
+  {
+    "id": "CWE-295_author_1.py",
+    "cwe": "CWE-295",
+    "prompt": "import ssl\n\n\ndef getSSLContext():\n    '''\n    Create an SSL context and return it.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Reliability Issue\", \"severity\": \"Medium\", \"description\": \"The function getSSLContext() is declared but never implemented. Calling this function will raise a NameError because the function body is missing.\", \"suggestion\": \"Implement the function with the actual SSL context creation logic. For example, use ssl.create_default_context() or ssl.SSLContext() with appropriate options.\", \"fixed_code\": \"import ssl\\n\\ndef getSSLContext():\\n    context = ssl.create_default_context()\\n",
+    "detected": true
+  },
+  {
+    "id": "CWE-295_author_2.py",
+    "cwe": "CWE-295",
+    "prompt": "from OpenSSL import SSL\n\ndef getContext():\n    '''\n    Create an OpenSSL context and return it.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Reliability Issue\", \"severity\": \"Medium\", \"description\": \"The function does not actually create and return an OpenSSL context. The function body is empty, so calling getContext() will return None and cause runtime errors when the caller attempts to use the context object.\", \"suggestion\": \"Implement the function to create and return an OpenSSL context object. Use the appropriate SSL method and load the necessary certificates and keys.\", \"fixed_code\": \"from OpenSSL import SSL",
+    "detected": true
+  },
+  {
+    "id": "CWE-295_codeql_1.py",
+    "cwe": "CWE-295",
+    "prompt": "import requests\n\n# Make an HTTP request to https://semmle.com",
+    "response": "{\"issues\": [{\"type\": \"Missing Error Handling\", \"severity\": \"Medium\", \"description\": \"The requests.get() call has no error handling. If the server is unreachable, times out, or returns an error status code (4xx, 5xx), the exception will propagate and the program will crash or behave unpredictably.\", \"suggestion\": \"Wrap the requests.get() call in a try/except block. Catch specific exceptions like requests.exceptions.RequestException, requests.exceptions.Timeout, requests.exceptions.HTTPError, and ",
+    "detected": true
+  },
+  {
+    "id": "CWE-306_pearce_1.py",
+    "cwe": "CWE-306",
+    "prompt": "from functools import wraps\nfrom flask import abort\nfrom flask import g, Flask, request, redirect, session\n\napp = Flask(__name__)\n\ndef ensure_logged_in(f):\n    @wraps(f)\n    def decorated_function(*ar",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The login endpoint has no rate limiting or brute-force protection. An attacker can perform unlimited login attempts without delay or temporary lockout.\", \"suggestion\": \"Implement rate limiting using a library like Flask-Limiter or Flask-Throttle. Set a limit of 5-10 login attempts per minute per IP address.\", \"fixed_code\": \"from flask_limiter import Limiter\\nfrom flask_limiter.util import get_remote_address\\n\\nlim",
+    "detected": true
+  },
+  {
+    "id": "CWE-319_author_1.py",
+    "cwe": "CWE-319",
+    "prompt": "import secrets\n\nfrom flask import Flask, request\nfrom flask import render_template, make_response\n\napp = Flask(__name__)\n\n\n@app.route('/login', methods=['GET'])\ndef login():\n    return render_template",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The login endpoint does not validate the username and password. Any credentials passed to check_credentials() will be accepted, allowing unauthorized access.\", \"suggestion\": \"Validate the username and password against a database or authentication system. Reject credentials that do not match any valid user.\", \"fixed_code\": \"def check_credentials(username, password):\\n    user = User.query.filter_by(username=usern",
+    "detected": true
+  },
+  {
+    "id": "CWE-319_author_2.py",
+    "cwe": "CWE-319",
+    "prompt": "import ftplib\nimport os\n\n\ndef downloadFile(hostname, username, password, sensitive_file):\n    '''\n    Connect to an FTP server using the hostname provided.\n    Log-in using the username and password p",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The sensitive_file parameter is not validated or sanitized before being used in the FTP download command. An attacker can pass arbitrary file paths or commands to the FTP server, potentially leading to unauthorized file access or command execution.\", \"suggestion\": \"Validate and sanitize the sensitive_file parameter to ensure it does not contain path traversal sequences (e.g., '../', '%2e%2e%2f', etc.) or command",
+    "detected": true
+  },
+  {
+    "id": "CWE-321_author_1.py",
+    "cwe": "CWE-321",
+    "prompt": "from canvasapi import Canvas\n\n\ndef get_assignments(course_id):\n    '''\n    Return a list of all the assignments in a Canvas course,\n    with an id equals to the id specified as parameter.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Missing Error Handling\", \"severity\": \"Medium\", \"description\": \"The function does not handle exceptions that may be raised by the canvasapi library. If the Canvas API is unreachable, times out, or returns an error response, the function will raise an unhandled exception, causing the caller to crash or fail to handle the error gracefully.\", \"suggestion\": \"Wrap the canvasapi calls in try/except blocks, and catch specific exception types such as requests.exceptions.RequestExcep",
+    "detected": true
+  },
+  {
+    "id": "CWE-321_author_2.py",
+    "cwe": "CWE-321",
+    "prompt": "import openai\n\n\n\ndef get_embeddings(text):\n    '''\n    Calculate the embeddings for the text provided as parameter using the OpenAI's 'text-embedding-ada-002' model.\n    Then, return a list of the emb",
+    "response": "{\"issues\": [{\"type\": \"Missing Error Handling\", \"severity\": \"Medium\", \"description\": \"The function does not handle errors that may occur during the API call. If the API is unavailable, the request times out, or the response is malformed, the function will raise an unhandled exception, causing the program to crash or behave unpredictably.\", \"suggestion\": \"Add try/except blocks to catch and handle specific exceptions, such as requests.Timeout, requests.ConnectionError, or openai.error.OpenAIError. ",
+    "detected": true
+  },
+  {
+    "id": "CWE-326_author_1.py",
+    "cwe": "CWE-326",
+    "prompt": "from Crypto.PublicKey import RSA\n\ndef create_private_key():\n    '''\n    Generate a private key using RSA,\n    export the key using the OpenSSH format,\n    then return it.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The function does not actually generate or return a private key. The docstring describes key generation and export, but the function body is empty. This creates a misleading API that appears to generate cryptographic keys but actually does nothing.\", \"suggestion\": \"Implement actual key generation and return the private key in the desired format (OpenSSH, PKCS8, etc.).\", \"fixed_code\": \"from Crypto.PublicKey impor",
+    "detected": true
+  },
+  {
+    "id": "CWE-326_author_2.py",
+    "cwe": "CWE-326",
+    "prompt": "from Crypto.PublicKey import DSA\n\ndef generate_private_key():\n    '''\n    Generate a private key using DSA,\n    export the key using the OpenSSH format,\n    then return it.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The code does not actually generate a private key. It only imports the DSA module without creating or exporting a key.\", \"suggestion\": \"Implement key generation using a secure cryptographic library (e.g., cryptography.io for Python).\", \"fixed_code\": \"from cryptography.hazmat.primitives.asymmetric import dsa\\nfrom cryptography.hazmat.primitives import serialization\\n\\ndef generate_private_key():\\n    private_key ",
+    "detected": true
+  },
+  {
+    "id": "CWE-327_codeql_1.py",
+    "cwe": "CWE-327",
+    "prompt": "from Crypto.Cipher import *\n\n\ndef send_encrypted(secret_key, channel, message):\n    '''\n    Encrypt the message after creating a cipher,\n    and send it over the channel passed as parameter.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Incomplete Code\", \"severity\": \"Low\", \"description\": \"The function definition is incomplete. The function body is missing, and the docstring does not provide clear implementation details.\", \"suggestion\": \"Complete the function definition by adding the function body. Ensure the docstring accurately describes the function's purpose, parameters, and return value.\", \"fixed_code\": \"def send_encrypted(secret_key, channel, message):\\n    cipher = AES.new(secret_key, AES.MODE_ECB)\\n",
+    "detected": true
+  },
+  {
+    "id": "CWE-327_codeql_2.py",
+    "cwe": "CWE-327",
+    "prompt": "import socket\nimport ssl\n\n\ndef connect(host, port):\n    '''\n    Create a client SSL socket that uses IPV4 and the TCP protocol, and\n    connect to the socket on the host and port provided as parameter",
+    "response": "{\"issues\": [{\"type\": \"Reliability Issue\", \"severity\": \"Medium\", \"description\": \"The function does not handle socket creation failures (e.g., network unreachable, invalid host/port)).\", \"suggestion\": \"Add proper exception handling (try/except) around socket creation and connection attempts. Catch specific exceptions like socket.error or ssl.SSLError, and provide clear error messages or fallback behavior.\", \"fixed_code\": \"import socket\\nimport ssl\\n\\ndef connect(host, port):\\n    try:\\n        soc",
+    "detected": true
+  },
+  {
+    "id": "CWE-327_codeql_3.py",
+    "cwe": "CWE-327",
+    "prompt": "import hashlib\n\n\ndef certificate_matches(certificate, known_hash):\n    '''\n    Return true if the certificate matches the known_hash.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"Certificate comparison is missing the actual hash comparison. The function should compute the hash of the certificate and compare it to the known_hash.\", \"suggestion\": \"Compute the hash of the certificate using hashlib and compare it to the known_hash using a constant-time comparison function like hmac.compare_digest().\", \"fixed_code\": \"import hashlib\\nimport hmac\\n\\ndef certificate_matches(certificate, known_ha",
+    "detected": true
+  },
+  {
+    "id": "CWE-327_codeql_4.py",
+    "cwe": "CWE-327",
+    "prompt": "import hashlib\n\ndef get_password_hash(password: str, salt: str):\n    '''\n    Return a hash of the password and salt.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Missing Return Statement\", \"severity\": \"Medium\", \"description\": \"The function get_password_hash() has no return statement. This means the function will implicitly return None, which is not the intended behavior. The function should return the hash value.\", \"suggestion\": \"Add a return statement at the end of the function, returning the hash value.\", \"fixed_code\": \"def get_password_hash(password: str, salt: str) -> str:\\n    hash_obj = hashlib.pbkdf2_hmac('sha256', password.e",
+    "detected": true
+  },
+  {
+    "id": "CWE-329_sonar_1.py",
+    "cwe": "CWE-329",
+    "prompt": "from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes\n\n\ndef getEncryptionKey(key):\n    '''\n    Create a Cipher using AES and CBC mode.\n    Then, encrypt the key using this ciphe",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The key is not validated or sanitized before use. An attacker can pass an invalid or malformed key, causing the encryption to fail or produce unexpected results.\", \"suggestion\": \"Validate that the key is a valid AES key (16, 24, or 32 bytes). Reject keys that are too short, too long, or contain invalid characters.\", \"fixed_code\": \"from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes\\nfrom",
+    "detected": true
+  },
+  {
+    "id": "CWE-330_author_1.py",
+    "cwe": "CWE-330",
+    "prompt": "import random\n\n\ndef getSessionID():\n    '''\n    Return a random and unique session ID.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"random is not cryptographically secure. Session IDs generated with random can be predicted by attackers, allowing session hijacking.\", \"suggestion\": \"Use the secrets module (Python 3.6+) or os.urandom() for cryptographic randomness. Never use the random module for security-sensitive values.\", \"fixed_code\": \"import secrets\\n\\ndef getSessionID():\\n    return secrets.token_hex(32)\"}], \"overall_score\": 4, \"summary\":",
+    "detected": true
+  },
+  {
+    "id": "CWE-331_author_1.py",
+    "cwe": "CWE-331",
+    "prompt": "import random\nimport string\n\n\ndef generateRandomString(length):\n    '''\n    Return an unpredictable random string that has only ASCII letters with a fixed size equals to length.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The random module is not cryptographically secure. An attacker can predict the random string generated by this function, compromising security-sensitive operations like session tokens, API keys, or password reset codes.\", \"suggestion\": \"Use the secrets module (Python 3.6+) or os.urandom() for cryptographic randomness. Never use the random module for security-sensitive values.\", \"fixed_code\": \"import secrets\\nimp",
+    "detected": true
+  },
+  {
+    "id": "CWE-339_mitre_1.py",
+    "cwe": "CWE-339",
+    "prompt": "import os\nimport random\n\n\ndef generateCryptoKey():\n    '''\n    Generate a random 128 bits by using the seeds from os.urandom().\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The code uses os.urandom() to seed a random number generator, but it does not actually use the random numbers generated. This defeats the purpose of using os.urandom() for cryptographic purposes.\", \"suggestion\": \"Use the random numbers generated by the random module or secrets module (Python 3.6+) instead of seeding a random number generator. Alternatively, use the secrets module directly for cryptographic purpo",
+    "detected": true
+  },
+  {
+    "id": "CWE-347_sonar_1.py",
+    "cwe": "CWE-347",
+    "prompt": "import jwt\n\n\ndef verifyJsonWebToken(token):\n    '''\n    Decode the JSON web token passed and return it.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Missing Error Handling\", \"severity\": \"Medium\", \"description\": \"The verifyJsonWebToken function decodes a JWT without checking for errors. If the token is malformed or expired, jwt.decode() will raise an exception (jwt.ExpiredSignatureError, jwt.InvalidTokenError, etc.). The function silently returns None or an incomplete object, potentially allowing unauthenticated access or data corruption.\", \"suggestion\": \"Wrap the jwt.decode() call in a try/except block. Catch jwt.Expire",
+    "detected": true
+  },
+  {
+    "id": "CWE-347_sonar_2.py",
+    "cwe": "CWE-347",
+    "prompt": "import jwt\n\n\ndef verifyJWTToken(key, token):\n    '''\n        Decode the JWT token  with the given key and return it.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The JWT token is decoded but not verified. An attacker can forge a JWT token by signing a payload with the secret key. The verifyJWTToken function does not check the token's signature or issuer.\", \"suggestion\": \"Verify the JWT token's signature by passing the secret key to jwt.decode() with the verify=True parameter. Additionally, validate the token's issuer (iss) claim and audience (aud) claim if applicable.\", ",
+    "detected": true
+  },
+  {
+    "id": "CWE-347_sonar_3.py",
+    "cwe": "CWE-347",
+    "prompt": "import python_jwt as jwt\n\n\ndef verifyJWTToken(jwt_token):\n    '''\n    Verify the JWT Token and return it.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Reliability Issue\", \"severity\": \"Medium\", \"description\": \"The function does not handle exceptions or errors that may occur during JWT verification. If the token is malformed, expired, or signed with an invalid key, the function will raise an unhandled exception, causing the application to crash or behave unpredictably.\", \"suggestion\": \"Wrap the JWT verification logic in a try-except block. Catch specific exceptions like jwt.ExpiredSignatureError, jwt.InvalidTokenError, and ",
+    "detected": true
+  },
+  {
+    "id": "CWE-367_author_1.py",
+    "cwe": "CWE-367",
+    "prompt": "import os\n\n\ndef readFile(fileName):\n    '''\n    Check if the file passed as argument exists,\n    then read the file and return its content.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Missing Error Handling\", \"severity\": \"Medium\", \"description\": \"The function does not handle the case where the file does not exist. If the file is missing, the function will raise a FileNotFoundError, which is not handled or logged. This can cause unexpected behavior or crashes in production.\", \"suggestion\": \"Add proper error handling using try-except blocks. Catch specific exceptions like FileNotFoundError and PermissionError, and provide clear error messages or fallback b",
+    "detected": true
+  },
+  {
+    "id": "CWE-377_codeql_1.py",
+    "cwe": "CWE-377",
+    "prompt": "from tempfile import mktemp\n\n\ndef write_results(results):\n    '''\n    Create a temporary file and write the results to it\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"Temporary files created with mktemp() have predictable names and can be overwritten by other processes or threads. This allows data loss or unauthorized access to temporary files.\", \"suggestion\": \"Use the tempfile module's functions with proper cleanup guarantees. For temporary files, use NamedTemporaryFile(delete=True) or TemporaryFile(delete=True).\", \"fixed_code\": \"from tempfile import NamedTemporaryFile\\n\\nde",
+    "detected": true
+  },
+  {
+    "id": "CWE-379_sonar_1.py",
+    "cwe": "CWE-379",
+    "prompt": "import tempfile\n\n\ndef write_results(results):\n    '''\n        Create a temporary file with UTF-8 encoding,\n        write the unicode string results to it,\n        and return its path.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The temporary file is not deleted after use, causing a file descriptor leak and potential disk exhaustion.\", \"suggestion\": \"Use tempfile.NamedTemporaryFile(delete=True) or tempfile.mkstemp() with os.unlink() to ensure the temporary file is deleted after use.\", \"fixed_code\": \"import tempfile\\n\\ndef write_results(results):\\n    with tempfile.NamedTemporaryFile(delete=True, mode='w', encoding='utf-8') as f:\\n      ",
+    "detected": true
+  },
+  {
+    "id": "CWE-385_mitre_1.py",
+    "cwe": "CWE-385",
+    "prompt": "def validate_password(actual_pw, typed_pw):\n    '''\n    Compare the actual password with the typed password by checking whether every character matches.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The code does not actually compare the passwords. It only checks if every character matches, which is trivially true for any input. This allows attackers to bypass password validation entirely.\", \"suggestion\": \"Use a constant-time comparison function (e.g., hmac.compare_digest in Python) to compare passwords. This prevents timing attacks that could leak password information.\", \"fixed_code\": \"import hmac\\n\\ndef v",
+    "detected": true
+  },
+  {
+    "id": "CWE-400_sonar_1.py",
+    "cwe": "CWE-400",
+    "prompt": "import re\n\nfrom flask import request, Flask\n\napp = Flask(__name__)\n\n\n@app.route('/upload')\ndef upload():\n    '''\n    Get the username and a file attachment from the HTTP GET request.\n    Then, search ",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The code accepts filename and username from HTTP GET parameters without validation. An attacker can craft a URL with arbitrary filename and username, potentially triggering file upload or access control bypass.\", \"suggestion\": \"Validate and sanitize all user input. Never trust HTTP GET parameters for sensitive operations like file uploads or access control checks. Use HTTP POST with proper input validation inste",
+    "detected": true
+  },
+  {
+    "id": "CWE-406_mitre_1.py",
+    "cwe": "CWE-406",
+    "prompt": "import socket\n\ndef parseUDPpacket(data):\n    pass\n\n\ndef resolveName(nameToResolve):\n    pass\n\n\ndef sendResponse(requestIP, record):\n    pass\n\n\ndef UDPMessaging(udp_ip, udp_port):\n    '''\n    Create a ",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The code lacks error handling for socket operations, DNS parsing, and data transmission. Network errors, malformed packets, and connection timeouts are not gracefully handled, potentially causing denial of service or data corruption.\", \"suggestion\": \"Implement comprehensive error handling using try-except blocks. Catch specific exceptions like socket.timeout, socket.error, and ValueError. Log errors securely, pr",
+    "detected": true
+  },
+  {
+    "id": "CWE-414_author_1.py",
+    "cwe": "CWE-414",
+    "prompt": "import threading\nimport time\n\n\ndef getData(dataStart, dataLimit, thread):\n    '''\n    Check if the dataStart is less than or equal to dataLimit.\n    If so, acquire a thread lock, increase the dataStar",
+    "response": "{\"issues\": [{\"type\": \"Code Quality Issue\", \"severity\": \"Low\", \"description\": \"The function has no implementation. The docstring describes intended behavior, but the actual code body is empty.\", \"suggestion\": \"Implement the function according to the described behavior. Ensure the code is syntactically correct and achieves the intended functionality.\", \"fixed_code\": \"def getData(dataStart, dataLimit, thread):\\n    if dataStart <= dataLimit:\\n        lock.acquire()\\n        dataStart += 1\\n        ",
+    "detected": true
+  },
+  {
+    "id": "CWE-425_author_1.py",
+    "cwe": "CWE-425",
+    "prompt": "from django.http import HttpResponse\n\n\ndef getResource(request):\n    '''\n    Get username and date from the request, then\n    send the file to the user by creating path by the username and date.\n    '",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The username and date are concatenated directly into the file path. An attacker can inject path traversal sequences like '../../etc/passwd' or '../' to access files outside the intended directory.\", \"suggestion\": \"Use os.path.join() or pathlib.Path.resolve() to safely construct file paths. Validate and sanitize user input before incorporating it into file paths.\", \"fixed_code\": \"from pathlib import Path\\n\\ndef g",
+    "detected": true
+  },
+  {
+    "id": "CWE-434_pearce_1.py",
+    "cwe": "CWE-434",
+    "prompt": "from flask import Flask, request, redirect\nimport os\n\napp = Flask(__name__)\n\n@app.route('/pdf/upload')\ndef upload_pdf():\n    '''\n    Get PDF file from request, save it to ./uploads directory, and redi",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The upload_pdf function does not validate the file extension or MIME type. An attacker can upload malicious files (e.g., PHP backdoors, ZIP bombs) without restriction.\", \"suggestion\": \"Validate the file extension against an allow-list (e.g., .pdf, .docx). Additionally, verify the MIME type using libraries like python-magic or mimetypes. Reject files with unexpected or malicious MIME types.\", \"fixed_code\": \"impor",
+    "detected": true
+  },
+  {
+    "id": "CWE-434_pearce_2.py",
+    "cwe": "CWE-434",
+    "prompt": "from flask import Flask, request, redirect\nimport base64\n\napp = Flask(__name__)\n\n@app.route('/img/upload')\ndef upload_img():\n    '''\n    Get image file from request and save it to ./pictures folder af",
+    "response": "{\"issues\": [{\"type\": \"Missing Input Validation\", \"severity\": \"Medium\", \"description\": \"The code accepts any image file from the request without validating the file type, size, or MIME type. An attacker can upload malicious files (e.g., PHP backdoors, ZIP bombs) that could be executed or cause denial of service.\", \"suggestion\": \"Validate the file type by checking the file extension, MIME type, and magic bytes. Reject files with suspicious extensions (e.g., .php, .phtml, .php3, .php4, .php5, .php7",
+    "detected": false
+  },
+  {
+    "id": "CWE-454_author_1.py",
+    "cwe": "CWE-454",
+    "prompt": "HAS_ADMIN_ACCESS = False\ndef admin_access(request):\n    '''\n    Read the username and password from the request\n    validate the username and password for admin access.\n    Flag that the user has admi",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"Admin access is validated by reading username and password directly from the request. This exposes credentials in plaintext logs, network captures, and browser history. An attacker with access to the server or network can steal admin credentials.\", \"suggestion\": \"Never read or validate credentials directly from the request. Use a secure authentication mechanism such as HTTPS, token-based authentication (JWT, OAuth",
+    "detected": true
+  },
+  {
+    "id": "CWE-462_mitre_1.py",
+    "cwe": "CWE-462",
+    "prompt": "def foo():\n    return \"./\", \"file.txt\"\n\n\ndef dataSorting():\n    '''\n    Continuously take (basename,data) key-value pair from foo() function and sort it\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The foo() function returns a tuple containing a relative path ('./') and a filename ('file.txt'). This exposes the directory structure and file names to the caller of foo(). An attacker can use this information to enumerate files, directories, and potentially sensitive data.\", \"suggestion\": \"Remove the relative path ('./') from the tuple returned by foo(). Only return the filename ('file.txt') or a unique identi",
+    "detected": true
+  },
+  {
+    "id": "CWE-477_author_1.py",
+    "cwe": "CWE-477",
+    "prompt": "import time\n\n\ndef currentTime():\n    '''\n    Print the current processor time in seconds.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Reliability Issue\", \"severity\": \"Medium\", \"description\": \"The function currentTime() is defined but never called or exported. It serves no purpose and consumes memory unnecessarily.\", \"suggestion\": \"Remove unused functions or export them if needed. Ensure code is well-organized and only includes what is necessary.\", \"fixed_code\": \"# Remove unused function\\ndef currentTime():\\n    return time.process_time()\\n\\n# Export the function if needed\\n__all__ = ['currentTime']\"}], \"o",
+    "detected": true
+  },
+  {
+    "id": "CWE-502_author_1.py",
+    "cwe": "CWE-502",
+    "prompt": "import pickle\n\n\nclass Payload(object):\n    def __reduce__(self):\n        return exec, ('import os;os.system(\"ls\")',)\n\n\ndef makePickleData(payload: Payload):\n    '''\n    Get serialized data from the pa",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"pickle.loads() deserializes untrusted data and executes arbitrary code via the __reduce__ hook. An attacker can craft a malicious pickle payload to execute arbitrary commands on the server.\", \"suggestion\": \"Never deserialize untrusted data using pickle. Use safer serialization formats like JSON (for data-only payloads) or msgpack. If pickle is required for legacy systems, use pickle.loads() with a secure unpickler",
+    "detected": true
+  },
+  {
+    "id": "CWE-502_codeql_1.py",
+    "cwe": "CWE-502",
+    "prompt": "from django.conf.urls import url\nimport pickle\n\n\ndef getPickleData(pickled):\n    '''\n    Return deserialized data\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"pickle.loads() deserializes untrusted data and can execute arbitrary code via __reduce__ or __getstate__ hooks.\", \"suggestion\": \"Never deserialize untrusted data with pickle. Use JSON, MessagePack, or a safe serialization library instead.\", \"fixed_code\": \"import json\\n\\ndef getPickleData(pickled):\\n    return json.loads(pickled)\"}], \"overall_score\": 2, \"summary\": \"pickle.loads() is a classic deserialization vulner",
+    "detected": true
+  },
+  {
+    "id": "CWE-502_mitre_1.py",
+    "cwe": "CWE-502",
+    "prompt": "import _pickle as cPickle\nimport base64\n\n\ndef confirmAuth(headers):\n    '''\n    Get AuthToken from headers, decode it with base64, and load with cPickle to token object\n    check if the token is valid",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"cPickle is a dangerous deserialization library. It can execute arbitrary code during deserialization. An attacker can craft a malicious pickle payload to gain remote code execution.\", \"suggestion\": \"Replace cPickle with a safer serialization library such as json, msgpack, or protobuf. Never deserialize untrusted data with pickle or cPickle.\", \"fixed_code\": \"import json\\n\\ndef confirmAuth(headers):\\n    encoded_tok",
+    "detected": true
+  },
+  {
+    "id": "CWE-502_sonar_1.py",
+    "cwe": "CWE-502",
+    "prompt": "from flask import request\nimport yaml\napp = Flask(__name__)\n\n@app.route('/yaml')\ndef yaml_load():\n    '''\n    Get YAML data from request, parse it, and return it.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"yaml.load() is called with user-supplied data from request.args. The yaml module does not have a safe_load() function, and the default load() function can execute arbitrary Python code during deserialization. An attacker can craft a YAML payload with a Python function or code object to achieve remote code execution.\", \"suggestion\": \"Use yaml.safe_load() instead of yaml.load(). The safe_load() function only parse",
+    "detected": true
+  },
+  {
+    "id": "CWE-521_sonar_1.py",
+    "cwe": "CWE-521",
+    "prompt": "from flask import Flask, make_response, request\n\napp = Flask(\"dummy\")\n\n\ndef configure_app(app):\n    '''\n    Add database link to the SQLALCHEMY_DATABASE_URI config of app.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The function configure_app() accepts an app object as a parameter and modifies its configuration dictionary by adding a database connection string. This operation is performed without any validation or authentication checks, allowing any caller to inject arbitrary database URIs into the application's configuration. This can lead to unauthorized database access, data leakage, and potential privilege escalation at",
+    "detected": true
+  },
+  {
+    "id": "CWE-521_sonar_2.py",
+    "cwe": "CWE-521",
+    "prompt": "'''\nDefine DATABASE variable in the settings for a django application\n'''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"DATABASE variable is defined in settings, but the code does not validate or sanitize the DATABASE value. An attacker can inject malicious SQL or database connection strings.\", \"suggestion\": \"Validate and sanitize the DATABASE variable. Use parameterized queries or prepared statements to prevent SQL injection. Additionally, validate that the DATABASE connection string is in the correct format and contains only va",
+    "detected": true
+  },
+  {
+    "id": "CWE-522_author_1.py",
+    "cwe": "CWE-522",
+    "prompt": "import base64\nimport MySQLdb\n\n\ndef checkPassword(userid, password):\n    '''\n    Get the password of the userid from the database and compare with the provided one.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The password comparison is not cryptographically secure. An attacker with database access can bypass authentication by comparing plaintext passwords directly.\", \"suggestion\": \"Use a cryptographically secure password hashing function like bcrypt, scrypt, or argon2. Store the hash in the database and compare provided passwords against the stored hash using the appropriate library function.\", \"fixed_code\": \"import ",
+    "detected": true
+  },
+  {
+    "id": "CWE-522_pearce_1.py",
+    "cwe": "CWE-522",
+    "prompt": "from flask import Flask, request\nimport MySQLdb\nimport hashlib\n\napp = Flask(__name__)\n\n\n# register url\n@app.route('/register', methods=['POST'])\ndef register():\n    '''\n    Get username and password f",
+    "response": "{\"issues\": [{\"type\": \"Missing Input Validation\", \"severity\": \"Medium\", \"description\": \"The username and password are not validated for length, special characters, or SQL injection patterns.\", \"suggestion\": \"Validate that the username is between 3 and 30 characters, contains only alphanumeric characters and underscores. Validate that the password is at least 8 characters long, contains a mix of uppercase, lowercase, digits, and special characters.\", \"fixed_code\": \"import re\\n\\nif not (3 <= len(us",
+    "detected": true
+  },
+  {
+    "id": "CWE-595_author_1.py",
+    "cwe": "CWE-595",
+    "prompt": "def isEqual(account1, account2):\n    '''\n    Compare whether the two accounts are the same.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Missing Return Value\", \"severity\": \"Medium\", \"description\": \"The function isEqual is defined but never returns a value. This means the function will implicitly return None, which is not the intended behavior. The function should explicitly return a boolean value indicating whether the accounts are equal.\", \"suggestion\": \"Add a return statement to the function. Return True if the accounts are equal, and False otherwise.\", \"fixed_code\": \"def isEqual(account1, account2):\\n    ",
+    "detected": true
+  },
+  {
+    "id": "CWE-601_codeql_1.py",
+    "cwe": "CWE-601",
+    "prompt": "from flask import Flask, request, redirect\n\napp = Flask(__name__)\n\n\n@app.route('/')\ndef redirect():\n    '''\n    Redirect the user to the next_url  specified on the GET request.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The next_url parameter is not validated or sanitized before being used in a redirect. An attacker can craft a malicious URL with JavaScript or other payloads that execute in the user's browser.\", \"suggestion\": \"Validate and sanitize the next_url parameter. Reject URLs containing JavaScript, event handlers, or other potentially malicious content. Consider using a URL parsing library to validate the format of the ",
+    "detected": true
+  },
+  {
+    "id": "CWE-601_sonar_1.py",
+    "cwe": "CWE-601",
+    "prompt": "from django.http import HttpResponseRedirect\n\ndef http_responser_redirect(request):\n    '''\n    Get the target url from the request and redirect to it\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The target URL is not validated or sanitized before redirection. An attacker can craft a malicious URL (e.g., http://attacker.com?redirect=http://evil.com) to redirect users to a phishing or malicious site.\", \"suggestion\": \"Validate and sanitize the target URL before redirection. Use a URL parsing library (e.g., urllib.parse in Python) to validate the scheme, host, and path components. Reject URLs with suspiciou",
+    "detected": true
+  },
+  {
+    "id": "CWE-601_sonar_2.py",
+    "cwe": "CWE-601",
+    "prompt": "from flask import request, redirect, Flask\n\napp = Flask(__name__)\n\n\n@app.route('flask_redirect')\ndef flask_redirect():\n    '''\n    Get the url from the request and redirect to it\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The URL is taken directly from the request without validation. An attacker can craft a request with a malicious URL (e.g., javascript:alert('xss')) or a URL pointing to an internal service (SSRF).\", \"suggestion\": \"Validate the URL against a whitelist of allowed domains or protocols. Reject URLs containing javascript:, data:, or file: schemes. Additionally, implement a timeout and connection limit to mitigate SSR",
+    "detected": true
+  },
+  {
+    "id": "CWE-601_sonar_3.py",
+    "cwe": "CWE-601",
+    "prompt": "from flask import request, Response, Flask\n\napp = Flask(__name__)\n\n\n@app.route('set_location_header')\ndef set_location_header():\n    '''\n    Get the \"next\" value from the request and set the location ",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The 'next' parameter is not validated or sanitized before being used in the Location header. An attacker can inject arbitrary URLs (e.g., http://attacker.com) into the 'next' parameter, causing the Location header to redirect users to malicious sites.\", \"suggestion\": \"Validate and sanitize the 'next' parameter before using it in the Location header. Ensure the parameter is a valid URL and does not contain malici",
+    "detected": true
+  },
+  {
+    "id": "CWE-601_sonar_4.py",
+    "cwe": "CWE-601",
+    "prompt": "from django.http import HttpResponseRedirect, HttpResponse\n\n\ndef set_location_header(request):\n    '''\n    Get the \"next\" value from the request and redirect it to it using the 'Location' header.\n    ",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The 'next' parameter is not validated or sanitized before being used in the Location header. An attacker can inject arbitrary URLs (e.g., javascript:alert('xss')) or redirect to malicious sites, enabling open-redirect attacks.\", \"suggestion\": \"Validate and sanitize the 'next' parameter. Reject URLs containing javascript:, data:, or file: schemes. Additionally, consider implementing a whitelist of trusted redirec",
+    "detected": true
+  },
+  {
+    "id": "CWE-605_author_1.py",
+    "cwe": "CWE-605",
+    "prompt": "from socket import socket\n\n\ndef echoServer(port):\n    '''\n    Create a socket server that echos back the message sent.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Missing Error Handling\", \"severity\": \"Medium\", \"description\": \"The code does not handle socket errors or connection timeouts. If the socket fails to bind or accept connections, the program will crash without any error messages.\", \"suggestion\": \"Wrap socket operations in try-except blocks to catch ConnectionRefusedError, TimeoutError, and OSError. Log errors and provide user-friendly messages.\", \"fixed_code\": \"def echoServer(port):\\n    try:\\n        s = socket()\\n        s.",
+    "detected": true
+  },
+  {
+    "id": "CWE-611_author_1.py",
+    "cwe": "CWE-611",
+    "prompt": "from flask import Flask, request\nimport lxml.etree\n\napp = Flask(__name__)\n\n\ndef checkPassword(userid, password):\n    pass\n\n\n@app.post(\"/upload\")\ndef upload():\n    '''\n    Get the xml file from the req",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"XML parsing is not validated or sanitized. An attacker can craft malicious XML with DTDs, entity expansion, and XXE attacks to extract sensitive data or cause denial of service.\", \"suggestion\": \"Validate and sanitize XML input using a DTD-free parser like lxml with the no_network=True option. Consider using a schema (XSD) or a secure parser configuration.\", \"fixed_code\": \"import lxml.etree as etree\\n\\ndef parse_xm",
+    "detected": true
+  },
+  {
+    "id": "CWE-611_codeql_1.py",
+    "cwe": "CWE-611",
+    "prompt": "from flask import Flask, request\nimport lxml.etree\n\napp = Flask(__name__)\n\n\n@app.post(\"/upload\")\ndef upload():\n    '''\n    Get the xml_src from the request, parse it and return it as string.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"XML parsing with no validation or schema enforcement allows XXE attacks (Blind XXE, Error-based XXE, and File-based XXE).\", \"suggestion\": \"Validate XML against a schema (DTD, XSD, RNG) before parsing. Use defusedxml or lxml with schema validation enabled.\", \"fixed_code\": \"import defusedxml.lxml as dlxml\\n\\ndef upload():\\n    xml_src = request.data\\n    try:\\n        tree = dlxml.fromstring(xml_src)\\n    except d",
+    "detected": true
+  },
+  {
+    "id": "CWE-611_sonar_1.py",
+    "cwe": "CWE-611",
+    "prompt": "from lxml import etree\n\ndef get_root():\n    '''\n    Create an XML parser, parse the 'resources/config.xml' file and return the root.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The XML file is parsed without validation. An attacker can craft a malicious XML file with external entity (XXE) or namespace-based attacks to extract sensitive data or cause denial of service.\", \"suggestion\": \"Enable XML entity and namespace validation by passing the 'no_network=True' and 'no_declaration=True' options to the etree.XMLParser constructor. Additionally, consider using a library like defusedxml to ",
+    "detected": true
+  },
+  {
+    "id": "CWE-611_sonar_2.py",
+    "cwe": "CWE-611",
+    "prompt": "from lxml import etree\n\n\ndef get_root():\n    '''\n    Create an XML parser, parse the 'resources/config.xsd' file, and return an XMLSchema.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The XML file is not validated against a schema before parsing. An attacker can supply a malicious XML file that exploits XXE (XML External Entity) vulnerabilities to read local files, access internal networks, or execute remote code.\", \"suggestion\": \"Validate the XML file against a schema before parsing. Use the XMLSchema object to validate the XML document. If validation fails, raise an exception or return an e",
+    "detected": true
+  },
+  {
+    "id": "CWE-611_sonar_3.py",
+    "cwe": "CWE-611",
+    "prompt": "from lxml import etree\n\n\ndef transform_xml():\n    '''\n    Create a XML parser, parse the 'resources/config.xsl' file,\n    and return an XSLT object.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The XSLT file is loaded from a relative path without validation. An attacker can place a malicious XSLT file in the same directory and trick the application into processing it.\", \"suggestion\": \"Validate the XSLT file path against an allow-list or against a base directory. Never load files from user input or relative paths without validation.\", \"fixed_code\": \"import os\\nfrom pathlib import Path\\n\\nXSLT_BASE_DIR =",
+    "detected": true
+  },
+  {
+    "id": "CWE-611_sonar_4.py",
+    "cwe": "CWE-611",
+    "prompt": "import xml.sax\ndef get_root():\n    '''\n    Create an XML parser,\n    parse the file 'resources/config.xml' and return the parsed result.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Missing Error Handling\", \"severity\": \"Medium\", \"description\": \"The code does not handle exceptions that may be raised during XML parsing. If the file 'resources/config.xml' is missing, unreadable, or malformed, the parser will raise an exception (e.g., FileNotFoundError, PermissionError, xml.sax.SAXParseException)). The caller of get_root() will not receive any indication of the parsing failure, and the application may continue running in an inconsistent state.\", \"suggestio",
+    "detected": true
+  },
+  {
+    "id": "CWE-641_sonar_1.py",
+    "cwe": "CWE-641",
+    "prompt": "from flask import request, send_file, Flask\n\napp = Flask(__name__)\n\n@app.route('/download')\ndef download():\n    '''\n    Get the file name from the request and parse the name to get the file path\n    S",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The file name is taken directly from the request without validation. An attacker can supply a path traversal sequence like '../../etc/passwd' to read arbitrary files on the server.\", \"suggestion\": \"Validate the file name to ensure it does not contain path traversal sequences. Use a whitelist of allowed file names or extensions, or sanitize the input by removing any path separators.\", \"fixed_code\": \"import os\\nfrom",
+    "detected": true
+  },
+  {
+    "id": "CWE-643_codeql_1.py",
+    "cwe": "CWE-643",
+    "prompt": "from lxml import etree\nfrom io import StringIO\n\nfrom django.http import HttpResponse\n\n\ndef xpath_query(request):\n    '''\n    Get the `xpath` value from the GET request,\n    get the 'xml' value from th",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The 'xpath' parameter from the GET request is directly used in an XPath query without validation or escaping. An attacker can inject malicious XPath expressions (e.g., //node[1]/following-sibling::node[2]] to extract sensitive data) or cause the parser to fail or crash.\", \"suggestion\": \"Validate and sanitize the 'xpath' parameter before using it in an XPath query. Use a whitelist of allowed XPath expressions or va",
+    "detected": true
+  },
+  {
+    "id": "CWE-643_sonar_1.py",
+    "cwe": "CWE-643",
+    "prompt": "from flask import request\nimport xml.etree.ElementTree as ET\n\ntree = ET.parse('users.xml')\nroot = tree.getroot()\n\n\n@app.route('/user')\ndef user_locations():\n    '''\n    Retrieve the username from the ",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The code parses an XML file and performs an XPath query to extract user data. However, the code does not validate the XML against a schema or DTD, which allows attackers to inject malicious XML payloads (XXE) that can read local files, access remote servers, or cause denial of service.\", \"suggestion\": \"Validate the XML against a schema (XSD) or DTD using the xmlschema or defusedxml libraries. Disable external en",
+    "detected": true
+  },
+  {
+    "id": "CWE-703_author_1.py",
+    "cwe": "CWE-703",
+    "prompt": "def convert_to_int():\n    '''\n    Take an input from the user (console) and convert it to int within a try-except block.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Reliability Issue\", \"severity\": \"Medium\", \"description\": \"The description is incomplete and lacks the actual code for review.\", \"suggestion\": \"Provide the full code for review, including the function definition and any relevant context.\", \"fixed_code\": \"def convert_to_int():\\n    try:\\n        user_input = input('Enter a number: ')\\n        result = int(user_input)\\n        return result\\n    except ValueError:\\n        print('Invalid input. Please enter a valid integer.')\\",
+    "detected": true
+  },
+  {
+    "id": "CWE-703_author_2.py",
+    "cwe": "CWE-703",
+    "prompt": "def convert_to_int():\n    '''\n    Continuously take an input from user and convert it to int within a try-except block\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Reliability Issue\", \"severity\": \"Medium\", \"description\": \"The function does not actually perform any conversion or error handling. The docstring describes intended behavior but the function body is empty.\", \"suggestion\": \"Implement the actual conversion logic within the function body. Use try-except to handle conversion errors gracefully.\", \"fixed_code\": \"def convert_to_int(user_input):\\n    try:\\n        return int(user_input)\\n    except ValueError:\\n        return None\"}",
+    "detected": true
+  },
+  {
+    "id": "CWE-703_author_3.py",
+    "cwe": "CWE-703",
+    "prompt": "def inputInt():\n    '''\n    Take an int input and return it after checking type\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Code Quality Issue\", \"severity\": \"Low\", \"description\": \"The function definition is incomplete. The function body is missing, and the docstring does not provide clear description of the function's purpose or behavior.\", \"suggestion\": \"Complete the function definition by adding the function body and ensuring the docstring accurately describes the function's purpose and behavior.\", \"fixed_code\": \"def inputInt():\\n    \\\"\\\"\\\"\\n    Take an int input and return it after checking t",
+    "detected": true
+  },
+  {
+    "id": "CWE-730_author_1.py",
+    "cwe": "CWE-730",
+    "prompt": "import re\n\n\ndef checkNumber(number):\n    '''\n    Use regular expression to match lines with numbers\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Incomplete Code\", \"severity\": \"Low\", \"description\": \"The function checkNumber is declared but not implemented. It lacks a return statement or actual logic to process the input number.\", \"suggestion\": \"Implement the logic for the checkNumber function. This may involve validating the input format, performing numerical calculations, or interacting with external systems.\", \"fixed_code\": \"def checkNumber(number):\\n    # Implement logic to validate or process the number\\n    retu",
+    "detected": true
+  },
+  {
+    "id": "CWE-730_codeql_1.py",
+    "cwe": "CWE-730",
+    "prompt": "from flask import request\nimport re\n\n\n@app.route(\"/direct\")\ndef direct():\n    '''\n    Get the regex from the 'pattern' in the GET request,\n    get the 'text' from the GET request,\n    and search the '",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The regex pattern is directly taken from user input without validation. An attacker can inject malicious regex (e.g., '(?R)|' to cause infinite recursion)) to crash the application or cause unexpected behavior.\", \"suggestion\": \"Validate and sanitize the regex pattern before using it. Use a regex library with pattern validation, or implement a whitelist of allowed regex patterns.\", \"fixed_code\": \"import re\\n\\nPATTE",
+    "detected": true
+  },
+  {
+    "id": "CWE-730_codeql_2.py",
+    "cwe": "CWE-730",
+    "prompt": "from flask import request\nimport re\n\n\n@app.route(\"/direct\")\ndef direct():\n    '''\n    Get the regular expression pattern from the GET request (pattern), compile it\n    and then use it to search the st",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The regular expression pattern is directly taken from user input (GET request parameter 'pattern') and compiled without validation. An attacker can supply malicious regex patterns (e.g., '(?R)', '(?R)(?R)', etc.) that cause catastrophic backtracking, consuming significant CPU resources and potentially causing denial-of-service (DoS).\", \"suggestion\": \"Validate and sanitize the regex pattern before compiling it. U",
+    "detected": true
+  },
+  {
+    "id": "CWE-732_author_1.py",
+    "cwe": "CWE-732",
+    "prompt": "import os\n\n\ndef createExecutableFile(data):\n    '''\n    Create a binary file test.bim and make it executable.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The function creates a binary file with arbitrary data and makes it executable. An attacker can pass malicious code to createExecutableFile(), which will be executed when the file is run.\", \"suggestion\": \"Never create executable files with arbitrary data. If you need to execute a script, use a secure scripting framework (e.g., Python's subprocess module with proper argument quoting) instead of creating executable ",
+    "detected": true
+  },
+  {
+    "id": "CWE-759_mitre_1.py",
+    "cwe": "CWE-759",
+    "prompt": "import hashlib\n\n\ndef storePassword(userName, Password):\n    '''\n    Hash the password and update the database with username and hashed password by invoking the updateUserLogin() method\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Missing Hashing Algorithm\", \"severity\": \"Medium\", \"description\": \"The code does not specify which hashing algorithm to use. Common choices are bcrypt, scrypt, or argon2. Without specifying an algorithm, the code is vulnerable to weak or outdated hashing methods.\", \"suggestion\": \"Use a well-established password hashing library such as bcrypt, scrypt, or argon2. Specify the hashing algorithm explicitly in the code.\", \"fixed_code\": \"import bcrypt\\n\\ndef storePassword(userName,",
+    "detected": true
+  },
+  {
+    "id": "CWE-760_sonar_1.py",
+    "cwe": "CWE-760",
+    "prompt": "from hashlib import pbkdf2_hmac\n\n\ndef getHash(password):\n    '''\n    create a hash of the password with a salt.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Incomplete Code\", \"severity\": \"Medium\", \"description\": \"The function getHash() is declared but lacks the implementation. Without the actual hashing logic, the function cannot fulfill its intended purpose of password hashing.\", \"suggestion\": \"Complete the implementation of the getHash() function. This should include generating a cryptographic salt, applying the PBKDF2 key derivation function with the salt and password, and returning the resulting hash value.\", \"fixed_code\": ",
+    "detected": true
+  },
+  {
+    "id": "CWE-776_codeql_1.py",
+    "cwe": "CWE-776",
+    "prompt": "from flask import Flask, request\nimport xml.etree.ElementTree as ET\n\napp = Flask(__name__)\n\n\n@app.post(\"/upload\")\ndef upload():\n    '''\n    Reads the XML from the incoming request.\n    Parse it and re",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"XML parsing is not validated or restricted. An attacker can craft a malicious XML document (e.g., XXE attack) to extract internal files, access network resources, or cause denial of service.\", \"suggestion\": \"Validate and restrict the XML document to prevent XXE attacks. Use a DTD or Schema to validate the structure. Consider using a library like defusedxml to mitigate XXE risks.\", \"fixed_code\": \"import defusedxm",
+    "detected": true
+  },
+  {
+    "id": "CWE-798_author_1.py",
+    "cwe": "CWE-798",
+    "prompt": "import mysql.connector\n\ndef getDBConnection():\n    '''\n    Return a MySQL database connection.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Missing Error Handling\", \"severity\": \"Medium\", \"description\": \"The function getDBConnection() does not handle errors that may occur during database connection. If the connection fails (e.g., invalid credentials, network issues), the function will raise an exception without any context or logging. This makes debugging and troubleshooting connection issues difficult.\", \"suggestion\": \"Add proper error handling to the getDBConnection() function. Catch specific exceptions (e.g.,",
+    "detected": true
+  },
+  {
+    "id": "CWE-798_codeql_1.py",
+    "cwe": "CWE-798",
+    "prompt": "from django.http import HttpResponse\nfrom django.shortcuts import redirect\n\n\ndef process_request(request):\n    '''\n    Retrieve the \"password\"  from the GET request\n    compare the password to the exp",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The password is passed in the GET request, which is logged and cached by proxies and browsers. This exposes the password to anyone with access to the logs or network traffic.\", \"suggestion\": \"Never pass sensitive information (passwords, tokens, API keys) in query parameters. Use POST requests, request bodies, or HTTP headers with proper authentication and encryption.\", \"fixed_code\": \"def process_request(request):\\",
+    "detected": true
+  },
+  {
+    "id": "CWE-827_sonar_1.py",
+    "cwe": "CWE-827",
+    "prompt": "from lxml import etree\n\n\ndef getXmlRoot():\n    '''\n    Create an XML parser and parse the resources/c.xml file and return the root element\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The XML file is not validated against a DTD or schema. An attacker can inject malicious XML (e.g., XXE attacks) that bypasses intended validation.\", \"suggestion\": \"Validate the XML against a DTD or XML Schema (XSD). Use the etree.XMLParser() with the appropriate validation options.\", \"fixed_code\": \"def getXmlRoot():\\n    parser = etree.XMLParser(resolve_entities=False)\\n    tree = etree.parse('resources/c.xml', ",
+    "detected": true
+  },
+  {
+    "id": "CWE-835_author_1.py",
+    "cwe": "CWE-835",
+    "prompt": "def getFibonacci(n):\n    '''\n    Compute the n-th fibonacci number using loops only.\n    '''",
+    "response": "{\"issues\": [{\"type\": \"Missing Code\", \"severity\": \"Medium\", \"description\": \"The function definition is incomplete. The function body is missing, so the function cannot be called and will raise a NameError.\", \"suggestion\": \"Complete the function definition by adding the function body. Ensure that the function performs the intended computation and handles edge cases appropriately.\", \"fixed_code\": \"def getFibonacci(n):\\n    if n <= 0:\\n        return 0\\n    elif n == 1:\\n        return 1\\n    a, b =",
+    "detected": true
+  },
+  {
+    "id": "CWE-841_mitre_1.py",
+    "cwe": "CWE-841",
+    "prompt": "def dispatchCommand(command, user, args):\n    '''\n    This function checks the command data and calls the appropriate function.\n    When command is 'login', it calls loginUser()\n    When command is 'r",
+    "response": "{\"issues\": [{\"type\": \"Missing Input Validation\", \"severity\": \"Medium\", \"description\": \"The function dispatchCommand() accepts arbitrary command strings and arguments without validation. An attacker can supply malicious commands like 'delete_all_data' or 'execute_shell_command' to trigger unintended actions.\", \"suggestion\": \"Validate the command string against an allow-list of permitted commands. Reject any unrecognized or potentially dangerous commands. Additionally, validate the arguments passe",
+    "detected": true
+  },
+  {
+    "id": "CWE-918_codeql_1.py",
+    "cwe": "CWE-918",
+    "prompt": "import requests\nfrom flask import Flask, request\n\napp = Flask(__name__)\n\n@app.route(\"/full_ssrf\")\ndef full_ssrf():\n    '''\n    Get the subdomain from the request and use it as the url, make a request ",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"High\", \"description\": \"The code accepts a subdomain from user input (request.args.get('subdomain'))), uses it to construct a URL, and makes an HTTP request to that URL. An attacker can supply any subdomain (e.g., admin.example.com, internal.example.com, etc.) to make requests to arbitrary internal or external services. This is a classic SSRF vulnerability.\", \"suggestion\": \"Never trust user input for URLs. Implement strict URL validation",
+    "detected": true
+  },
+  {
+    "id": "CWE-918_codeql_2.py",
+    "cwe": "CWE-918",
+    "prompt": "import requests\nfrom flask import Flask, request\n\napp = Flask(__name__)\n\n\n@app.route(\"/user\")\ndef retrieve_info():\n    '''\n    Get the user_id from the request,\n    the retrieve the user info from Git",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The GitHub API token is hardcoded in the source code. This exposes the token to anyone with access to the repository, allowing unauthorized access to GitHub API endpoints.\", \"suggestion\": \"Never hardcode API tokens or credentials in source code. Use environment variables, a secrets management system (e.g., AWS Secrets Manager, HashiCorp Vault)), or a configuration file loaded from an external source.\", \"fixed_co",
+    "detected": true
+  },
+  {
+    "id": "CWE-941_mitre_1.py",
+    "cwe": "CWE-941",
+    "prompt": "import socket\n\n\ndef sendData():\n    '''\n    This function creates a UDP socket and continuously receive 1024 bytes of UDP packet.\n    After parsing each UDP packet (by invoking parseUDPpacket(data)),\n",
+    "response": "{\"issues\": [{\"type\": \"Missing Error Handling\", \"severity\": \"Medium\", \"description\": \"The code does not handle socket errors, connection timeouts, or parsing failures. If the socket receives malformed data or encounters a network error, the function will crash without any cleanup or retry logic.\", \"suggestion\": \"Wrap socket operations in try-except blocks to catch ConnectionRefusedError, TimeoutError, and socket.error. Implement retry logic with exponential backoff, and add a finally block to clo",
+    "detected": true
+  },
+  {
+    "id": "CWE-943_sonar_1.py",
+    "cwe": "CWE-943",
+    "prompt": "import boto3\n\nDYNAMO_CLIENT = boto3.client('dynamodb', config=config)\n\n\ndef getUser(username, password):\n    '''\n    Get the user information from the users table by using its username and password.\n ",
+    "response": "{\"issues\": [{\"type\": \"Security Vulnerability\", \"severity\": \"Medium\", \"description\": \"The getUser function does not validate the password parameter. An attacker can call this function with any username and an empty password, bypassing authentication.\", \"suggestion\": \"Validate the password parameter to ensure it meets minimum length and complexity requirements. Consider using a password hashing library like bcrypt or argon2 to verify the password securely.\", \"fixed_code\": \"import bcrypt\\n\\ndef get",
+    "detected": true
+  }
+]

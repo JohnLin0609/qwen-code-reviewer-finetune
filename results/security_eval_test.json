@@ -1,0 +1,117 @@
+[
+  {
+    "label": "Fine-tuned Qwen2.5-Coder",
+    "detection_rate": 1.0,
+    "cwe_accuracy": 0.8,
+    "cwe_coverage": "2/2",
+    "false_positive_rate": 1.0,
+    "precision": 0.4,
+    "f1_score": 0.5714,
+    "youden_index": 0.0,
+    "schema_conformance": 1.0,
+    "severity_weighted_recall": 0.9333,
+    "severity_distribution": {
+      "高": 8,
+      "中": 2
+    },
+    "samples_tested": 10,
+    "clean_samples_tested": 15,
+    "cwes_detected": [
+      "CWE-020",
+      "CWE-022"
+    ],
+    "cwes_missed": [],
+    "vuln_predictions": [
+      {
+        "id": "CWE-020_author_1.py",
+        "cwe": "CWE-020",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"yaml.load 使用 BaseLoader 而非 FullLoader，不解析自定義型別且不驗證結構，可能導致 RCE。\",\n      \"suggestion\": \"所有 YAML 檔案應使用 yaml.safe_load（或 yaml.FullLoader），絕不使用 BaseLoader。\",\n      \"fixed_code\": \"data = yaml.safe_load(f)\"\n    },\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 FileNotFoundError、YAMLError 等例外，檔案不存在或格式錯誤時會崩潰。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_co",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-020_author_2.py",
+        "cwe": "CWE-020",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"xml_string 可能包含不合法的 XML，fromstring() 會拋出 ParseError。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"import xml.etree.ElementTree as ET\\n\\ndef parse_xml(xml_string):\\n    try:\\n        root = ET.fromstring(xml_string)\\n    except ET.ParseError as e:\\n        raise ValueError(f'Invalid XML: {e}') from None\\n    return root\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"缺乏",
+        "detected_any": true,
+        "correct_cwe": false,
+        "severity": "中",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-020_codeql_1.py",
+        "cwe": "CWE-020",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"username 直接寫入 HTTP 回應 header 中，攻擊者可注入任意 header（如 Set-Cookie）造成 SSRF 或 session hijacking。\",\n      \"suggestion\": \"使用 Flask 的 cookies 功能（request.cookies / response.set_cookie），不要直接操作 header 字串。\",\n      \"fixed_code\": \"response = make_response(f'Welcome @{username}')\\nresponse.set_cookie('_u', username)  # 使用 cookie 而非 header\"\n    },\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 us",
+        "detected_any": true,
+        "correct_cwe": false,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-020_codeql_2.py",
+        "cwe": "CWE-020",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"pickle.loads 反序列化來自使用者輸入的資料，可執行任意程式碼（RCE）。\",\n      \"suggestion\": \"改用 json.loads。\",\n      \"fixed_code\": \"obj = json.loads(data)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證輸入參數存在性，若 data 為 None 會引發 TypeError。\",\n      \"suggestion\": \"檢查參數是否存在且格式正確。\",\n      \"fixed_code\": \"data = request.args.get('data')\\nif not data:\\n    abort(400)\\nraw_data = data.encode('utf-8')\"\n    }\n",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-020_codeql_3.py",
+        "cwe": "CWE-020",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"正則表達式僅檢查開頭是否匹配，但 redirect 可能包含完整 URL（含 http/https），應驗證完整路徑。\",\n      \"suggestion\": \"使用 urlparse 驗證目標 URL 的 host 在允許清單內，且不包含外部 scheme。\",\n      \"fixed_code\": \"from urllib.parse import urlparse\\nurl = urlparse(target)\\nif url.hostname not in ALLOWED_HOSTS or url.scheme not in ['http', 'https']:\\n    abort(403)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 target 是否指向內部資源，攻擊",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-020_codeql_4.py",
+        "cwe": "CWE-020",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"target 字串直接傳入 redirect()，攻擊者可指定任意 URL（如 https://attacker.com）進行 Open Redirect。\",\n      \"suggestion\": \"使用 urlparse 檢查目標 URL 的 host 是否在允許清單內，並驗證路徑不包含 '../'。\",\n      \"fixed_code\": \"from urllib.parse import urlparse\\nparsed = urlparse(target)\\nif parsed.hostname not in ALLOWED_HOSTS or '..' in target:\\n    abort(403)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 target URL ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-022_author_1.py",
+        "cwe": "CWE-022",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"未驗證 fileName 的路徑是否在允許的基礎目錄內，可刪除任意檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基础目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"import os\\nfrom flask import Flask, request\\nfrom werkzeug.utils import secure_filename\\n\\napp = Flask(__name__)\\nALLOWED_DIR = '/var/www/images'\\n\\n@app.route('/deleteImage')\\ndef deleteImage():\\n    fileName = request.args.get('fileName')\\n    if no",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-022_author_2.py",
+        "cwe": "CWE-022",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 URLError（連線失敗）、json.JSONDecodeError（非有效 JSON），且未設定 timeout。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"import json\\nimport urllib.request as request\\ndef readJSON(url):\\n    try:\\n        with request.urlopen(request.Request(url, headers={'Accept': 'application/json'}), timeout=10) as resp:\\n            return json.load(resp)\\n    except (request.URLError, json.J",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "中",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-022_codeql_1.py",
+        "cwe": "CWE-022",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"filename 直接拼入 open()，攻擊者可讀取任意檔案（如 /etc/passwd）。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"import os\\nfrom pathlib import Path\\nALLOWED_DIR = Path('/app/data').resolve()\\n\\ndef get_file_data(filename):\\n    path = (ALLOWED_DIR / filename).resolve()\\n    if not str(path).startswith(str(ALLOWED_DIR)):\\n        raise PermissionError",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-022_codeql_2.py",
+        "cwe": "CWE-022",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Tar 檔案中的 symlink 可指向任意路徑，extract 到 /tmp 後可能覆寫系統關鍵檔案。\",\n      \"suggestion\": \"使用 tarfile.TarFile.listmembers() 遍歷所有成員並驗證路徑在白名單內；使用 secure_filename() 清理檔名。\",\n      \"fixed_code\": \"# 使用 listmembers 跳過可疑檔名\\nfor member in tar.getmembers():\\n    if not member.name.startswith('/') or '..' in member.name:\\n        raise ValueError('Dangerous archive')\\ntar.extractall(path='/tmp', members=members)\"\n    },\n    {\n      \"",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      }
+    ]
+  }
+]

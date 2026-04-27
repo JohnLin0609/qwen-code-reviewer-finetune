@@ -1,0 +1,1184 @@
+[
+  {
+    "label": "Fine-tuned Qwen2.5-Coder",
+    "detection_rate": 1.0,
+    "cwe_accuracy": 0.9421,
+    "cwe_coverage": "67/69",
+    "false_positive_rate": 0.2,
+    "precision": 0.9758,
+    "f1_score": 0.9878,
+    "youden_index": 0.8,
+    "schema_conformance": 1.0,
+    "severity_weighted_recall": 0.9339,
+    "severity_distribution": {
+      "高": 109,
+      "中": 6
+    },
+    "samples_tested": 121,
+    "clean_samples_tested": 15,
+    "cwes_detected": [
+      "CWE-020",
+      "CWE-022",
+      "CWE-078",
+      "CWE-079",
+      "CWE-080",
+      "CWE-089",
+      "CWE-090",
+      "CWE-094",
+      "CWE-095",
+      "CWE-099",
+      "CWE-113",
+      "CWE-116",
+      "CWE-117",
+      "CWE-1204",
+      "CWE-193",
+      "CWE-209",
+      "CWE-215",
+      "CWE-250",
+      "CWE-252",
+      "CWE-259",
+      "CWE-269",
+      "CWE-283",
+      "CWE-285",
+      "CWE-295",
+      "CWE-306",
+      "CWE-319",
+      "CWE-321",
+      "CWE-326",
+      "CWE-327",
+      "CWE-329",
+      "CWE-330",
+      "CWE-331",
+      "CWE-339",
+      "CWE-347",
+      "CWE-367",
+      "CWE-377",
+      "CWE-379",
+      "CWE-385",
+      "CWE-406",
+      "CWE-414",
+      "CWE-425",
+      "CWE-434",
+      "CWE-454",
+      "CWE-462",
+      "CWE-477",
+      "CWE-502",
+      "CWE-521",
+      "CWE-522",
+      "CWE-595",
+      "CWE-601",
+      "CWE-605",
+      "CWE-611",
+      "CWE-641",
+      "CWE-643",
+      "CWE-703",
+      "CWE-730",
+      "CWE-732",
+      "CWE-759",
+      "CWE-760",
+      "CWE-776",
+      "CWE-798",
+      "CWE-827",
+      "CWE-835",
+      "CWE-841",
+      "CWE-918",
+      "CWE-941",
+      "CWE-943"
+    ],
+    "cwes_missed": [
+      "CWE-200",
+      "CWE-400"
+    ],
+    "vuln_predictions": [
+      {
+        "id": "CWE-020_author_1.py",
+        "cwe": "CWE-020",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"yaml.load 使用 BaseLoader（無安全保護），可執行任意 Python 物件。\",\n      \"suggestion\": \"使用 yaml.safe_load()，不支援自定義類別反序列化。\",\n      \"fixed_code\": \"data = yaml.safe_load(f)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未限制 filename 可能指向的路徑，可能讀取或寫入伺服器任意檔案。\",\n      \"suggestion\": \"驗證 filename 是允許的目錄內的檔案。\",\n      \"fixed_code\": \"from pathlib import Path\\nALLOWED_DIR = Path('/safe/directory').resolv",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-020_author_2.py",
+        "cwe": "CWE-020",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"XML 反序列化可能導致 Server-Side Request Forgery (SSRF) 或 Out-of-Band 副作用（OOB），攻擊者可讀取內部檔案或發送 DoS 請求。\",\n      \"suggestion\": \"使用 defusedxml 模組取代 xml.etree.ElementTree，或在解析前驗證 XML 內容。\",\n      \"fixed_code\": \"from defusedxml import ElementTree as ET\\n\\ndef parse_xml(xml_string):\\n    try:\\n        root = ET.fromstring(xml_string)\\n    except ET.ParseError:\\n        raise ValueError('Invalid XML')\\n    return root\"\n    }\n",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-020_codeql_1.py",
+        "cwe": "CWE-020",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"username 直接寫入 HTTP 回應 header（Set-Cookie、Cache-Control、X-Frame-Options 等），可能被注入至 Cookie 或 HTTP 指令中。\",\n      \"suggestion\": \"使用模板渲染或 string.format()，絕不拼接字串生成 HTTP header 值。\",\n      \"fixed_code\": \"response.headers['X-Custom-Header'] = f'User: {username}'\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 username 格式，可能含特殊字元或空值，導致 HTTP header injection。\",\n      \"suggestion\": \"永遠不",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-020_codeql_2.py",
+        "cwe": "CWE-020",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"base64 解碼後直接用 pickle.loads 反序列化，攻擊者可傳入 pickle 毒物（如 __reduce__）執行任意程式碼。\",\n      \"suggestion\": \"使用有界緩存（lru_cache/deque maxlen）、weakref、context manager 與 try/except finally 確保資源正確釋放。\",\n      \"fixed_code\": \"import json\\n\\ndef profile():\\n    raw_data = request.args.get('data', '')\\n    try:\\n        return json.loads(base64.b64decode(raw_data).decode())\\n    except (TypeError, binascii.Error, UnicodeDecodeError,",
+        "detected_any": true,
+        "correct_cwe": false,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-020_codeql_3.py",
+        "cwe": "CWE-020",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"正則表達式僅檢查開頭的 www 或 beta.example.com/，未驗證完整 URL。\",\n      \"suggestion\": \"使用 urlparse 解析 URL 取得 netloc，再用白名單確認域名是否允許。\",\n      \"fixed_code\": \"from urllib.parse import urlparse\\nallowed_hosts = {'www.example.com', 'beta.example.com'}\\nurl = urlparse(target)\\nif url.netloc in allowed_hosts:\\n    return redirect(target)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證目標 URL 是否為 HT",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-020_codeql_4.py",
+        "cwe": "CWE-020",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"target 可含完整 URL（如 https://example.com/path），檢查字串不夠嚴格。\",\n      \"suggestion\": \"使用 urlparse 分離 URL 各部分後，檢查 scheme 與 netloc 是否允許。\",\n      \"fixed_code\": \"from urllib.parse import urlparse\\nparsed = urlparse(target)\\nif parsed.scheme not in ('http', 'https') or parsed.netloc != 'example.com':\\n    abort(403)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 target 是否為已知白名單中的路徑，攻擊",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-022_author_1.py",
+        "cwe": "CWE-022",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"未驗證 fileName 是圖片路徑（以允許的目錄開頭），也未驗證是檔案而非目錄。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"import os\\nfrom flask import Flask, request, abort\\n\\napp = Flask(__name__)\\nIMAGE_DIR = '/safe/images'\\n\\n@app.route('/deleteImage')\\ndef deleteImage():\\n    fileName = request.args.get('fileName', '')\\n    if not fileName or not fileName.endswith(('.png', '.jpg', '.jpeg')):\\n       ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-022_author_2.py",
+        "cwe": "CWE-022",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"未驗證 URL 白名單，可讀取任意外部 JSON 檔案。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"from urllib.parse import urlparse\\nALLOWED_DOMAINS = {'api.example.com', 'data.gov'}\\ndef readJSON(url):\\n    parsed = urlparse(url)\\n    if parsed.netloc not in ALLOWED_DOMAINS:\\n        raise ValueError(f'Untrusted domain: {parsed.netloc}')\\n    # 繼續處理\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summar",
+        "detected_any": true,
+        "correct_cwe": false,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-022_codeql_1.py",
+        "cwe": "CWE-022",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"未驗證 filename 是否為允許的路徑，攻擊者可使用路徑遍歷讀取伺服器任意檔案。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"import os\\nALLOWED_DIR = '/safe/files'\\nif not filename or '..' in filename:\\n    abort(400)\\npath = os.path.join(ALLOWED_DIR, filename)\\nif not path.startswith(ALLOWED_DIR):\\n    abort(403)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"open() 沒有 ti",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-022_codeql_2.py",
+        "cwe": "CWE-022",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Tarball 可含多個成員（如 ../etc/passwd），解壓到 /tmp/ 後可覆寫系統檔案。\",\n      \"suggestion\": \"使用 secure_filename() 清理檔名並驗證目標路徑在允許目錄內；使用 pathlib.resolve() 取得絕對路徑後確認路徑以允許目錄開頭。\",\n      \"fixed_code\": \"from pathlib import Path\\n\\ndef extract_tar(file_name):\\n    target_dir = Path('/safe/tmp').resolve()\\n    with tarfile.open(file_name) as tar:\\n        for member in tar.getmembers():\\n            path = (target_dir / member.name).r",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-078_author_1.py",
+        "cwe": "CWE-078",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"shell=True 允許任意系統指令執行，等同於命令注入。\",\n      \"suggestion\": \"永遠不要使用 shell=True，改用 list 參數傳入單個參數。\",\n      \"fixed_code\": \"subprocess.run(user_input.split(), check=True)\"\n    },\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證使用者輸入是否為合法指令，可能導致意外行為或錯誤。\",\n      \"suggestion\": \"建立白名單或正則表達式驗證。\",\n      \"fixed_code\": \"ALLOWED_COMMANDS = {'ls', 'cat', 'grep'}\\nif user_input not in ALLOWED_COMMANDS",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-078_codeql_1.py",
+        "cwe": "CWE-078",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"action 從 args 取得但未驗證，攻擊者可透過 GET 請求執行任意系統指令。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"import re\\nif not re.match(r'^[a-zA-Z0-9_]+$', action):\\n    abort(400)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"os.system() 直接執行使用者提供的字串，等同於 shell=True，有 shell injection 風險。\",\n      \"suggestion\": \"使用 list 參數避免 shell=True，或改用 subprocess.run()。",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-079_codeql_1.py",
+        "cwe": "CWE-079",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"FileSystemLoader 從當前目錄載入模板，攻擊者可使用 ../ 讀取任意檔案（SSTI）。\",\n      \"suggestion\": \"使用 TemplateResponse（Django）或 Jinja2 的 select_autoescape 與 sandbox 模組限制模板功能。\",\n      \"fixed_code\": \"env = Environment(loader=PackageLoader('your_package'), autoescape=True)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"name 直接嵌入模板且未清理，可能被注入 HTML 或 JS（Stored XSS）。\",\n      \"suggestion\": \"過濾使用者輸入後再傳入模板。\"",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-079_codeql_2.py",
+        "cwe": "CWE-079",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"name 直接拼入 HTML 回傳且未驗證長度，可能被注入 XSS。\",\n      \"suggestion\": \"使用 markupsafe.escape() 跳脫特殊字元，或改用 template engine（Jinja2）自動跳脫。\",\n      \"fixed_code\": \"from markupsafe import escape\\nresponse = make_response(f'Your name is {escape(name)}')\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未限制 name 長度，若使用者輸入超長字串會造成 HTTP header injection（如 'A' * 10000），最終導致 DoS。\",\n      \"suggestion\": \"限制",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-079_sonar_1.py",
+        "cwe": "CWE-079",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"name 直接嵌入 HTML 回傳，攻擊者可注入 <script>alert('XSS')</script> 觸發彈窗。\",\n      \"suggestion\": \"使用模板引擎的自動跳脫功能（Jinja2 的 autoescape），或手動跳脫特殊字元：&<>'\\\"\",\n      \"fixed_code\": \"from markupsafe import escape\\nresponse = make_response(html.replace('{{ name }}', escape(param)))\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 name 長度與格式，可能過長造成 DoS 或檔案讀取。\",\n      \"suggestion\": \"限制參數長度並驗證型別。\",\n ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-080_author_1.py",
+        "cwe": "CWE-080",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"name 直接拼入 HTML 回傳，攻擊者可傳入 <script>alert(\\\"XSS\\\")</script> 觸發 XSS。\",\n      \"suggestion\": \"使用模板引擎（Jinja2）自動跳脫特殊字元，或手動跳脫（html.escape()），絕不直接拼入 HTML 字串。\",\n      \"fixed_code\": \"from markupsafe import escape\\nresponse = make_response(f'<h1>Hello {escape(name)}</h1>')\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 name 長度與格式，可能過長造成效能問題或被用於 DoS 攻擊。\",\n      \"suggestion\": \"限制最大長度並檢",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-089_author_1.py",
+        "cwe": "CWE-089",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"host/username/password 為空字串，連線到預設 MySQL server（通常是 root），存在 SQL Injection。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef get_connection():\\n    return mysql.connector.connect(\\n        host=os.environ['DB_HOST'],\\n        user=os.environ['DB_USER'],\\n        password=os.environ['DB_PASSWORD']\\n    )\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"s",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-089_codeql_1.py",
+        "cwe": "CWE-089",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"使用者名稱直接拼入 SQL 字串且未參數化，攻擊者可注入任意 SQL（如 ' OR '1'='1）讀取所有資料。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def show_user(username):\\n    conn = get_connection()\\n    cursor = conn.cursor()\\n    query = \\\"SELECT * FROM users WHERE username = %s\\\"\\n    cursor.execute(query, (username,))\\n    return cursor.fetchone()\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\"",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-090_codeql_1.py",
+        "cwe": "CWE-090",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"dc 直接拼入 DN 與 filter，攻擊者可注入 LDAP 特殊字元（如 *、(、)）造成 LDAP Injection。\",\n      \"suggestion\": \"使用 ldap3 模組的 SearchScope.SUBTREE 參數取代 ldap.SCOPE_SUBTREE，避免 LDAP Injection。\",\n      \"fixed_code\": \"from ldap3 import Server, Connection\\nserver = Server('127.0.0.1')\\nconn = Connection(server, auto_bind=True)\\nconn.search(f'dc={unsafe_dc}', f'(uid={unsafe_filter})', attributes=['*'])\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n   ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-090_codeql_2.py",
+        "cwe": "CWE-090",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"dc 直接拼入 DN 且未驗證格式，可能包含 LDAP injection。\",\n      \"suggestion\": \"使用 ldap3.utils.dn.str_to_dn() 轉換字串為 DN 物件後再處理。\",\n      \"fixed_code\": \"from ldap3.utils.dn import str_to_dn\\ndn = ''.join(str_to_dn(unsafe_dc))\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"search_filter 直接拼入 LDAP filter 字串，存在 LDAP Injection 風險。\",\n      \"suggestion\": \"使用 ldap3 的 SearchFilter 工具函數生成安全的查詢。\",\n      \"",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-094_author_1.py",
+        "cwe": "CWE-094",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"使用者提供的程式碼被直接編譯成字節碼但未執行，攻擊者可傳入任意 Python 程式碼（如 __import__('os').system('rm -rf /')）。\",\n      \"suggestion\": \"立即移除此端點，若需評估程式碼安全性應使用抽象語法樹分析而非動態執行。\",\n      \"fixed_code\": \"# 移除此端點\\n# 若需安全的程式碼審查功能，應使用靜態程式碼分析工具或沙箱環境，絕不允許動態 exec/eval。\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"動態 exec/eval 允许執行任意程式碼是嚴重的安全漏洞，等同於提供一個後門給攻擊者。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-094_codeql_1.py",
+        "cwe": "CWE-094",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"base64 解碼後直接拼入 exec 字串，攻擊者可注入任意 Python 程式碼。\",\n      \"suggestion\": \"使用 ast.literal_eval 取代 eval，僅處理常量值。\",\n      \"fixed_code\": \"import ast\\nvalue = ast.literal_eval(first_name)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"request.args.get 回傳 None，base64.decodebytes(None) 會引發 TypeError。\",\n      \"suggestion\": \"檢查第一個參數是否存在且為字串型別。\",\n      \"fixed_code\": \"first_name = request.args",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-094_sonar_1.py",
+        "cwe": "CWE-094",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"module 可含任意字串，exec() 會執行任意 Python 程式碼。\",\n      \"suggestion\": \"使用白名單限制允許的模組名稱。\",\n      \"fixed_code\": \"ALLOWED_MODULES = {'parse': 'urllib.parse', 'request': 'urllib.request'}\\nif module not in ALLOWED_MODULES:\\n    abort(403)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"exec() 執行的程式碼可存取 Flask app 物件（request、g、current_app）並修改應用程式狀態。\",\n      \"suggestion\": \"避免在 exec 中使用 Flask ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-095_author_1.py",
+        "cwe": "CWE-095",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"eval 直接執行使用者輸入的字串，等同於在伺服器上執行任意程式碼。\",\n      \"suggestion\": \"改用 ast 模組解析字串後逐一檢查每個節點是否為允許的類型，再動態建立可信任的函數。\",\n      \"fixed_code\": \"import ast\\n\\ndef safe_eval(expr):\\n    tree = ast.parse(expr, mode='eval')\\n    allowed_types = (ast.NameConstant, ast.Num, ast.Str,\\n                     ast.BinOp, ast.UnaryOp, ast.Compare)\\n    for node in ast.walk(tree):\\n        if not isinstance(node, allowed_types):\\n          ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-099_sonar_1.py",
+        "cwe": "CWE-099",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"file 參數直接拼入 send_file 路徑，攻擊者可指定任意路徑讀取伺服器檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename 清理使用者提供的檔名。\",\n      \"fixed_code\": \"import os\\nfrom werkzeug.utils import secure_filename\\nALLOWED_DIR = '/safe/static'\\n\\ndef download():\\n    filename = request.args.get('file')\\n    if not filename:\\n        abort(400)\\n    safe_name = secure_filename(filename)\\n    path = (Path",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-113_sonar_1.py",
+        "cwe": "CWE-113",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Content-Type 可能包含參數（如 text/html; charset=utf-8），直接寫入 header 會導致 HTTP header injection。\",\n      \"suggestion\": \"使用 Werkzeug 的 HeaderSet 和 parse_header() 工具函數處理 header 值。\",\n      \"fixed_code\": \"from werkzeug.http import parse_options_header\\ncontent_type, options = parse_options_header(content_type)\\nheaders.add('Content-Type', f'{content_type}; charset={options.get('charset', 'utf-8')}')\"\n    },\n    {\n      \"t",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-113_sonar_2.py",
+        "cwe": "CWE-113",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Content-Type 可能包含 charset 或 boundary 等指令，攻擊者可注入自定義的 multipart/form-data 或 text/html 帶有 XSS 指令。\",\n      \"suggestion\": \"使用 headers.from_mapping() 複製已驗證的 header，不直接操作 headers 物件。\",\n      \"fixed_code\": \"response.content_type = content_type\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 Content-Type 是否為允許的類型（如 text/html、application/json），可能導致 MIME type sniffing 風險。\",\n      \"s",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-116_author_1.py",
+        "cwe": "CWE-116",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"username 直接拼入 shell 指令且使用 os.system，攻擊者可注入任意指令（如 ; rm -rf /）覆寫系統檔案。\",\n      \"suggestion\": \"改用 subprocess.run 與 list 語法，避免 shell=True。\",\n      \"fixed_code\": \"os.chroot(f'/home/{username}')\\nfiles = '\\n'.join(os.listdir())\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"列出的目錄內容直接回傳給使用者，可能包含敏感檔案（如 .ssh/authorized_keys、.bash_history），造成資料洩漏。\",\n      \"suggestion\": \"僅列出預定義的非敏感目錄。\",",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-116_codeql_1.py",
+        "cwe": "CWE-116",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"正則表達式存在 DoS 風險：若 content 包含數萬個嵌套的 <script> 標籤，每次取代會產生更長的字串，造成無限迴圈。\",\n      \"suggestion\": \"使用有限狀態機（Finite State Machine）或有界緩存技巧避免無限增長。\",\n      \"fixed_code\": \"from html.parser import HTMLParser\\nclass ScriptStripper(HTMLParser):\\n    def __init__(self):\\n        super().__init__()\\n        self.script_mode = False\\n        self.result = []\\n    def handle_starttag(self, tag, attrs):\\n        if tag == 'script'",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-117_author_1.py",
+        "cwe": "CWE-117",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"ValueError 被捕捉後未重新 raise，使用者輸入被無效化且未提供錯誤訊息。\",\n      \"suggestion\": \"Log 前先確認例外類型（logging.exception），捕捉具體的例外類型而非bare except；提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"try:\\n    userInput = int(input(\\\"Enter a number: \\\"))\\nexcept ValueError as e:\\n    logging.error(f'Invalid input: {e}')\\n    raise ValueError('Please enter a valid integer') from e\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"缺乏例外處理或例外處理不完善，程式在遇到錯誤時容",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "中",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-117_codeql_1.py",
+        "cwe": "CWE-117",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"name 直接拼入 log 消息且未過濾，可能包含敏感資訊（如密碼）。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import re\\nSENSITIVE_FIELDS = {'password', 'passwd', 'pass', 'secret', 'token', 'key'}\\n\\ndef sanitize_log_record(record):\\n    for field in SENSITIVE_FIELDS:\\n        if field in record.msg or field in record.kwargs:\\n            record.msg = re.sub(rf'{field}=\\\\S+', f'{fie",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-117_sonar_1.py",
+        "cwe": "CWE-117",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"input 可能包含使用者輸入的任意字串（如 SQL Injection、XSS），直接寫入 log 可能洩漏敏感資訊。\",\n      \"suggestion\": \"Log 前過濾敏感欄位（密碼、token、卡號、個資），可建立統一的 log sanitize 工具函數。\",\n      \"fixed_code\": \"import re\\nSENSITIVE_RE = re.compile(r'password=\\\\w+|api_key=\\\\w+|card_number=\\\\d{12,19}')\\ndef sanitize_log_message(msg):\\n    return SENSITIVE_RE.sub('[REDACTED]', msg)\\ncurrent_app.logger.error(sanitize_log_message(input))\"\n    },\n    {\n      \"typ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-1204_sonar_1.py",
+        "cwe": "CWE-1204",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"CBC 模式的初始化向量（IV）應隨每次加密生成且不重複使用。\",\n      \"suggestion\": \"使用 secrets.token_bytes() 產生安全的 IV。\",\n      \"fixed_code\": \"iv = secrets.token_bytes(AES.block_size)\\ncipher = AES.new(key, AES.MODE_CBC, iv)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"AES key 可能是弱密碼字串或預設值，未通過任何雜湊或鍵派生函數處理。\",\n      \"suggestion\": \"使用 bcrypt、scrypt 或 argon2 雜湊密碼，或使用 HKDF、PBKDF2 或 Argon2ID 進行密鑰派生。\",\n      ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-193_author_1.py",
+        "cwe": "CWE-193",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"while 迴圈使用 <=，會導致索引越界（len(arr) 為上限），且未處理空陣列。\",\n      \"suggestion\": \"改用 for 迴圈或正確設定終止條件，加上 try/except 捕捉 IndexError。\",\n      \"fixed_code\": \"for i in range(len(arr)):\\n    arr[i] += 1\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在陣列越界存取，可能導致資料損毀或安全漏洞。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-200_author_1.py",
+        "cwe": "CWE-200",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"SQL Injection：userId 直接拼入 SQL 字串。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"sql = \\\"SELECT * FROM user_bank_account WHERE user_id = ?\\\"\\nresult = connection.execute(sql, (userId,))\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"isAuthorizedUser() 的結果未驗證型別，可能回傳任意值。\",\n      \"suggestion\": \"永遠信任輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"",
+        "detected_any": true,
+        "correct_cwe": false,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-209_codeql_1.py",
+        "cwe": "CWE-209",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"traceback.format_exc() 回傳完整的 stack trace 包含內部程式碼與變數值，可被攻擊者用於 RCE。\",\n      \"suggestion\": \"Log exception to file (with logging) 而非回傳給 client。\",\n      \"fixed_code\": \"import logging\\nlogging.error('Server error', exc_info=True)\\nreturn 'Internal Server Error', 500\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"例外處理直接將錯誤資訊回傳給使用者，等同於暴露內部實作細節，必須立即修正。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-215_codeql_1.py",
+        "cwe": "CWE-215",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"debug 模式下啟用 reloader、debugger 與 auto-reload，洩漏內部例外堆疊。\",\n      \"suggestion\": \"移除 debug=True，使用環境變數控制（FLASK_ENV=production）。\",\n      \"fixed_code\": \"# 移除此行\\ndef main():\\n    raise Exception()\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"Flask debug mode 启動時暴露内部伺服器狀態與 debugger，等同於開放遠端程式碼執行。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-250_mitre_1.py",
+        "cwe": "CWE-250",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"username 直接拼入字串傳給 os.mkdir，攻擊者可使用路徑遍歷（../）寫入任意位置。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"from pathlib import Path\\nhome_dir = Path('/home').resolve()\\nuser_dir = (home_dir / username).resolve()\\nif not str(user_dir).startswith(str(home_dir)):\\n    raise PermissionError('Directory traversal detected')\\nos.mkdir(user_dir)\"\n    ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-252_author_1.py",
+        "cwe": "CWE-252",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"request.form['data'] 可能不存在（KeyError）或為空字串，直接傳入 parse() 會引發 TypeError。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def getRecord(request):\\n    data = request.form.get('data', '')\\n    return len(parse(data))\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-259_author_1.py",
+        "cwe": "CWE-259",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"admin 密碼硬編碼為 'admin'，攻擊者可直接登入管理後台。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef checkAdminPassword(password):\\n    return password == os.environ['ADMIN_PASSWORD']\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"憑證硬編碼是嚴重的安全漏洞，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-259_author_2.py",
+        "cwe": "CWE-259",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"資料庫連線資訊硬編碼，一旦程式外洩或進入版本控制歷史，憑證將永久暴露。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef getConnection():\\n    return mysql.connector.connect(\\n        user=os.environ['DB_USER'],\\n        password=os.environ['DB_PASSWORD'],\\n        host=os.environ['DB_HOST'],\\n        database=os.environ['DB_NAME']\\n    )\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summar",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-269_mitre_1.py",
+        "cwe": "CWE-269",
+        "prediction": "{\n  \"issues\": [],\n  \"overall_score\": 9,\n  \"summary\": \"此段程式碼遵循安全最佳實務，未發現安全漏洞或品質問題。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": null,
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-283_mitre_1.py",
+        "cwe": "CWE-283",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"未驗證 processID 是否屬於當前使用者的子程序，可能kill到其他應用程式的進程。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"import os\\n\\ndef kill_process(process_id):\\n    if not isinstance(process_id, int) or process_id <= 0:\\n        raise ValueError('Invalid process ID')\\n    try:\\n        os.kill(process_id, 0)\\n    except ProcessLookupError:\\n        raise ValueError(f'No such process: {process_id",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-285_codeql_1.py",
+        "cwe": "CWE-285",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"my_conv 回呼函數未處理任何訊息類型（如 PROMPT_ECHO_OFF），攻擊者可利用此漏洞注入任意指令。\",\n      \"suggestion\": \"使用 PAM_CONVERSATION 的 wrapper 裝飾器（如 pam_conversation）強制處理所有訊息類型。\",\n      \"fixed_code\": \"def my_conv(n_msgs, msgs, resp_ptr, data):\\n    responses = []\\n    for msg in msgs:\\n        if msg.msg_style == PAM_PROMPT_ECHO_OFF:\\n            responses.append(PamResponse(password.encode(), 0))\\n        else:\\n            raise RuntimeE",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-295_author_1.py",
+        "cwe": "CWE-295",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"SSL 憑證驗證全部關閉（check_hostname=False, verify_mode=NONE），等同於不使用 TLS。\",\n      \"suggestion\": \"移除 check_hostname=False 與 verify_mode=ssl.CERT_NONE，讓系統預設行為為使用 CA 憑證驗證。\",\n      \"fixed_code\": \"def getSSLContext():\\n    return ssl.create_default_context()\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"SSL/TLS 連線完全無安全保障，等同於 HTTP。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-295_author_2.py",
+        "cwe": "CWE-295",
+        "prediction": "{\n  \"issues\": [],\n  \"overall_score\": 9,\n  \"summary\": \"此段程式碼品質良好，具有適當的錯誤處理且遵循最佳實務。\"\n}",
+        "detected_any": true,
+        "correct_cwe": false,
+        "severity": null,
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-295_codeql_1.py",
+        "cwe": "CWE-295",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"verify=False 關閉 TLS 憑證驗證，攻擊者可使用中间人（MITM）攻擊竊聽或篡改通訊內容。\",\n      \"suggestion\": \"永遠不要關閉 TLS 驗證，在測試環境中應使用自簽憑證或 certifi 套件件。\",\n      \"fixed_code\": \"requests.get('https://semmle.com')\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"TLS 驗證關閉等同於不加密的通訊，所有資料在網路中裸露，必須立即修正。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-306_pearce_1.py",
+        "cwe": "CWE-306",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"session['username'] 可能不存在（KeyError），且密碼硬編碼為 'password'。\",\n      \"suggestion\": \"使用 try/except 捕捉 KeyError，或在 decorator 中檢查 session 是否存在。\",\n      \"fixed_code\": \"def ensure_logged_in(f):\\n    @wraps(f)\\n    def decorated_function(*args, **kws):\\n        if 'username' not in session:\\n            return redirect('/login')\\n        return f(*args, **kws)\\n    return decorated_function\"\n    },\n    {\n      \"type\": ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-319_author_1.py",
+        "cwe": "CWE-319",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"cookie 中的 sessionID 使用 token_urlsafe(16)，只有 24 bytes（192 bits），遠不足以防護 CSRF。\",\n      \"suggestion\": \"使用 secrets.token_hex(32) 或 secrets.token_bytes(32) 生成至少 256-bit 的隨機值。\",\n      \"fixed_code\": \"response.set_cookie('sessionID', secrets.token_hex(32), httponly=True, secure=True)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 Content-Type 為 application/x-www-form-urlencoded 或",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-319_author_2.py",
+        "cwe": "CWE-319",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"FTP 使用不安全的明文協定傳輸帳號密碼與檔案內容，敏感資料完全暴露在網路中。\",\n      \"suggestion\": \"使用 SFTP（SSH File Transfer Protocol）或 HTTPS。\",\n      \"fixed_code\": \"import paramiko\\n\\ndef downloadFile(hostname, username, password, sensitive_file):\\n    client = paramiko.SSHClient()\\n    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())\\n    client.connect(hostname, username=username, password=password)\\n    sftp = client.open_sftp(",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-321_author_1.py",
+        "cwe": "CWE-321",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Canvas API key 硬編碼在原始碼中，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ncanvas = Canvas(os.environ['CANVAS_URL'], os.environ['CANVAS_API_KEY'])\"\n    },\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 CanvasAPIError 及 ConnectionError，當 Canvas 服務異常時會直接崩潰，且未提供清楚的錯誤訊息。\",\n      \"suggestion\": \"加入適當的 ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-321_author_2.py",
+        "cwe": "CWE-321",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"API key 硬編碼在原始碼中，一旦程式碼外洩或進入版本控制歷史，憑證將永久暴露。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\nopenai.api_key = os.environ['OPENAI_API_KEY']\"\n    },\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 OpenAI API 回傳的錯誤（如過量請求、無效輸入），且未處理 API 連線失敗的例外。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\"",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-326_author_1.py",
+        "cwe": "CWE-326",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"RSA 密鑰長度為 1024 位元（已過時），應使用至少 2048 位元。\",\n      \"suggestion\": \"使用至少 2048 位元的密鑰大小，可考慮使用 4096 位元以增加安全性。\",\n      \"fixed_code\": \"key = RSA.generate(4096)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"OpenSSH 格式的私鑰包含密碼學安全的隨機值，直接暴露在原始碼中可能違反法規（GDPR、PCI DSS）。\",\n      \"suggestion\": \"將私鑰寫入檔案或從環境變數/Secret Manager 取用，不應硬編碼。\",\n      \"fixed_code\": \"# 不要回傳私鑰字串\\nreturn key\"\n    }\n  ],\n  \"ove",
+        "detected_any": true,
+        "correct_cwe": false,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-326_author_2.py",
+        "cwe": "CWE-326",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"DSA 1024 位元太短，可被暴力破解。\",\n      \"suggestion\": \"使用至少 2048 位元的 RSA 或 Ed25519。\",\n      \"fixed_code\": \"from cryptography.hazmat.primitives.asymmetric import rsa\\nkey = rsa.generate_private_key(\\n    public_exponent=65537,\\n    key_size=4096,\\n)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"OpenSSH 格式的私鑰包含密碼學安全隨機值，但 DSA 本身不安全。\",\n      \"suggestion\": \"使用更安全的金鑰格式（PEM）。\",\n      \"fixed",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-327_codeql_1.py",
+        "cwe": "CWE-327",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"DES 是已被破解的加密演算法，應使用 AES。\",\n      \"suggestion\": \"改用 bcrypt、scrypt 或 argon2 搭配 salt/hash 儲存密碼。\",\n      \"fixed_code\": \"import hashlib\\n\\ndef hash_password(password: str) -> str:\\n    return hashlib.sha256(password.encode()).hexdigest()\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"未驗證 secret_key 長度是否為 8 字元（DES）或 16/24/32 字元（AES），且未處理 PKCS7 padding。\",\n      \"suggestion\": \"檢查 ke",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-327_codeql_2.py",
+        "cwe": "CWE-327",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"ssl.wrap_socket() 只傳入 AF_INET 與 SOCK_STREAM，未指定 SSL context，TLS 版本與加密套件預設值可能不安全。\",\n      \"suggestion\": \"使用 ssl.create_default_context() 建立安全的 SSL 上下文，並傳入 wrap_socket 中。\",\n      \"fixed_code\": \"context = ssl.create_default_context()\\ncontext.check_hostname = False\\ncontext.verify_mode = ssl.CERT_NONE\\nssl_sock = context.wrap_socket(...)\"\n    },\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"descrip",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-327_codeql_3.py",
+        "cwe": "CWE-327",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"MD5 是已被攻破的雜湊演算法，不適合用於安全用途。\",\n      \"suggestion\": \"使用 SHA-256 或更強烈的雜湊演算法（如 bcrypt、scrypt），並驗證時比較完整值而非僅比較雜湊值。\",\n      \"fixed_code\": \"import hashlib\\n\\ndef certificate_matches(certificate, known_hash):\\n    hash = hashlib.sha256(certificate.encode()).hexdigest()\\n    return hash == known_hash\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"使用已破解的雜湊演算法，可能導致安全 token 被暴力破解。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-327_codeql_4.py",
+        "cwe": "CWE-327",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"SHA-256 是快速雜湊演算法，不適合密碼儲存；應使用 bcrypt、scrypt 或 argon2。\",\n      \"suggestion\": \"使用 bcrypt.hashpw()，或使用 passlib 模組中的高品質雜湊函數。\",\n      \"fixed_code\": \"import bcrypt\\n\\ndef get_password_hash(password: str):\\n    return bcrypt.hashpw(password.encode(), bcrypt.gensalt())\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"使用弱雜湊演算法處理密碼，等同於未加密。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-329_sonar_1.py",
+        "cwe": "CWE-329",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"CBC 模式的初始化向量（IV）固定為 'x' x 16，攻擊者可預測所有加密結果。\",\n      \"suggestion\": \"使用隨機 IV（os.urandom(16)），並在解密時傳入相同的 IV。\",\n      \"fixed_code\": \"iv = os.urandom(16)\\nreturn iv + cipher.encryptor().update(key).finalize()\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"AES 密鑰直接用作加密金鑰，未經過任何處理或雜湊。\",\n      \"suggestion\": \"使用 hashlib.sha256() 或其他雜湊演算法將密鑰限制在正確長度。\",\n      \"fixed_code\": \"import hashlib",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-330_author_1.py",
+        "cwe": "CWE-330",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"Session ID 使用不安全亂數（LCG），可被預測。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"import secrets\\n\\ndef getSessionID():\\n    return secrets.randbits(32)\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"使用不安全的亂數生成，可能導致安全 token 被預測或暴力破解。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-331_author_1.py",
+        "cwe": "CWE-331",
+        "prediction": "{\n  \"issues\": [],\n  \"overall_score\": 8,\n  \"summary\": \"此段程式碼品質良好，具有適當的錯誤處理與安全防護措施，可安全使用。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": null,
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-339_mitre_1.py",
+        "cwe": "CWE-339",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"使用不安全的亂數生成（os.urandom + random 模組），可被預測。\",\n      \"suggestion\": \"所有安全用途的隨機值應使用 secrets 模組（Python 3.6+）或 os.urandom()，不應使用 random 模組。\",\n      \"fixed_code\": \"from cryptography.hazmat.primitives import hashes\\n\\ndef generateCryptoKey():\\n    digest = hashes.Hash(hashes.SHA256())\\n    digest.update(os.urandom(32))\\n    return int.from_bytes(digest.finalize(), byteorder='big')\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-347_sonar_1.py",
+        "cwe": "CWE-347",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"verify=False 完全關閉簽章驗證，任何人都能偽造 JWT。\",\n      \"suggestion\": \"永遠不要關閉 JWT 驗證，正確的實作應包含密鑰與過期時間檢查。\",\n      \"fixed_code\": \"return jwt.decode(token, SECRET_KEY, algorithms=['HS256'])\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"缺乏輸入驗證與安全防護，可能導致資料損毀、安全洩漏或系統異常行為。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-347_sonar_2.py",
+        "cwe": "CWE-347",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"verify_signature=False 完全跳過簽章驗證，任何人都能生成有效 token。\",\n      \"suggestion\": \"永遠不要關閉簽章驗證（verify_signature），且應使用預設的 leeway（30 秒）而非空字典。\",\n      \"fixed_code\": \"return jwt.decode(token, key)\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"缺乏輸入驗證或安全防護措施，可能導致資料損毀、安全洩漏或系統異常行為。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-347_sonar_3.py",
+        "cwe": "CWE-347",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"未指定 key/alg，JWT 可被偽造或篡改。\",\n      \"suggestion\": \"使用密鑰驗證（HS256）或公鑰驗證（RS256），絕不信任 JWT 自身的 header 中的 alg 與 typ。\",\n      \"fixed_code\": \"import python_jwt as jwt\\n\\ndef verifyJWTToken(jwt_token):\\n    try:\\n        return jwt.decode(jwt_token, 'your_secret_key', algorithms=['HS256'])\\n    except jwt.InvalidTokenError:\\n        raise ValueError('Invalid JWT token')\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"缺乏",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-367_author_1.py",
+        "cwe": "CWE-367",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"os.path.exists() 只確認檔案存在但未驗證路徑是否在允許目錄內，攻擊者可讀取任意系統檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"from pathlib import Path\\nALLOWED_DIR = Path('/safe/dir').resolve()\\n\\ndef readFile(fileName):\\n    path = (ALLOWED_DIR / fileName).resolve()\\n    if not str(path).startswith(str(ALLOWED_DIR)):\\n        raise PermissionError('Access de",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "中",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-377_codeql_1.py",
+        "cwe": "CWE-377",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"mktemp() 只生成名稱不建立檔案，攻擊者可建立同名暫存檔覆寫。\",\n      \"suggestion\": \"使用 tempfile.NamedTemporaryFile(delete=False) 建立檔案並取得完整路徑。\",\n      \"fixed_code\": \"import tempfile\\n\\ndef write_results(results):\\n    with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:\\n        filename = f.name\\n        f.write(results)\\n    print(f'Results written to {filename}')\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在 TOCTOU 資",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-379_sonar_1.py",
+        "cwe": "CWE-379",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"mktemp 只建立空檔名，未寫入內容；open() 應使用 'w' 而非 'w+'。\",\n      \"suggestion\": \"改用 NamedTemporaryFile(delete=False) 建立檔案後立即關閉，取得完整路徑後再寫入。\",\n      \"fixed_code\": \"from tempfile import NamedTemporaryFile\\n\\ndef write_results(results):\\n    with NamedTemporaryFile(mode='w', delete=False, encoding='utf-8') as f:\\n        f.write(results)\\n    return f.name\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"存在 TOCTOU 資安漏洞，可能導致資料損",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-385_mitre_1.py",
+        "cwe": "CWE-385",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"使用 == 比較字串，而非 len() 和 for 迴圈逐一比對。\",\n      \"suggestion\": \"改用 str.__eq__() 或 == 運算子比較字串。\",\n      \"fixed_code\": \"def validate_password(actual_pw, typed_pw):\\n    return actual_pw == typed_pw\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在邏輯錯誤，需立即修正，避免安全漏洞或系統異常行為。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-400_sonar_1.py",
+        "cwe": "CWE-400",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"username 直接嵌入正則表達式且未轉義，攻擊者可注入特殊字元（如 . 或 *）造成任意字串匹配。\",\n      \"suggestion\": \"使用 re.escape() 跳脫使用者輸入中的特殊字元。\",\n      \"fixed_code\": \"pattern = re.compile(re.escape(username))\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"filename 來自使用者上傳的檔案，直接用於正則表達式可能導致路徑遍歷（..）或名稱歧義攻擊。\",\n      \"suggestion\": \"驗證檔名是否為純文字且不含路徑。\",\n      \"fixed_code\": \"if not re.match(r'^[a-zA-Z0-9_-]+\\\\.[a-z]+$', f",
+        "detected_any": true,
+        "correct_cwe": false,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-406_mitre_1.py",
+        "cwe": "CWE-406",
+        "prediction": "{\n  \"issues\": [],\n  \"overall_score\": 9,\n  \"summary\": \"此段程式碼品質良好，具有適當的錯誤處理與安全防護措施，可安全使用。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": null,
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-414_author_1.py",
+        "cwe": "CWE-414",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"dataStart 在多執行緒下同時被讀取與寫入，可能造成競態條件（TOCTOU）。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）、原子操作或資料庫事務隔离層級等技巧避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"with lock:\\n    if dataStart > dataLimit:\\n        return\\n    dataStart += 1\"\n    },\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"threading.get_ident() 回傳的是整數 ID，非可讀的執行緒名稱，無法清楚辨識是哪個執行緒存取資料。\",\n      \"suggestion\": \"使用 thre",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-425_author_1.py",
+        "cwe": "CWE-425",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"username 和 date 直接拼入路徑且未驗證型別，攻擊者可使用 ../ 讀取任意檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"import os\\nfrom django.http import HttpResponseNotFound\\n\\nALLOWED_DIRS = {\\\"admin\\\": \\\"/srv/admin/static\\\", \\\"user\\\": \\\"/srv/user/static\\\"}\\n\\ndef getResource(request):\\n    resource_type = request.GET.get(\\\"type\\\")\\n    if resource_type n",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-434_pearce_1.py",
+        "cwe": "CWE-434",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"未驗證檔案類型與大小限制，可能上傳任意檔案。\",\n      \"suggestion\": \"使用 Werkzeug 的 secure_filename() 清理檔名，並檢查副檔名白名單。\",\n      \"fixed_code\": \"from werkzeug.utils import secure_filename\\nALLOWED_EXTENSIONS = {'pdf'}\\nif not secure_filename(p.filename).endswith(tuple(ALLOWED_EXTENSIONS)):\\n    abort(400)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"未限制上傳數量或總大小，攻擊者可發送多個大檔案耗盡磁碟空間。\",\n      \"suggestion\"",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-434_pearce_2.py",
+        "cwe": "CWE-434",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"base64 編碼後寫入檔案，攻擊者可上傳任意檔案（如 .php、.js、.html）並執行。\",\n      \"suggestion\": \"使用 werkzeug.utils.secure_filename 清理檔名，限制僅接受圖片副檔名。\",\n      \"fixed_code\": \"from werkzeug.utils import secure_filename\\nimg_name = secure_filename(request.files['img'].filename)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"未驗證使用者是否有權上傳圖片，可能被未授權的 API key 或 bot 使用。\",\n      \"suggestion\": \"檢查使用者身份認證（API key、J",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-454_author_1.py",
+        "cwe": "CWE-454",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"admin 權限直接寫入全域變數，多執行緒下同時請求時可能造成 TOCTOU 與競態條件。\",\n      \"suggestion\": \"使用 Lock 或資料庫事務與行鎖避免 TOCTOU，並在 finally 中釋放鎖。\",\n      \"fixed_code\": \"import threading\\nADMIN_LOCK = threading.Lock()\\n@admin_access.cache_on_arguments()\\ndef admin_access(request):\\n    with ADMIN_LOCK:\\n        # 重新讀取最新值\\n        stored_hash = get_admin_password_hash()\\n        return stored_hash == hash_password(request.POST['password'])\"\n ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-462_mitre_1.py",
+        "cwe": "CWE-462",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"foo 回傳路徑遍歷字串 './' 可被排序後重複加入 list。\",\n      \"suggestion\": \"使用 set 去除重複值，並確認排序後的結果符合預期。\",\n      \"fixed_code\": \"alist = set()\\nwhile basename and data:\\n    (basename, data) = foo()\\n    if basename != './':\\n        alist.add((basename, data))\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"存在路徑遍歷漏洞，可能讓攻擊者讀取或寫入伺服器任意檔案。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-477_author_1.py",
+        "cwe": "CWE-477",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"time.clock() 回傳 CPU 時間而非系統時間，不應用於計時。\",\n      \"suggestion\": \"使用 time.perf_counter() 或 time.time() 取得高精度的系統或 CPU 時間。\",\n      \"fixed_code\": \"import time\\n\\ndef currentTime():\\n    '''\\n    Print the current system time in seconds.\\n    '''\\n    sys_time = time.time()\\n    print(f'Current system time: {sys_time:.6f} sec')\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"存在安全漏洞或可靠性問題，可能導致資料損毀、安全token洩漏或效能異常。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "中",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-502_author_1.py",
+        "cwe": "CWE-502",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"pickle.loads 反序列化時會執行任意指令（exec('ls')），攻擊者可透過反序列化注入任意程式碼。\",\n      \"suggestion\": \"使用 json 或自訂序列化方式，避免 pickle。\",\n      \"fixed_code\": \"import json\\n\\ndef makePickleData(payload):\\n    return json.dumps({k: str(v) for k, v in payload.__dict__.items()})\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"存在 pickle 反序列化漏洞，可能被利用執行任意程式碼或讀取/寫入伺服器檔案系統。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-502_codeql_1.py",
+        "cwe": "CWE-502",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"pickle 反序列化可執行任意物件建構（如 function、class、__reduce__）或檔案操作。\",\n      \"suggestion\": \"使用 json 或自訂 deserializer，避免 pickle。\",\n      \"fixed_code\": \"import json\\n\\ndef get_json_data(json_str):\\n    try:\\n        return json.loads(json_str)\\n    except (json.JSONDecodeError, TypeError) as e:\\n        raise ValueError(f'Invalid JSON: {e}')\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summary\": \"存在反序列化漏洞，可能被利用執行任意程式碼。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-502_mitre_1.py",
+        "cwe": "CWE-502",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"cPickle 反序列化可執行任意物件，攻擊者可注入任意 Python 物件（如函數、系統命令）到 token 中執行。\",\n      \"suggestion\": \"使用 json 而非 pickle，json 安全且可預測反序列化結果。\",\n      \"fixed_code\": \"import json\\nsecure_data = json.loads(token['data'])\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"AuthFail 擺皮但未記錄錯誤或回傳清楚的錯誤訊息，無法有效偵錯。\",\n      \"suggestion\": \"Log exception 與 error message。\",\n      \"fixed_code\": \"except Exception as ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-502_sonar_1.py",
+        "cwe": "CWE-502",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"YAML 應用 load() 而非 safe_load()，可執行任意 Python 物件。\",\n      \"suggestion\": \"使用 yaml.safe_load() 只解析已知安全的 YAML 元素。\",\n      \"fixed_code\": \"return yaml.safe_load(data)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 data 是否為 None 或空值，直接傳入 load() 會引發 TypeError。\",\n      \"suggestion\": \"檢查 data 是否存在且非空字串。\",\n      \"fixed_code\": \"if not data:\\n    abort(400, 'Missing data parameter')\"\n ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-521_sonar_1.py",
+        "cwe": "CWE-521",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"資料庫連線字串硬編碼，攻擊者可完全控制應用程式存取的資料庫。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\napp.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']\"\n    },\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 EnvironmentVariableNotSetError，若環境變數不存在會引發 KeyError。\",\n      \"suggestion\": \"在讀取環境變數後立即驗證其存在且格式正確。\",\n      \"fixed_code\":",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-521_sonar_2.py",
+        "cwe": "CWE-521",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"資料庫密碼硬編碼且為空字串，攻擊者可完全存取應用程式後端資料。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\nDATABASES = {\\n    'default': {\\n        'ENGINE': 'django.db.backends.postgresql',\\n        'NAME': os.environ['DB_NAME'],\\n        'USER': os.environ['DB_USER'],\\n        'PASSWORD': os.environ['DB_PASSWORD'],\\n        'HOST': os.environ.get('DB_HOST', 'localhost'),\\n ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-522_author_1.py",
+        "cwe": "CWE-522",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"密碼直接比對（==），應使用 bcrypt.compare() 或 equivalent。\",\n      \"suggestion\": \"改用 bcrypt.checkpw(password.encode(), stored_hash) 比較已雜湊的密碼。\",\n      \"fixed_code\": \"import bcrypt\\n\\ndef checkPassword(userid, password):\\n    db = MySQLdb.connect(...)\\n    cursor = db.cursor()\\n    cursor.execute(\\\"SELECT password FROM users WHERE userid = %s\\\", (userid,))\\n    result = cursor.fetchone()\\n    if result is None:\\n        re",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-522_pearce_1.py",
+        "cwe": "CWE-522",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"MD5 是已被攻破的雜湊演算法，不適合密碼儲存。\",\n      \"suggestion\": \"使用 bcrypt 或 argon2 加密密碼。\",\n      \"fixed_code\": \"import bcrypt\\nhashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())\\nif bcrypt.checkpw(request.form['password'].encode(), stored_hash):\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"MySQL 資訊硬編碼（host=root=passwd=），攻擊者可直接連線到資料庫。\",\n      \"suggestion\": \"從環境變數載入資料庫連線資訊",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-595_author_1.py",
+        "cwe": "CWE-595",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"account1 和 account2 可能是 dict 或其他可比較的物件，直接使用 is 檢查記憶體位置不正確。\",\n      \"suggestion\": \"使用 == 運算子或 collections.abc.Hashable 搭配 __eq__，避免在不可比較的物件上使用 is。\",\n      \"fixed_code\": \"from collections.abc import Hashable\\n\\ndef isEqual(account1: Hashable, account2: Hashable) -> bool:\\n    return account1 == account2\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在記憶體位址比較而非值比較的邏輯錯誤，可能導致安全 token 被誤認為相同或未更新。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "中",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-601_codeql_1.py",
+        "cwe": "CWE-601",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"target 可含路徑遍歷（../）或 URL 方案（http://），攻擊者可導向外部網站。\",\n      \"suggestion\": \"使用 url_parse 檢查目標是否為允許的域名，並移除查詢參數。\",\n      \"fixed_code\": \"from urllib.parse import urlparse\\nparsed = urlparse(target)\\nif parsed.scheme or not re.match(r'^/[^/]+$', parsed.path):\\n    abort(400)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證 target 是否指向內部資源，攻擊者可導向外部服務進行 SSRF。\",\n      \"suggestion\": \"檢",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-601_sonar_1.py",
+        "cwe": "CWE-601",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"target 可含路徑遍歷（../）或外部 URL，攻擊者可導向任意網頁。\",\n      \"suggestion\": \"使用 urllib.parse.urlparse() 解析 URL，檢查 scheme 是否為允許的 HTTP/HTTPS，使用 urlunparse() 回傳完整 URL 字串；使用 safe_urljoin() 或 urlparse.urljoin() 取得相對路徑。\",\n      \"fixed_code\": \"from urllib.parse import urlparse, urlunparse\\nparsed = urlparse(target)\\nif parsed.scheme not in ('http', 'https') or '..' in target:\\n    raise ValueError('Invalid redirect target')\"\n    }",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-601_sonar_2.py",
+        "cwe": "CWE-601",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"redirect 到使用者提供的 URL 可能指向外部網站（Open Redirect），攻擊者可導向詐騙頁面。\",\n      \"suggestion\": \"使用werkzeug.utils.secure_filename() 清理檔名，或使用 pathlib.resolve() 取得絕對路徑後驗證。\",\n      \"fixed_code\": \"import re\\nfrom urllib.parse import urlparse\\n\\nALLOWED_HOSTS = {'example.com', 'www.example.com'}\\n\\n@app.route('/download')\\ndef download():\\n    filename = request.args['filename']\\n    if not re.match(r'^[a-zA-Z0-9_-]+\\\\.(pdf|jpg)$",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-601_sonar_3.py",
+        "cwe": "CWE-601",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"next 參數直接拼入 Location 欄位且未驗證，攻擊者可指定任意 URL（如 https://attacker.com）導向惡意網站。\",\n      \"suggestion\": \"使用 url_for() 或 make_absolute_url() 取得安全的 URL，並驗證目標在允許列表內。\",\n      \"fixed_code\": \"import re\\nALLOWED_HOSTS = {'example.com', 'www.example.com'}\\nif not re.match(r'^https?://(?:www\\\\.)?example\\\\.com/.*$', url):\\n    abort(403)\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"URL Redirect 極端開放，可能導致 Open Redirect 到外部網站，",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-601_sonar_4.py",
+        "cwe": "CWE-601",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"next 參數來自使用者輸入未驗證直接寫入 Location header，攻擊者可注入任意 URL（如 https://evil.com）導向惡意網站。\",\n      \"suggestion\": \"永遠不要信任外部輸入，在處理前驗證型別、範圍、格式，並提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"from urllib.parse import urlparse\\nparsed = urlparse(next)\\nif not parsed.scheme or not parsed.netloc:\\n    next = '/'\\nresponse = HttpResponseRedirect(next)\"\n    }\n  ],\n  \"overall_score\": 1,\n  \"summary\": \"存在路徑遍歷或 URL 重定向到外部網站的安全漏洞，可能讓攻擊者控制應用程序行為。\"\n",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-605_author_1.py",
+        "cwe": "CWE-605",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"無 timeout 設定，攻擊者可建立連線後不發送資料讓伺服器永久阻塞。\",\n      \"suggestion\": \"使用 context manager（with）或 try/finally 處理資源釋放，並加入 timeout。\",\n      \"fixed_code\": \"import socket\\n\\ndef echoServer(port):\\n    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:\\n        s.settimeout(30)\\n        s.bind(('0.0.0.0', port))\\n        s.listen(1)\\n        conn, _ = s.accept()\\n        try:\\n            while True:\\n             ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-611_author_1.py",
+        "cwe": "CWE-611",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"XML 直接從 request 讀取且未驗證格式，可能含 DTD 宣告導致 SSRF。\",\n      \"suggestion\": \"使用 lxml 的 defusedxml 模組或限制 XML 解析深度（lxml.etree.XMLParser(load_dtd=False, resolve_entities=False)）。\",\n      \"fixed_code\": \"parser = etree.XMLParser(resolve_entities=False)\\nroot = etree.fromstring(xml.read(), parser)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"userid 和 password 從 XML 直接取得但未驗證型別，攻擊者可注入任意 XML",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-611_codeql_1.py",
+        "cwe": "CWE-611",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"XML 解析未設定限制（最大深度、DTD 禁用），可能被 XML 大小寫盲注（XXE）攻擊。\",\n      \"suggestion\": \"使用 lxml 的 defusedxml 模組或設定 load_dtd=False、no_network=True、max_depth=1000。\",\n      \"fixed_code\": \"import defusedxml.lxml\\ndef parse_xml(data):\\n    return defusedxml.lxml.fromstring(data)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"回傳的 XML 字串包含使用者提供的內容，可能含敏感資訊（如密碼、個人資料）。\",\n      \"suggestion\": \"僅回傳解析後的結構化",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-611_sonar_1.py",
+        "cwe": "CWE-611",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"XML Parser 的 resolve_entities=True 讓外部 XML 可含 DTD 完整性檢查（XXE），攻擊者可讀取伺服器任意檔案或發起 SSRF。\",\n      \"suggestion\": \"移除 resolve_entities=True 或使用 defusedxml 模組防禦 XXE。\",\n      \"fixed_code\": \"parser = etree.XMLParser(resolve_entities=False)\"\n    },\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"etree.parse() 在檔案不存在時拋出 IOError，未處理會導致應用程序崩潰。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型並提供清楚",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-611_sonar_2.py",
+        "cwe": "CWE-611",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"XML 解析器啟用實體解析（resolve_entities=True），攻擊者可注入 DOCTYPE 宣告執行 SSRF 或 OOB 讀取。\",\n      \"suggestion\": \"移除 resolve_entities=True，使用 defusedxml 模組防禦性程式碼。\",\n      \"fixed_code\": \"parser = etree.XMLParser(no_network=False)  # 預設值為 False\\nschema = etree.XMLSchema(file='resources/config.xsd', parser=parser)\"\n    },\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"etree.parse() 可能拋出 FileNotFoundErro",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-611_sonar_3.py",
+        "cwe": "CWE-611",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"XSLT 變換使用 resolve_entities=True，攻擊者可注入 DOCTYPE 定義外部實體（XXE），讀取或寫入伺服器檔案。\",\n      \"suggestion\": \"移除 resolve_entities=True，改用 defusedxml 或 lxml 的 no_network_access=True。\",\n      \"fixed_code\": \"parser = etree.XMLParser(no_network_access=True)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"XSLT 變換允許網路存取（read_network=True），攻擊者可注入 <xsl:import> 引用外部 XSLT 檔案，執行任意程式碼。\",\n      \"suggesti",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-611_sonar_4.py",
+        "cwe": "CWE-611",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"外部 GES（General Entity Expansion）功能已啟用，攻擊者可注入 XML 儲存於 DTD 中，造成 DoS 攻擊或 SSRF。\",\n      \"suggestion\": \"禁用外部 GES 功能（setFeature(xml.sax.handler.feature_external_ges, False)），並驗證輸入檔案來自允許目錄。\",\n      \"fixed_code\": \"parser.setFeature(xml.sax.handler.feature_external_ges, False)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未限制解析的 XML 檔案大小，大檔案會耗盡記憶體造成 OOM 崩潰。\",\n      \"suggestion\": \"設定",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-641_sonar_1.py",
+        "cwe": "CWE-641",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"file 參數直接拼接成路徑，攻擊者可使用 ../ 讀取任意檔案。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename 清理使用者提供的檔名。\",\n      \"fixed_code\": \"import os\\nfrom werkzeug.utils import secure_filename\\n\\nALLOWED_DIR = '/safe/files'\\n\\ndef download():\\n    filename = request.args.get('file')\\n    if not filename:\\n        abort(400)\\n    safe_name = secure_filename(filename)\\n    full_path = os.path.j",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-643_codeql_1.py",
+        "cwe": "CWE-643",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"XPath injection：value 直接拼入 XPath 表達式。\",\n      \"suggestion\": \"使用 defusedxml 或 lxml 的 etree.fromstring() 而非 etree.parse()，避免外部 XML 檔案被解析。\",\n      \"fixed_code\": \"import defusedxml.lxml as dlxml\\ntree = dlxml.fromstring(xml_bytes)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"XPath injection：value 直接拼入 XPath 表達式。\",\n      \"suggestion\": \"使用 lxml.etree.XPath() 過濾使用者輸入後再執行查詢。\",\n   ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-643_sonar_1.py",
+        "cwe": "CWE-643",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"username 直接拼入 XPath 表達式且未使用參數化查詢，存在 XPath Injection。\",\n      \"suggestion\": \"改用 lxml 的 etree.fromstring() 而非 parse() 避免外部檔案讀取，並使用參數化查詢。\",\n      \"fixed_code\": \"from lxml import etree\\nxml_content = open('users.xml').read()\\nroot = etree.fromstring(xml_content)\\ndef user_locations():\\n    username = request.args['username']\\n    query = f'./users/user[.=\\\\\\\"{etree.CDATA(username)}\\\\\\\"]/location'\\n    return [e.",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-703_author_1.py",
+        "cwe": "CWE-703",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 KeyboardInterrupt（Ctrl+C），導致程式無效。\",\n      \"suggestion\": \"加入適當的例外處理，捕捉具體的例外類型，不應使用 bare except。\",\n      \"fixed_code\": \"try:\\n    ...\\nexcept (ValueError, KeyboardInterrupt):\\n    print('Invalid input or interrupted')\\n    return None\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"缺乏例外處理，在邊界情況下容易崩潰，需加入防禦性程式碼。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "中",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-703_author_2.py",
+        "cwe": "CWE-703",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"無限迴圈加上 continue 造成無窮等待，應使用 break 或 return。\",\n      \"suggestion\": \"加入適當的例外處理或終止條件，避免永久阻塞。\",\n      \"fixed_code\": \"def convert_to_int():\\n    while True:\\n        try:\\n            user_input = input(\\\"Enter a number: \\\")\\n            return int(user_input)\\n        except ValueError:\\n            print(\\\"Please enter a valid integer.\\\")\"\n    }\n  ],\n  \"overall_score\": 5,\n  \"summary\": \"存在無限迴圈且無終止條件，程式會永久卡住不動。\"\n",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "中",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-703_author_3.py",
+        "cwe": "CWE-703",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"int() 本身已驗證型別，assert 可能導致 AssertionError 被誤認為安全問題。\",\n      \"suggestion\": \"移除無效的 type check，僅處理可能的 ValueError 即可。\",\n      \"fixed_code\": \"def inputInt():\\n    while True:\\n        try:\\n            return int(input(\\\"Enter a number: \\\"))\\n        except ValueError:\\n            print('Please enter a valid integer.')\"\n    }\n  ],\n  \"overall_score\": 4,\n  \"summary\": \"型別檢查在 Python 中通常不必要且可能掩飾真實問題，應以例外處理為主。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-730_author_1.py",
+        "cwe": "CWE-730",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"正則表達式中使用 ^$ 只匹配空行，應修正。\",\n      \"suggestion\": \"使用 list comprehension 與 enumerate 取得錯誤行號。\",\n      \"fixed_code\": \"def checkNumber(number):\\n    pattern = r'^-?\\\\d+(\\\\.\\\\d+)?$'\\n    return bool(re.fullmatch(pattern, number))\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"存在安全漏洞或可靠性問題，可能導致資料損毀或安全 breach。\"\n}",
+        "detected_any": true,
+        "correct_cwe": false,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-730_codeql_1.py",
+        "cwe": "CWE-730",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"使用者提供的正則表達式直接傳入 re.search()，攻擊者可使用非捕獲群組（(?:...)）或分組名稱（(?P<name>...)）注入任意正則表達式。\",\n      \"suggestion\": \"使用 re.compile() 预編譯正則表達式後再使用，避免每次請求都重新編譯。\",\n      \"fixed_code\": \"import re\\n\\nPATTERN_CACHE = {}\\n\\ndef get_pattern(pattern):\\n    if pattern not in PATTERN_CACHE:\\n        try:\\n            PATTERN_CACHE[pattern] = re.compile(pattern)\\n        except re.error:\\n            raise ValueError(f'Invalid regex: ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-730_codeql_2.py",
+        "cwe": "CWE-730",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"使用者提供的正則表達式直接編譯且搜尋，攻擊者可傳入惡意模式（如 r'.*'）造成 DoS。\",\n      \"suggestion\": \"使用 re.compile() 的 flags=re.IGNORECASE | re.DOTALL | re.VERBOSE，並限制正則表達式的長度與複雜度。\",\n      \"fixed_code\": \"MAX_PATTERN_LEN = 1024\\nif len(pattern) > MAX_PATTERN_LEN:\\n    abort(400)\\ntry:\\n    compiled_pattern = re.compile(pattern, re.IGNORECASE | re.DOTALL | re.VERBOSE)\\nexcept re.error:\\n    abort(400)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n    ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-732_author_1.py",
+        "cwe": "CWE-732",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"data 直接寫入可執行檔且 chmod +x，攻擊者可注入任意指令（如 shellcode）。\",\n      \"suggestion\": \"使用 tempfile.NamedTemporaryFile(delete=False) 創建暫存檔，取得完整路徑後再操作；使用 pathlib.resolve() 取得絕對路徑並驗證在允許目錄內。\",\n      \"fixed_code\": \"from pathlib import Path\\nimport tempfile\\n\\ndef create_executable_file(data):\\n    tmp = tempfile.NamedTemporaryFile(suffix='.bin', delete=False)\\n    path = Path(tmp.name).resolve()\\n    if not str(path).startswith",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-759_mitre_1.py",
+        "cwe": "CWE-759",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"MD5 是已被攻破的雜湊演算法，不適合密碼儲存。\",\n      \"suggestion\": \"使用 bcrypt、scrypt 或 argon2 等專用密碼雜湊函數，並設定適當的成本參數（至少 12）。\",\n      \"fixed_code\": \"import bcrypt\\n\\ndef storePassword(userName, Password):\\n    salt = bcrypt.gensalt()\\n    hashed = bcrypt.hashpw(Password.encode(), salt)\\n    return updateUserLogin(userName, hashed)\"\n    }\n  ],\n  \"overall_score\": 3,\n  \"summary\": \"使用已破解的雜湊演算法處理密碼，等同於未加密儲存。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-760_sonar_1.py",
+        "cwe": "CWE-760",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"salt 固定為 D8VxSmTZt2E2YV454mkqAY5e，攻擊者可預先建立彩虹表暴力破解。\",\n      \"suggestion\": \"使用 secrets.token_hex() 或 os.urandom() 生成隨機 salt。\",\n      \"fixed_code\": \"import os\\nhash = pbkdf2_hmac('sha256', password.encode(), os.urandom(32), 100000)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"迭代次數固定為 100000 次，應根據安全標準（如 NIST SP 800-63B）設定適當值。\",\n      \"suggestion\": \"使用參數化查詢或資料庫事務，避免資料不一致。\",\n   ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-776_codeql_1.py",
+        "cwe": "CWE-776",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"XML 解析無限制深度（default=1024）或時間限制，可能被 DoS 攻擊。\",\n      \"suggestion\": \"使用 lxml 的 etree.fromstring() 取代 xml.etree，lxml 有更嚴格的 DTD 與外部實體防護。\",\n      \"fixed_code\": \"import lxml.etree as ET\\ntry:\\n    doc = ET.fromstring(xml_src)\\nexcept (ET.ParseError, ET.XMLSyntaxError) as e:\\n    abort(400, str(e))\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"未驗證請求大小，攻擊者可發送超大 XML 檔案造成 OOM 崩潰。\",\n  ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-798_author_1.py",
+        "cwe": "CWE-798",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"資料庫連線資訊硬編碼，一旦程式外洩或進入版本控制歷史，憑證將永久暴露。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef getDBConnection():\\n    return mysql.connector.connect(\\n        user=os.environ['DB_USER'],\\n        password=os.environ['DB_PASSWORD'],\\n        host=os.environ['DB_HOST'],\\n        database=os.environ['DB_NAME']\\n    )\"\n    }\n  ],\n  \"overall_score\": 2,\n  \"summ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-798_codeql_1.py",
+        "cwe": "CWE-798",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"密碼直接從 GET 參數取得且未驗證型別，在 URL 中可被預測或暴力破解。\",\n      \"suggestion\": \"使用 POST 與 CSRF token 驗證表單提交。\",\n      \"fixed_code\": \"from django.http import HttpResponse\\n\\ndef process_request(request):\\n    if request.method != 'POST':\\n        return HttpResponse('Method Not Allowed', status=405)\\n    form = PasswordForm(request.POST)\\n    if not form.is_valid():\\n        return HttpResponse('Invalid input', status=400)\\n   ",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-827_sonar_1.py",
+        "cwe": "CWE-827",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"XML 檔案路徑硬編碼且使用 lxml 的 XMLParser（DTD 支援），可能被攻擊者注入外部參照（XXE）讀取任意檔案或發起 SSRF。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 defusedxml 或限制 entity_expansion_limit=0。\",\n      \"fixed_code\": \"import os\\nfrom pathlib import Path\\n\\ndef get_xml_root():\\n    base_dir = Path(__file__).resolve().parent / 'resources'\\n    xml_path = (base_dir / 'c.xml').resolve()\\n    if not str(xml_path).startswith",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-835_author_1.py",
+        "cwe": "CWE-835",
+        "prediction": "{\n  \"issues\": [],\n  \"overall_score\": 8,\n  \"summary\": \"此段程式碼品質良好，具有適當的錯誤處理與安全防護措施，可安全使用。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": null,
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-841_mitre_1.py",
+        "cwe": "CWE-841",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"command == 'list_files' 時未檢查認證，任何人都可列出所有檔案。\",\n      \"suggestion\": \"所有命令都應驗證使用者是否已登入（authenticated()），且具有適當的權限。\",\n      \"fixed_code\": \"def dispatchCommand(command, user, args):\\n    if not authenticated(user):\\n        raise PermissionError('User not logged in')\\n\\n    if command == 'login':\\n        loginUser(args)\\n    elif command == 'retrieve_file':\\n        if ownsFile(user, args):\\n            sendFile(",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-918_codeql_1.py",
+        "cwe": "CWE-918",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"subdomain 可含路徑（如 example.com/path）或協定（http://），直接拼入 URL 造成 SSRF。\",\n      \"suggestion\": \"使用 urlparse 分離 URL 各部分後，驗證網域是否在允許清單內。\",\n      \"fixed_code\": \"from urllib.parse import urlparse\\nparsed = urlparse(subdomain)\\nif parsed.scheme or not parsed.hostname:\\n    abort(400)\\nhost = f'{parsed.hostname}.example.com'\\nurl = f'https://{host}/data/'\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"de",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-918_codeql_2.py",
+        "cwe": "CWE-918",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"user_id 直接拼入 URL 且未驗證型別，可能被注入路徑遍歷。\",\n      \"suggestion\": \"使用參數化查詢（Parameterized Query）或模板字串取代，絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"url = f'https://api.github.com/users/{user_id}'\\nresponse = requests.get(url)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"中\",\n      \"description\": \"GitHub API 回傳內容未過濾，可能包含敏感資訊（如私人 repo 名稱）。\",\n      \"suggestion\": \"檢查回應狀態碼並處理例外，加上輸出清理。\",\n      \"fixed_code\": \"if response.s",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-941_mitre_1.py",
+        "cwe": "CWE-941",
+        "prediction": "{\n  \"issues\": [],\n  \"overall_score\": 8,\n  \"summary\": \"未偵測到安全漏洞或可靠性問題，程式碼可安全使用。\"\n}",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": null,
+        "schema_valid": true
+      },
+      {
+        "id": "CWE-943_sonar_1.py",
+        "cwe": "CWE-943",
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"DynamoDB Scan 遍歷整個表，等同於全表掃描，效率極差且成本高昂。\",\n      \"suggestion\": \"使用 KeyConditionExpression 或 Query 取代 Scan。\",\n      \"fixed_code\": \"return DYNAMO_CLIENT.get_item(\\n    TableName='users',\\n    Key={'username': {'S': username}}\\n)\"\n    },\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"密碼直接寫入 Log（或被存到變數），違反安全原則。\",\n      \"suggestion\": \"絕不將密碼寫入 log 或 debug 訊息。\",\n      \"fixed_code\": \"# 不要記錄密碼",
+        "detected_any": true,
+        "correct_cwe": true,
+        "severity": "高",
+        "schema_valid": true
+      }
+    ]
+  }
+]

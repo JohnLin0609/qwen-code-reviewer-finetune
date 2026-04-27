@@ -1,0 +1,49 @@
+[
+  {
+    "label": "Fine-tuned Qwen2.5-Coder",
+    "model_path": "./code-review-model-v7/lora",
+    "codebleu": -1.0,
+    "bertscore": 0.891,
+    "rougeL": 0.4215,
+    "json_validity": 0.95,
+    "bug_detection_rate": 1.0,
+    "security_details": [
+      {
+        "test": "SQL Injection",
+        "detected": true,
+        "prediction": "{\"issues\": [{\"type\": \"SQL Injection\", \"severity\": \"Medium\", \"description\": \"user_id is concatenated directly into the SQL string without parameterization. An attacker can inject malicious SQL (e.g., user_id='1 OR 1=1' or user_id=\"'; DROP TABLE users; --\") to bypass authentication, extract data, or m"
+      },
+      {
+        "test": "Hardcoded Password",
+        "detected": true,
+        "prediction": "{\"issues\": [{\"type\": \"Hardcoded Credentials\", \"severity\": \"Medium\", \"description\": \"Database credentials (username and password) are hardcoded directly in source code. This exposes sensitive authentication information to anyone with access to the repository or compiled bytecode.\", \"suggestion\": \"Sto"
+      },
+      {
+        "test": "Missing Exception Handling",
+        "detected": true,
+        "prediction": "{\"issues\": [{\"type\": \"Missing Error Handling\", \"severity\": \"Medium\", \"description\": \"No exception handling — FileNotFoundError, PermissionError, or JSONDecodeError will crash the application without context.\", \"suggestion\": \"Wrap file operations in try/except blocks; catch specific exceptions like F"
+      },
+      {
+        "test": "Race Condition",
+        "detected": true,
+        "prediction": "{\"issues\": [{\"type\": \"Race Condition (TOCTOU)\", \"severity\": \"Medium\", \"description\": \"The vote() function checks if post_id exists in vote_counts and then modifies it without locking or atomic operations. In a multi-threaded environment, two threads can both read that post_id is not present, both wr"
+      },
+      {
+        "test": "Path Traversal",
+        "detected": true,
+        "prediction": "{\"issues\": [{\"type\": \"Path Traversal\", \"severity\": \"Medium\", \"description\": \"User-supplied 'name' parameter is concatenated directly into the file path without validation or sanitization. An attacker can use '../' sequences (e.g., '../../etc/passwd') to read arbitrary files outside the intended dire"
+      },
+      {
+        "test": "Command Injection",
+        "detected": true,
+        "prediction": "{\"issues\": [{\"type\": \"Command Injection\", \"severity\": \"Medium\", \"description\": \"The host parameter is concatenated directly into a shell command string without validation or escaping. An attacker can inject arbitrary commands by passing input like 'example.com; rm -rf /'.\", \"suggestion\": \"Use subpro"
+      },
+      {
+        "test": "Insecure Deserialization",
+        "detected": true,
+        "prediction": "{\"issues\": [{\"type\": \"Insecure Deserialization\", \"severity\": \"Medium\", \"description\": \"pickle.loads() deserializes untrusted data without validation or allow-listing. An attacker can craft malicious pickled objects (e.g., __reduce__ hooks) to execute arbitrary code during deserialization.\", \"suggest"
+      }
+    ],
+    "false_positive_rate": 1.0
+  }
+]

@@ -1,0 +1,282 @@
+{
+  "total": 121,
+  "detection_rate": 99.17355371900827,
+  "per_cwe": {
+    "CWE-020": {
+      "rate": 100.0,
+      "count": 6
+    },
+    "CWE-022": {
+      "rate": 100.0,
+      "count": 4
+    },
+    "CWE-078": {
+      "rate": 100.0,
+      "count": 2
+    },
+    "CWE-079": {
+      "rate": 100.0,
+      "count": 3
+    },
+    "CWE-080": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-089": {
+      "rate": 100.0,
+      "count": 2
+    },
+    "CWE-090": {
+      "rate": 100.0,
+      "count": 2
+    },
+    "CWE-094": {
+      "rate": 100.0,
+      "count": 3
+    },
+    "CWE-095": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-099": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-113": {
+      "rate": 100.0,
+      "count": 2
+    },
+    "CWE-116": {
+      "rate": 100.0,
+      "count": 2
+    },
+    "CWE-117": {
+      "rate": 100.0,
+      "count": 3
+    },
+    "CWE-1204": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-193": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-200": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-209": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-215": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-250": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-252": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-259": {
+      "rate": 100.0,
+      "count": 2
+    },
+    "CWE-269": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-283": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-285": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-295": {
+      "rate": 100.0,
+      "count": 3
+    },
+    "CWE-306": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-319": {
+      "rate": 100.0,
+      "count": 2
+    },
+    "CWE-321": {
+      "rate": 100.0,
+      "count": 2
+    },
+    "CWE-326": {
+      "rate": 100.0,
+      "count": 2
+    },
+    "CWE-327": {
+      "rate": 100.0,
+      "count": 4
+    },
+    "CWE-329": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-330": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-331": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-339": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-347": {
+      "rate": 100.0,
+      "count": 3
+    },
+    "CWE-367": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-377": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-379": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-385": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-400": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-406": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-414": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-425": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-434": {
+      "rate": 50.0,
+      "count": 2
+    },
+    "CWE-454": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-462": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-477": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-502": {
+      "rate": 100.0,
+      "count": 4
+    },
+    "CWE-521": {
+      "rate": 100.0,
+      "count": 2
+    },
+    "CWE-522": {
+      "rate": 100.0,
+      "count": 2
+    },
+    "CWE-595": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-601": {
+      "rate": 100.0,
+      "count": 5
+    },
+    "CWE-605": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-611": {
+      "rate": 100.0,
+      "count": 6
+    },
+    "CWE-641": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-643": {
+      "rate": 100.0,
+      "count": 2
+    },
+    "CWE-703": {
+      "rate": 100.0,
+      "count": 3
+    },
+    "CWE-730": {
+      "rate": 100.0,
+      "count": 3
+    },
+    "CWE-732": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-759": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-760": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-776": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-798": {
+      "rate": 100.0,
+      "count": 2
+    },
+    "CWE-827": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-835": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-841": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-918": {
+      "rate": 100.0,
+      "count": 2
+    },
+    "CWE-941": {
+      "rate": 100.0,
+      "count": 1
+    },
+    "CWE-943": {
+      "rate": 100.0,
+      "count": 1
+    }
+  }
+}

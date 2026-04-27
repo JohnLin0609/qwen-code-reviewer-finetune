@@ -1,0 +1,49 @@
+[
+  {
+    "label": "Fine-tuned Qwen2.5-Coder",
+    "model_path": "./code-review-model/lora",
+    "codebleu": -1.0,
+    "bertscore": 0.8915,
+    "rougeL": 0.4127,
+    "json_validity": 0.96,
+    "bug_detection_rate": 1.0,
+    "security_details": [
+      {
+        "test": "SQL Injection",
+        "detected": true,
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"直接拼接 SQL 字串，存在 SQL Injection 風險。\",\n      \"suggestion\": \"改用參數化查詢（Parameterized Query），絕不拼接 SQL 字串。\",\n      \"fixed_code\": \"def get_user(user_id):\\n    query = \\\"SELECT * FROM users WHERE id = ?\\\"\\n    return db.ex"
+      },
+      {
+        "test": "Hardcoded Password",
+        "detected": true,
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"密碼硬編碼在原始碼中，一旦進入版本控制歷史永久暴露。\",\n      \"suggestion\": \"使用環境變數（os.environ）或 Secret Manager 管理敏感資訊，絕不寫入原始碼。\",\n      \"fixed_code\": \"import os\\ndef connect():\\n    return psycopg2.connect(\\n        host=os.environ['DB_HO"
+      },
+      {
+        "test": "Missing Exception Handling",
+        "detected": true,
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"可靠性問題\",\n      \"severity\": \"中\",\n      \"description\": \"未處理 FileNotFoundError 與 JSONDecodeError。\",\n      \"suggestion\": \"加入適當的 try/except，捕捉具體的例外類型，提供清楚的錯誤訊息。\",\n      \"fixed_code\": \"def read_config(path):\\n    try:\\n        with open(path, encoding='utf-8') as f:\\n  "
+      },
+      {
+        "test": "Race Condition",
+        "detected": true,
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"多執行緒下 read-modify-write 操作非原子性，可能造成計數失准。\",\n      \"suggestion\": \"使用 Lock、資料庫事務與行鎖（SELECT FOR UPDATE）或原子操作，避免 TOCTOU 與並發更新問題。\",\n      \"fixed_code\": \"import threading\\nlock = threading.Lock()\\n\\ndef vote(post_id):\\"
+      },
+      {
+        "test": "Path Traversal",
+        "detected": true,
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"未驗證 name 參數，可讀取任意 HTML 檔案（如 templates/../config.py）。\",\n      \"suggestion\": \"使用 pathlib.resolve() 取得絕對路徑後，確認路徑以允許的基礎目錄開頭；使用 secure_filename() 清理使用者提供的檔名。\",\n      \"fixed_code\": \"from pathlib import Path\\n\\ntemplat"
+      },
+      {
+        "test": "Command Injection",
+        "detected": true,
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"shell=True 與字串拼接可被注入攻擊利用。\",\n      \"suggestion\": \"改用 list 參數避免 shell=True，並驗證 host 格式。\",\n      \"fixed_code\": \"import subprocess\\ndef ping(host):\\n    if not re.match(r'^[a-zA-Z0-9.-]+$', host):\\n        raise Val"
+      },
+      {
+        "test": "Insecure Deserialization",
+        "detected": true,
+        "prediction": "{\n  \"issues\": [\n    {\n      \"type\": \"安全漏洞\",\n      \"severity\": \"高\",\n      \"description\": \"pickle 反序列化可執行任意程式碼，攻擊者可載入惡意物件圖。\",\n      \"suggestion\": \"改用安全的序列化格式（JSON、MessagePack、Protocol Buffers），或至少對反序列化結果做類型檢查與清理。\",\n      \"fixed_code\": \"import json\\ndef load_data(data):\\n    return json.loads(data, obj"
+      }
+    ],
+    "false_positive_rate": 1.0
+  }
+]

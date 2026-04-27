@@ -1,0 +1,14 @@
+{
+  "total_tasks": 119,
+  "response_completion_rate": 96.63865546218487,
+  "code_generation_rate": 96.63865546218487,
+  "errors": 4,
+  "per_language": {
+    "c": 31,
+    "cpp": 21,
+    "go": 19,
+    "py": 25,
+    "js": 23
+  },
+  "unique_cwes": 31
+}
