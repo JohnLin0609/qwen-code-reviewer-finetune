@@ -19,7 +19,7 @@ model, from raw data collection through training and evaluation.
 - `training_data/code_review_training_data.json` — 200 single-issue examples
 - `training_data/multi_issue_training_data.json` — 103 multi-issue examples
 - Each: structured JSON review with issue type, severity, description, suggestion, and fixed_code
-- Purpose: supply high-quality gold labels that PR comments can't match
+- Purpose: provide structured labels (severity, fixed_code) that PR review comments lack
 
 ### 1.3 Synthetic generation (v7 addition)
 - Script: `data/generate_v7.py`
@@ -188,19 +188,16 @@ model, from raw data collection through training and evaluation.
 
 ---
 
-## 6. Engineering patterns applied throughout
+## 6. Recurring conventions
 
-1. **Atomic file writes** — write to `*.tmp` then `os.replace()` to avoid corruption on crash
-2. **Idempotent, resumable scripts** — every long-running job reads a progress file at startup
-3. **Few-shot prompting** — 3 matched examples as demonstration before each generation request
-4. **Stratified planning** — batch plans fixed upfront (severity/type mix) then shuffled,
-   ensuring the requested distribution is hit even if some requests fail
-5. **Fail-closed validation** — only entries that pass JSON + schema checks enter the dataset
-6. **Deterministic randomness** — fixed seeds (42) for splits, shuffles, and sampling
-7. **Data/code separation** — generated data in gitignored `*.json` / `*.jsonl`;
-   scripts and small handcrafted data tracked
-8. **Separate output dirs per dataset version** — `code-review-model-v5/`, `code-review-model-v7/`
-   so older checkpoints stay available for comparison
+- Atomic writes: write to `*.tmp` then `os.replace()` so an interrupted process doesn't leave a half-written file
+- Resumable long-running scripts: progress file read at startup, completed indices skipped
+- Few-shot prompting in the synthetic generator: 3 matched examples before each request
+- Batch plans fixed up-front (severity/type mix) then shuffled, so the target distribution is met even if some calls fail
+- JSON + schema validation before any entry enters the dataset
+- Fixed seeds (42) for splits, shuffles, and sampling
+- Generated data files gitignored; scripts and small handcrafted data tracked
+- Separate output directories per dataset version (`code-review-model-v5/`, `code-review-model-v7/`) so older checkpoints stay available
 
 ---
 

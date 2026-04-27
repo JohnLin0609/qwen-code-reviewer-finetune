@@ -4,18 +4,7 @@ Fine-tuning **Qwen2.5-Coder-7B-Instruct** via QLoRA to build a security-focused 
 
 Current dataset (**v7**) covers **7 languages**: Python, JavaScript, Java, C, Go, PHP, Rust. Outputs are in **English**. Earlier versions (v1–v4) were Traditional Chinese; v5 introduced the Chinese → English migration.
 
-> **v7 model trained** — best checkpoint at epoch 2 with eval_loss **0.3378** (55% lower than v5's 0.7372). See [Results](#results) below.
-
-## Highlights
-
-- **QLoRA on 8GB VRAM** — 4-bit quantization reduces memory from ~28GB to ~6GB, making fine-tuning feasible on a single laptop GPU
-- **Structured JSON output** — Unlike the base model's free-form markdown, the fine-tuned model outputs machine-parseable JSON with `issues[]`, `severity`, `suggestion`, and `fixed_code`
-- **Multi-language coverage (v7)** — 700 synthetic examples across 7 programming languages generated with `claude-haiku-4-5`, stratified by severity and vulnerability category
-- **15 vulnerability categories** — SQL Injection, XSS, Path Traversal, Hardcoded Credentials, Insecure Random, Race Condition, Authentication Bypass, SSRF, Command Injection, Insecure Deserialization, Missing Rate Limiting, Information Disclosure, Memory Leak, and more
-- **Multi-issue detection** — Trained on 103 hand-crafted multi-issue examples to detect 2-5 vulnerabilities per code snippet
-- **9-pass data cleaning pipeline** — Bot removal, deduplication, normalization, quality filtering across 2,977 GitHub PR reviews
-- **Clean-code examples** — 17.8% of the v7 dataset is clean code with no issues, training the model to avoid false positives
-- **DDP-ready via Accelerate** — Single/multi-GPU with zero code changes
+The current v7 model was trained on 1,064 entries (4 epochs); best checkpoint is epoch 2 with eval_loss 0.3378.
 
 ## Results
 
@@ -26,7 +15,7 @@ Current dataset (**v7**) covers **7 languages**: Python, JavaScript, Java, C, Go
 | v5 (2,683 samples) | 0.8943 | 0.7491 | **0.7372** | — | Epoch 3 |
 | **v7 (1,064 samples)** | 0.3845 | **0.3378** | 0.3422 | 0.3587 | **Epoch 2** |
 
-> v7 delivers a **~54% lower eval loss** than v5 despite using only 40% of the samples — the cleaner synthetic data, structured JSON output, and consistent English format pay off. `load_best_model_at_end=True` preserves the epoch-2 checkpoint as the shipped weights.
+v7 uses ~40% of v5's samples but lands at lower eval loss; `load_best_model_at_end=True` keeps the epoch-2 checkpoint.
 
 ### Quantitative Benchmark (v7)
 
@@ -84,9 +73,9 @@ The same 1,916-case benchmark was run on both models. The difference is dramatic
 | v5 (Chinese, GitHub-PR-style) | ~99.9% | ~0.1% | 0.215 |
 | **v7 (English, structured JSON)** | **63.15%** | 36.85% | **11.82** |
 
-The v5 numbers look better only because v5 didn't actually produce code — sample v5 responses included `"Done. I think I've got the point."` and similar review-comment replies, which the scorer couldn't parse as code at all (hence the near-zero BLEU). v7 emits structured JSON with a `fixed_code` field that the scorer treats as generated code, so for the first time the benchmark is measuring what the model actually outputs. The 63.15% pass rate and 11.82 BLEU on those `fixed_code` snippets are honest numbers; the 36.85% vulnerable rate reflects places where the model's suggested fix still has issues (or where the scorer's pattern-matching produces false positives on legitimate code).
+v5 didn't produce code at all — sample responses were review-comment replies like `"Done. I think I've got the point."`, which the scorer couldn't parse, hence the near-zero BLEU. v7 emits structured JSON with a `fixed_code` field that the scorer treats as generated code, so the benchmark is now measuring v7's `fixed_code` snippets. The 36.85% vulnerable rate reflects places where the suggested fix still has issues, or where the scorer's pattern-matching flags legitimate code.
 
-**Important framing**: CyberSecEval ICD is fundamentally a code-generation benchmark. This is a code-review model. The most direct measures of v7's intended capability are SecurityEval (99.17% detection) and CodeReviewQA (95.93% accuracy).
+CyberSecEval ICD is a code-generation benchmark, not a code-review benchmark. SecurityEval (99.17% detection) and CodeReviewQA (95.93% accuracy) are closer measures of what the model is actually trained to do.
 
 #### Per-language CyberSecEval breakdown (v7)
 
@@ -154,16 +143,16 @@ def get_user(user_id):
 ```
 ````
 
-**Key improvements over base model:**
+**Differences observed across the 5 compare.py test cases:**
 
 | Aspect | Fine-tuned (v7) | Base (Qwen2.5-Coder-7B) |
 |---|---|---|
-| Raw JSON output | No markdown fences — ready to parse | Wraps JSON in ` ```json ... ``` ` fences |
-| Multi-issue detection | 2-5 issues per review | Often only the primary vulnerability |
-| Reliability issues | Catches missing error handling, connection leaks | Focuses only on security |
-| Type vocabulary | Specific ("SQL Injection", "Hardcoded Credentials") | Generic ("Security Vulnerability") |
-| Fix code formatting | Multi-line with proper `\n` escapes | Sometimes one-line with lost indentation |
-| Descriptions | Concrete attack examples (`1 OR 1=1;--`) | Abstract restatement |
+| JSON output | No markdown fences | Wrapped in ` ```json ... ``` ` fences |
+| Issues per review | 2 (consistent across 5 cases) | 1 (consistent across 5 cases) |
+| Reliability issues | Surfaces missing error handling, connection leaks | Focuses only on the primary security issue |
+| Type vocabulary | Specific (e.g. "SQL Injection", "Hardcoded Credentials") | Generic ("Security Vulnerability") |
+| Fix code formatting | Multi-line with `\n` escapes | Sometimes one-line, lost indentation |
+| Descriptions | Includes concrete attack examples (e.g. `1 OR 1=1;--`) | Mostly abstract restatement |
 
 ## Data Pipeline
 
@@ -298,14 +287,14 @@ Runs after the 9-pass cleaner to fix three remaining issues:
 | Optimizer | paged_adamw_32bit |
 | Hardware | NVIDIA RTX 2000 Ada Laptop GPU (8 GB) |
 
-### Memory Optimization Stack
+### Memory optimizations (8 GB VRAM)
 
-- **QLoRA 4-bit** — NF4 quantization via Unsloth
-- **Gradient checkpointing** — Unsloth-optimized, trades compute for VRAM
-- **Paged AdamW** — Auto-offloads optimizer states to CPU when VRAM is full
-- **Gradient accumulation (16)** — Simulates batch size 16 without OOM
-- **bf16 mixed precision** — Via Accelerator
-- **Pin memory + parallel dataloader** — Reduces CPU-GPU transfer latency
+- QLoRA 4-bit NF4 quantization via Unsloth
+- Gradient checkpointing
+- `paged_adamw_32bit` (CPU-offloaded optimizer states)
+- Gradient accumulation × 16
+- bf16 mixed precision
+- Pinned memory + parallel dataloader
 
 ## Quick Start
 
@@ -412,17 +401,6 @@ python compare.py
     ├── lora/                          # LoRA adapter weights (~155 MB)
     └── merged/                        # Full merged model (~15 GB)
 ```
-
-## Tech Stack
-
-| Component | Technology |
-|---|---|
-| Base Model | Qwen/Qwen2.5-Coder-7B-Instruct |
-| Fine-tuning | QLoRA (4-bit) + Unsloth |
-| Training | TRL (SFTTrainer) + PEFT + Accelerate |
-| Multi-GPU | Accelerate (DDP-ready) |
-| Profiling | PyTorch Profiler |
-| Hardware | NVIDIA RTX 2000 Ada (8 GB VRAM) |
 
 ## License
 
