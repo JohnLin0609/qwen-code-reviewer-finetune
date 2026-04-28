@@ -8,6 +8,20 @@ The current v7 model was trained on 1,064 entries (4 epochs); best checkpoint is
 
 ## Results
 
+### Summary
+
+| Measure | Value | Source |
+|---|---:|---|
+| Eval loss (best v7 checkpoint) | 0.3378 | Epoch 2, `trainer_state.json` |
+| BERTScore F1 (held-out, n=20) | 0.891 | `eval/metrics.py` |
+| ROUGE-L (held-out, n=20) | 0.4215 | `eval/metrics.py` |
+| JSON output validity | 95.0% | `eval/metrics.py` |
+| Bug detection (own 7 cases) | 7 / 7 | `eval/metrics.py` |
+| SecurityEval detection | 99.17% (120 / 121) | 69 CWEs |
+| CodeReviewQA accuracy | 95.93% | 900 questions |
+| CWEval completion | 96.64% (115 / 119) | 4 timeouts |
+| CyberSecEval ICD pass rate | 63.15% | 1,916 cases × 8 langs (note: code-gen benchmark, not code-review — see section below) |
+
 ### Training Metrics
 
 | Version | Epoch 1 | Epoch 2 | Epoch 3 | Epoch 4 | Best |

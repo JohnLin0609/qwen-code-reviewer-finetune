@@ -203,63 +203,20 @@ model, from raw data collection through training and evaluation.
 
 ## 7. Pipeline diagram
 
-```
-GitHub API
-    │
-    ▼
-fetch_github_pr.py ────► github_pr_training_data.json (2,977)
-                                 │
-handcrafted/*.json (303) ────────┤
-                                 ▼
-                         combine_dataset.py
-                                 │
-                                 ▼
-                         combined_training_data.json (3,177)
-                                 │
-                                 ▼
-                         claude_clean.py (9-pass)
-                                 │
-                                 ▼
-                         claude_cleaned_training_data.json (2,683)
-                                 │
-                                 ▼
-                         fix_dataset.py (dedupe, EN instructions)
-                                 │
-                                 ▼
-                         claude_cleaned_training_data_v3.json (1,546)
-                                 │
-                                 ▼
-                         v5_translate.py (zh → en) + multilang_examples.py
-                                 │
-                                 ▼
-                         claude_cleaned_training_data_v5_en.json
-                                 │
-                                 ▼
-                         v5_to_v6_chat.py (chat-format conversion)
-                                 │
-                                 ▼
-                         training_data_v6_final.jsonl (391)
-                                 │
-                                 ▼
-                         fix_v6.py (language detection + zh → en metadata)
-                                 │
-                                 ▼
-                         training_data_v6_fixed.jsonl (391)
-                                 │
-generate_v7.py (100/lang × 7) ───┤
-(~692 synthetic)                 │
-                                 ▼
-                         merge_v7.py (combine, dedupe, shuffle, validate)
-                                 │
-                                 ▼
-                         training_data_v7_final.jsonl (1,064)
-                                 │
-                                 ▼
-                         accelerate launch train.py
-                                 │
-                                 ▼
-                         code-review-model-v7/{lora, merged}
-                                 │
-                                 ▼
-                         eval/metrics.py + compare.py
+```mermaid
+flowchart TD
+    A[GitHub API] -->|fetch_github_pr.py| B[github_pr_training_data.json<br/>2,977 records]
+    H[handcrafted/*.json<br/>303 records] --> C
+    B --> C[combine_dataset.py]
+    C --> D[combined_training_data.json<br/>3,177]
+    D -->|claude_clean.py<br/>9-pass cleaning| E[claude_cleaned_training_data.json<br/>2,683]
+    E -->|fix_dataset.py<br/>dedupe + EN instructions| F[claude_cleaned_training_data_v3.json<br/>1,546]
+    F -->|v5_translate.py + multilang_examples.py<br/>zh→en + Java/JS/C/Go| G[claude_cleaned_training_data_v5_en.json]
+    G -->|v5_to_v6_chat.py<br/>chat-format conversion| I[training_data_v6_final.jsonl<br/>391]
+    I -->|fix_v6.py<br/>language detection + EN metadata| J[training_data_v6_fixed.jsonl<br/>391]
+    K[generate_v7.py<br/>100/lang × 7 langs<br/>~692 synthetic] --> L
+    J --> L[merge_v7.py<br/>combine + dedupe + shuffle + validate]
+    L --> M[training_data_v7_final.jsonl<br/>1,064]
+    M -->|accelerate launch train.py| N[code-review-model-v7/<br/>lora + merged]
+    N --> O[eval/metrics.py + compare.py]
 ```
